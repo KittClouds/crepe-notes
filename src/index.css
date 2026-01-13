@@ -2,95 +2,132 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* 
+ * INKWELL - Production Note-Taking App Design System
+ * Editorial minimalism with warm neutrals and focused typography
+ */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core palette - Warm editorial tones */
+    --background: 40 20% 98%;
+    --foreground: 220 20% 12%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card surfaces with subtle warmth */
+    --card: 40 15% 99%;
+    --card-foreground: 220 20% 12%;
 
+    /* Popovers and overlays */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 20% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Deep ink blue */
+    --primary: 220 60% 25%;
+    --primary-foreground: 40 20% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Soft warm gray */
+    --secondary: 40 10% 94%;
+    --secondary-foreground: 220 20% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted surfaces */
+    --muted: 40 10% 96%;
+    --muted-foreground: 220 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Warm amber for highlights */
+    --accent: 35 90% 55%;
+    --accent-foreground: 220 20% 12%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive states */
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Success state */
+    --success: 145 60% 40%;
+    --success-foreground: 0 0% 100%;
 
+    /* Warning state */
+    --warning: 40 90% 50%;
+    --warning-foreground: 220 20% 12%;
+
+    /* Border and input styling */
+    --border: 40 15% 88%;
+    --input: 40 15% 88%;
+    --ring: 220 60% 25%;
+
+    /* Border radius */
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Sidebar - Slightly darker warm tone */
+    --sidebar-background: 40 15% 96%;
+    --sidebar-foreground: 220 15% 25%;
+    --sidebar-primary: 220 60% 25%;
+    --sidebar-primary-foreground: 40 20% 98%;
+    --sidebar-accent: 40 20% 92%;
+    --sidebar-accent-foreground: 220 20% 12%;
+    --sidebar-border: 40 15% 88%;
+    --sidebar-ring: 220 60% 25%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Editor-specific tokens */
+    --editor-bg: 40 20% 99%;
+    --editor-selection: 220 60% 90%;
+    --editor-cursor: 220 60% 25%;
+    --editor-line-highlight: 40 30% 97%;
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 20% 12% / 0.03);
+    --shadow-md: 0 4px 6px -1px hsl(220 20% 12% / 0.05), 0 2px 4px -2px hsl(220 20% 12% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(220 20% 12% / 0.08), 0 4px 6px -4px hsl(220 20% 12% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(220 20% 12% / 0.1), 0 8px 10px -6px hsl(220 20% 12% / 0.05);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 20% 8%;
+    --foreground: 40 15% 92%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 18% 10%;
+    --card-foreground: 40 15% 92%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 40 15% 92%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 40 60% 65%;
+    --primary-foreground: 220 20% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 40 15% 90%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 15% 15%;
+    --muted-foreground: 40 10% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 35 80% 55%;
+    --accent-foreground: 220 20% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 60% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --success: 145 50% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 40 80% 50%;
+    --warning-foreground: 220 20% 8%;
+
+    --border: 220 15% 20%;
+    --input: 220 15% 20%;
+    --ring: 40 60% 65%;
+
+    --sidebar-background: 220 18% 7%;
+    --sidebar-foreground: 40 15% 85%;
+    --sidebar-primary: 40 60% 65%;
+    --sidebar-primary-foreground: 220 20% 8%;
+    --sidebar-accent: 220 15% 15%;
+    --sidebar-accent-foreground: 40 15% 92%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 40 60% 65%;
+
+    --editor-bg: 220 18% 9%;
+    --editor-selection: 220 40% 25%;
+    --editor-cursor: 40 60% 65%;
+    --editor-line-highlight: 220 18% 12%;
   }
 }
 
@@ -100,6 +137,201 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* Smooth focus transitions */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background transition-shadow;
+  }
+}
+
+@layer components {
+  /* Status badges */
+  .badge-synced {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full;
+    @apply bg-success/10 text-success;
+  }
+
+  .badge-saving {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full;
+    @apply bg-warning/10 text-warning;
+  }
+
+  .badge-offline {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full;
+    @apply bg-muted text-muted-foreground;
+  }
+
+  /* Editor container styling */
+  .editor-container {
+    @apply min-h-[500px] rounded-lg;
+    background: hsl(var(--editor-bg));
+  }
+
+  /* Note card in sidebar */
+  .note-card {
+    @apply p-3 rounded-lg cursor-pointer transition-all duration-200;
+    @apply hover:bg-sidebar-accent;
+  }
+
+  .note-card.active {
+    @apply bg-sidebar-accent;
+  }
+}
+
+@layer utilities {
+  /* Smooth scrollbars */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+  }
+}
+
+/* Milkdown Crepe Editor Overrides */
+.milkdown-editor-wrapper {
+  --crepe-color-background: hsl(var(--editor-bg));
+  --crepe-color-surface: hsl(var(--card));
+  --crepe-color-overlay: hsl(var(--popover));
+  --crepe-color-primary: hsl(var(--primary));
+  --crepe-color-secondary: hsl(var(--secondary));
+  --crepe-color-neutral: hsl(var(--muted));
+  --crepe-color-solid: hsl(var(--foreground));
+  --crepe-color-line: hsl(var(--border));
+  --crepe-color-border: hsl(var(--border));
+  --crepe-color-inline-code: hsl(var(--accent));
+  --crepe-color-selection: hsl(var(--editor-selection));
+  --crepe-font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --crepe-font-family-code: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+.milkdown-editor-wrapper .milkdown {
+  padding: 2rem;
+  min-height: 400px;
+}
+
+.milkdown-editor-wrapper .milkdown .editor {
+  outline: none;
+}
+
+.milkdown-editor-wrapper .milkdown .ProseMirror {
+  outline: none;
+  min-height: 300px;
+}
+
+.milkdown-editor-wrapper .milkdown .ProseMirror > * + * {
+  margin-top: 0.75em;
+}
+
+.milkdown-editor-wrapper .milkdown h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.milkdown-editor-wrapper .milkdown h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.milkdown-editor-wrapper .milkdown h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.milkdown-editor-wrapper .milkdown p {
+  line-height: 1.75;
+  color: hsl(var(--foreground));
+}
+
+.milkdown-editor-wrapper .milkdown code {
+  background: hsl(var(--muted));
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: var(--crepe-font-family-code);
+}
+
+.milkdown-editor-wrapper .milkdown pre {
+  background: hsl(var(--muted));
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.milkdown-editor-wrapper .milkdown pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.milkdown-editor-wrapper .milkdown blockquote {
+  border-left: 3px solid hsl(var(--accent));
+  padding-left: 1rem;
+  margin-left: 0;
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+.milkdown-editor-wrapper .milkdown ul,
+.milkdown-editor-wrapper .milkdown ol {
+  padding-left: 1.5rem;
+}
+
+.milkdown-editor-wrapper .milkdown li {
+  line-height: 1.75;
+}
+
+.milkdown-editor-wrapper .milkdown a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.milkdown-editor-wrapper .milkdown a:hover {
+  color: hsl(var(--accent));
+}
+
+.milkdown-editor-wrapper .milkdown hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 2rem 0;
+}
+
+.milkdown-editor-wrapper .milkdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.milkdown-editor-wrapper .milkdown ::selection {
+  background: hsl(var(--editor-selection));
 }
