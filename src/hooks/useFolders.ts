@@ -1,0 +1,112 @@
+// src/hooks/useFolders.ts
+// TanStack Query hooks for folders - server state management
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+    getAllFolders,
+    createFolder as createFolderStorage,
+} from '@/lib/storage';
+import type { Folder, FolderWithChildren } from '@/types/noteTypes';
+import type { EntityKind } from '@/lib/types/entityTypes';
+
+// Query key factory
+export const folderKeys = {
+    all: ['folders'] as const,
+};
+
+interface FolderCreateOptions {
+    entityKind?: EntityKind;
+    entitySubtype?: string;
+    entityLabel?: string;
+    isTypedRoot?: boolean;
+    isSubtypeRoot?: boolean;
+    color?: string;
+}
+
+// Fetch all folders
+export function useFolders() {
+    return useQuery({
+        queryKey: folderKeys.all,
+        queryFn: getAllFolders,
+        staleTime: Infinity,
+    });
+}
+
+// Create folder mutation
+export function useCreateFolder() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (params: { name: string; parentId?: string | null; options?: FolderCreateOptions }): Promise<Folder> => {
+            const folder = createFolderStorage(params.name, params.parentId || null);
+            return { ...folder, ...params.options } as Folder;
+        },
+        onSuccess: (newFolder) => {
+            queryClient.setQueryData<Folder[]>(folderKeys.all, (old) =>
+                old ? [...old, newFolder] : [newFolder]
+            );
+        },
+    });
+}
+
+// Update folder mutation (in-memory only for now)
+export function useUpdateFolder() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, updates }: { id: string; updates: Partial<Folder> }): Promise<{ id: string; updates: Partial<Folder> }> => {
+            return { id, updates };
+        },
+        onSuccess: ({ id, updates }) => {
+            queryClient.setQueryData<Folder[]>(folderKeys.all, (old) =>
+                old?.map(f => f.id === id ? { ...f, ...updates } : f)
+            );
+        },
+    });
+}
+
+// Delete folder mutation
+export function useDeleteFolder() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string): Promise<string> => {
+            return id;
+        },
+        onSuccess: (id) => {
+            queryClient.setQueryData<Folder[]>(folderKeys.all, (old) =>
+                old?.filter(f => f.id !== id)
+            );
+        },
+    });
+}
+
+// Build folder tree from flat data
+export function buildFolderTree(folders: Folder[], notes: any[]): FolderWithChildren[] {
+    const folderMap = new Map<string, FolderWithChildren>();
+
+    for (const folder of folders) {
+        folderMap.set(folder.id, { ...folder, children: [], notes: [] });
+    }
+
+    const roots: FolderWithChildren[] = [];
+    for (const folder of folders) {
+        const node = folderMap.get(folder.id)!;
+        const parentId = folder.parentId || folder.parent_id;
+
+        if (parentId && folderMap.has(parentId)) {
+            folderMap.get(parentId)!.children.push(node);
+        } else {
+            roots.push(node);
+        }
+    }
+
+    for (const note of notes) {
+        const folderId = note.folderId || note.parent_id;
+        if (folderId && folderMap.has(folderId)) {
+            folderMap.get(folderId)!.notes.push(note);
+        }
+    }
+
+    return roots;
+}

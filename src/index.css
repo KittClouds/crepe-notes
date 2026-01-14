@@ -3,137 +3,143 @@
 @tailwind utilities;
 
 /* 
- * INKWELL - Production Note-Taking App Design System
- * Editorial minimalism with warm neutrals and focused typography
+ * GRAPHAITE V2 - Premium Dark Theme
+ * Black + Deep Charcoal + Dark Teal
+ * Award-winning immersive design
  */
+
+/* View Transition API - Dark Mode Circle Animation */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
 
 @layer base {
   :root {
-    /* Core palette - Warm editorial tones */
-    --background: 40 20% 98%;
-    --foreground: 220 20% 12%;
-
-    /* Card surfaces with subtle warmth */
-    --card: 40 15% 99%;
-    --card-foreground: 220 20% 12%;
-
-    /* Popovers and overlays */
+    /* Light mode kept for completeness - App runs in dark by default */
+    --background: 0 0% 98%;
+    --foreground: 220 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 10% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 12%;
-
-    /* Primary - Deep ink blue */
-    --primary: 220 60% 25%;
-    --primary-foreground: 40 20% 98%;
-
-    /* Secondary - Soft warm gray */
-    --secondary: 40 10% 94%;
-    --secondary-foreground: 220 20% 20%;
-
-    /* Muted surfaces */
-    --muted: 40 10% 96%;
+    --popover-foreground: 220 10% 10%;
+    --primary: 175 50% 35%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 10% 94%;
+    --secondary-foreground: 220 10% 20%;
+    --muted: 220 10% 96%;
     --muted-foreground: 220 10% 45%;
-
-    /* Accent - Warm amber for highlights */
-    --accent: 35 90% 55%;
-    --accent-foreground: 220 20% 12%;
-
-    /* Destructive states */
-    --destructive: 0 70% 55%;
+    --accent: 175 60% 45%;
+    --accent-foreground: 220 10% 10%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
-
-    /* Success state */
-    --success: 145 60% 40%;
+    --success: 160 60% 40%;
     --success-foreground: 0 0% 100%;
-
-    /* Warning state */
     --warning: 40 90% 50%;
-    --warning-foreground: 220 20% 12%;
-
-    /* Border and input styling */
-    --border: 40 15% 88%;
-    --input: 40 15% 88%;
-    --ring: 220 60% 25%;
-
-    /* Border radius */
+    --warning-foreground: 220 10% 10%;
+    --border: 220 10% 90%;
+    --input: 220 10% 90%;
+    --ring: 175 50% 35%;
     --radius: 0.5rem;
-
-    /* Sidebar - Slightly darker warm tone */
-    --sidebar-background: 40 15% 96%;
-    --sidebar-foreground: 220 15% 25%;
-    --sidebar-primary: 220 60% 25%;
-    --sidebar-primary-foreground: 40 20% 98%;
-    --sidebar-accent: 40 20% 92%;
-    --sidebar-accent-foreground: 220 20% 12%;
-    --sidebar-border: 40 15% 88%;
-    --sidebar-ring: 220 60% 25%;
-
-    /* Editor-specific tokens */
-    --editor-bg: 40 20% 99%;
-    --editor-selection: 220 60% 90%;
-    --editor-cursor: 220 60% 25%;
-    --editor-line-highlight: 40 30% 97%;
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(220 20% 12% / 0.03);
-    --shadow-md: 0 4px 6px -1px hsl(220 20% 12% / 0.05), 0 2px 4px -2px hsl(220 20% 12% / 0.05);
-    --shadow-lg: 0 10px 15px -3px hsl(220 20% 12% / 0.08), 0 4px 6px -4px hsl(220 20% 12% / 0.05);
-    --shadow-xl: 0 20px 25px -5px hsl(220 20% 12% / 0.1), 0 8px 10px -6px hsl(220 20% 12% / 0.05);
+    --sidebar-background: 220 10% 96%;
+    --sidebar-foreground: 220 10% 20%;
+    --sidebar-primary: 175 50% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 10% 92%;
+    --sidebar-accent-foreground: 220 10% 10%;
+    --sidebar-border: 220 10% 88%;
+    --sidebar-ring: 175 50% 35%;
+    --editor-bg: 0 0% 100%;
+    --editor-selection: 175 40% 85%;
+    --editor-cursor: 175 50% 35%;
+    --editor-line-highlight: 175 20% 96%;
   }
 
   .dark {
-    --background: 220 20% 8%;
-    --foreground: 40 15% 92%;
+    /* === GRAPHAITE V2 PREMIUM DARK === */
 
-    --card: 220 18% 10%;
-    --card-foreground: 40 15% 92%;
+    /* Pure black base */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 88%;
 
-    --popover: 220 20% 10%;
-    --popover-foreground: 40 15% 92%;
+    /* Deep charcoal surfaces */
+    --card: 220 10% 7%;
+    --card-foreground: 0 0% 88%;
 
-    --primary: 40 60% 65%;
-    --primary-foreground: 220 20% 8%;
+    /* Popovers slightly lighter */
+    --popover: 220 10% 9%;
+    --popover-foreground: 0 0% 88%;
 
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 40 15% 90%;
+    /* Dark Teal primary */
+    --primary: 175 50% 42%;
+    --primary-foreground: 0 0% 4%;
 
-    --muted: 220 15% 15%;
-    --muted-foreground: 40 10% 60%;
+    /* Charcoal secondary */
+    --secondary: 220 10% 14%;
+    --secondary-foreground: 0 0% 82%;
 
-    --accent: 35 80% 55%;
-    --accent-foreground: 220 20% 8%;
+    /* Muted charcoal */
+    --muted: 220 10% 12%;
+    --muted-foreground: 0 0% 55%;
 
-    --destructive: 0 60% 45%;
+    /* Bright teal accent */
+    --accent: 175 65% 48%;
+    --accent-foreground: 0 0% 4%;
+
+    /* States */
+    --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 100%;
-
-    --success: 145 50% 45%;
+    --success: 160 55% 42%;
     --success-foreground: 0 0% 100%;
+    --warning: 40 85% 52%;
+    --warning-foreground: 0 0% 4%;
 
-    --warning: 40 80% 50%;
-    --warning-foreground: 220 20% 8%;
+    /* Subtle borders */
+    --border: 220 8% 18%;
+    --input: 220 8% 18%;
+    --ring: 175 50% 42%;
 
-    --border: 220 15% 20%;
-    --input: 220 15% 20%;
-    --ring: 40 60% 65%;
+    /* Sidebar - Deeper charcoal */
+    --sidebar-background: 220 12% 5%;
+    --sidebar-foreground: 0 0% 80%;
+    --sidebar-primary: 175 50% 42%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 220 10% 12%;
+    --sidebar-accent-foreground: 0 0% 88%;
+    --sidebar-border: 220 8% 15%;
+    --sidebar-ring: 175 50% 42%;
 
-    --sidebar-background: 220 18% 7%;
-    --sidebar-foreground: 40 15% 85%;
-    --sidebar-primary: 40 60% 65%;
-    --sidebar-primary-foreground: 220 20% 8%;
-    --sidebar-accent: 220 15% 15%;
-    --sidebar-accent-foreground: 40 15% 92%;
-    --sidebar-border: 220 15% 18%;
-    --sidebar-ring: 40 60% 65%;
+    /* Editor - Same as background (no beige!) */
+    --editor-bg: 0 0% 4%;
+    --editor-selection: 175 40% 22%;
+    --editor-cursor: 175 65% 48%;
+    --editor-line-highlight: 220 10% 8%;
 
-    --editor-bg: 220 18% 9%;
-    --editor-selection: 220 40% 25%;
-    --editor-cursor: 40 60% 65%;
-    --editor-line-highlight: 220 18% 12%;
+    /* Premium shadows with teal hint */
+    --shadow-sm: 0 1px 2px 0 hsl(175 30% 5% / 0.3);
+    --shadow-md: 0 4px 6px -1px hsl(175 30% 5% / 0.4), 0 2px 4px -2px hsl(175 30% 5% / 0.3);
+    --shadow-lg: 0 10px 15px -3px hsl(175 30% 5% / 0.5), 0 4px 6px -4px hsl(175 30% 5% / 0.3);
+    --shadow-xl: 0 20px 25px -5px hsl(175 30% 5% / 0.5), 0 8px 10px -6px hsl(175 30% 5% / 0.3);
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+  }
+
+  html {
+    /* Force dark mode */
+    color-scheme: dark;
   }
 
   body {
@@ -145,18 +151,25 @@
   *:focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background transition-shadow;
   }
+
+  /* Selection color */
+  ::selection {
+    background: hsl(var(--editor-selection));
+    color: hsl(var(--foreground));
+  }
 }
 
 @layer components {
+
   /* Status badges */
   .badge-synced {
     @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full;
-    @apply bg-success/10 text-success;
+    @apply bg-success/15 text-success;
   }
 
   .badge-saving {
     @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full;
-    @apply bg-warning/10 text-warning;
+    @apply bg-warning/15 text-warning;
   }
 
   .badge-offline {
@@ -164,10 +177,10 @@
     @apply bg-muted text-muted-foreground;
   }
 
-  /* Editor container styling */
+  /* Editor container - full width, no beige */
   .editor-container {
-    @apply min-h-[500px] rounded-lg;
-    background: hsl(var(--editor-bg));
+    @apply min-h-[500px];
+    background: hsl(var(--background));
   }
 
   /* Note card in sidebar */
@@ -177,12 +190,18 @@
   }
 
   .note-card.active {
-    @apply bg-sidebar-accent;
+    @apply bg-sidebar-accent border-l-2 border-primary;
+  }
+
+  /* Teal glow effect for active items */
+  .teal-glow {
+    box-shadow: 0 0 20px hsl(175 50% 42% / 0.15);
   }
 }
 
 @layer utilities {
-  /* Smooth scrollbars */
+
+  /* Custom scrollbars - thin and dark */
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) transparent;
@@ -203,135 +222,212 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(var(--muted-foreground) / 0.3);
+    background-color: hsl(var(--muted-foreground) / 0.4);
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Compatibility alias for custom-scrollbar */
+  .custom-scrollbar {
+    @apply scrollbar-thin;
   }
 }
 
-/* Milkdown Crepe Editor Overrides */
+/* Milkdown Crepe Editor - Premium Dark Theme */
 .milkdown-editor-wrapper {
-  --crepe-color-background: hsl(var(--editor-bg));
+  --crepe-color-background: hsl(var(--background));
+  --crepe-color-on-background: hsl(var(--foreground));
   --crepe-color-surface: hsl(var(--card));
-  --crepe-color-overlay: hsl(var(--popover));
+  --crepe-color-surface-low: hsl(var(--muted));
+  --crepe-color-on-surface: hsl(var(--foreground));
+  --crepe-color-on-surface-variant: hsl(var(--muted-foreground));
+  --crepe-color-outline: hsl(var(--border));
   --crepe-color-primary: hsl(var(--primary));
   --crepe-color-secondary: hsl(var(--secondary));
-  --crepe-color-neutral: hsl(var(--muted));
-  --crepe-color-solid: hsl(var(--foreground));
-  --crepe-color-line: hsl(var(--border));
-  --crepe-color-border: hsl(var(--border));
+  --crepe-color-on-secondary: hsl(var(--secondary-foreground));
+  --crepe-color-inverse: hsl(var(--foreground));
+  --crepe-color-on-inverse: hsl(var(--background));
   --crepe-color-inline-code: hsl(var(--accent));
-  --crepe-color-selection: hsl(var(--editor-selection));
-  --crepe-font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --crepe-font-family-code: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --crepe-color-error: hsl(var(--destructive));
+  --crepe-color-hover: hsl(var(--muted));
+  --crepe-color-selected: hsl(var(--editor-selection));
+  --crepe-color-inline-area: hsl(var(--secondary));
+
+  --crepe-font-title: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --crepe-font-default: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --crepe-font-code: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  --crepe-shadow-1: 0px 1px 3px 0px hsl(175 30% 5% / 0.3);
+  --crepe-shadow-2: 0px 2px 6px 2px hsl(175 30% 5% / 0.4);
 }
 
 .milkdown-editor-wrapper .milkdown {
-  padding: 2rem;
-  min-height: 400px;
+  padding: 2.5rem 3rem;
+  min-height: 100%;
+  background: transparent;
 }
 
-.milkdown-editor-wrapper .milkdown .editor {
-  outline: none;
-}
-
+.milkdown-editor-wrapper .milkdown .editor,
 .milkdown-editor-wrapper .milkdown .ProseMirror {
   outline: none;
-  min-height: 300px;
+  min-height: calc(100vh - 150px);
 }
 
-.milkdown-editor-wrapper .milkdown .ProseMirror > * + * {
-  margin-top: 0.75em;
+.milkdown-editor-wrapper .milkdown .ProseMirror>*+* {
+  margin-top: 0.875em;
 }
 
+/* Typography */
 .milkdown-editor-wrapper .milkdown h1 {
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
-.milkdown-editor-wrapper .milkdown h2 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-  margin-top: 1.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.milkdown-editor-wrapper .milkdown h3 {
-  font-size: 1.35rem;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.milkdown-editor-wrapper .milkdown p {
-  line-height: 1.75;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
   color: hsl(var(--foreground));
 }
 
-.milkdown-editor-wrapper .milkdown code {
-  background: hsl(var(--muted));
-  padding: 0.2em 0.4em;
-  border-radius: 0.25rem;
-  font-size: 0.875em;
-  font-family: var(--crepe-font-family-code);
+.milkdown-editor-wrapper .milkdown h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: hsl(var(--foreground));
 }
 
+.milkdown-editor-wrapper .milkdown h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.35;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  color: hsl(var(--foreground));
+}
+
+.milkdown-editor-wrapper .milkdown p {
+  line-height: 1.8;
+  color: hsl(var(--foreground) / 0.9);
+}
+
+/* Inline code - teal highlight */
+.milkdown-editor-wrapper .milkdown code {
+  background: hsl(175 30% 15% / 0.5);
+  color: hsl(var(--accent));
+  padding: 0.2em 0.45em;
+  border-radius: 0.3rem;
+  font-size: 0.875em;
+  font-family: var(--crepe-font-code);
+}
+
+/* Code blocks */
 .milkdown-editor-wrapper .milkdown pre {
-  background: hsl(var(--muted));
-  border-radius: 0.5rem;
-  padding: 1rem;
+  background: hsl(220 12% 8%);
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.625rem;
+  padding: 1.25rem;
   overflow-x: auto;
 }
 
 .milkdown-editor-wrapper .milkdown pre code {
   background: transparent;
+  color: hsl(var(--foreground));
   padding: 0;
 }
 
+/* Blockquotes - teal border */
 .milkdown-editor-wrapper .milkdown blockquote {
-  border-left: 3px solid hsl(var(--accent));
-  padding-left: 1rem;
+  border-left: 3px solid hsl(var(--primary));
+  padding-left: 1.25rem;
   margin-left: 0;
   color: hsl(var(--muted-foreground));
   font-style: italic;
 }
 
+/* Lists */
 .milkdown-editor-wrapper .milkdown ul,
 .milkdown-editor-wrapper .milkdown ol {
-  padding-left: 1.5rem;
+  padding-left: 1.75rem;
 }
 
 .milkdown-editor-wrapper .milkdown li {
-  line-height: 1.75;
+  line-height: 1.8;
 }
 
+.milkdown-editor-wrapper .milkdown li::marker {
+  color: hsl(var(--primary));
+}
+
+/* Links - teal with hover effect */
 .milkdown-editor-wrapper .milkdown a {
   color: hsl(var(--primary));
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
+  border-bottom: 1px solid hsl(var(--primary) / 0.3);
+  transition: all 0.15s ease;
 }
 
 .milkdown-editor-wrapper .milkdown a:hover {
   color: hsl(var(--accent));
+  border-bottom-color: hsl(var(--accent));
 }
 
+/* Horizontal rules */
 .milkdown-editor-wrapper .milkdown hr {
   border: none;
   border-top: 1px solid hsl(var(--border));
-  margin: 2rem 0;
+  margin: 2.5rem 0;
 }
 
+/* Images */
 .milkdown-editor-wrapper .milkdown img {
   max-width: 100%;
   height: auto;
-  border-radius: 0.5rem;
+  border-radius: 0.625rem;
+  border: 1px solid hsl(var(--border));
 }
 
+/* Selection */
 .milkdown-editor-wrapper .milkdown ::selection {
   background: hsl(var(--editor-selection));
+}
+
+/* Tables */
+.milkdown-editor-wrapper .milkdown table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+.milkdown-editor-wrapper .milkdown th,
+.milkdown-editor-wrapper .milkdown td {
+  border: 1px solid hsl(var(--border));
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.milkdown-editor-wrapper .milkdown th {
+  background: hsl(var(--muted));
+  font-weight: 600;
+}
+
+.milkdown-editor-wrapper .milkdown tr:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+
+/* Checkboxes */
+.milkdown-editor-wrapper .milkdown input[type="checkbox"] {
+  accent-color: hsl(var(--primary));
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
 }

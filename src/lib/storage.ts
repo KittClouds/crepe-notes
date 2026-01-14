@@ -75,14 +75,14 @@ export function createNote(partial?: Partial<Note>): Note {
   const notes = getAllNotes();
   notes.unshift(note);
   setStorageItem(STORAGE_KEYS.NOTES, notes);
-  
+
   return note;
 }
 
 export function updateNote(id: string, updates: Partial<Note>): Note | undefined {
   const notes = getAllNotes();
   const index = notes.findIndex((note) => note.id === id);
-  
+
   if (index === -1) return undefined;
 
   const updatedNote = {
@@ -93,16 +93,16 @@ export function updateNote(id: string, updates: Partial<Note>): Note | undefined
 
   notes[index] = updatedNote;
   setStorageItem(STORAGE_KEYS.NOTES, notes);
-  
+
   return updatedNote;
 }
 
 export function deleteNote(id: string): boolean {
   const notes = getAllNotes();
   const filteredNotes = notes.filter((note) => note.id !== id);
-  
+
   if (filteredNotes.length === notes.length) return false;
-  
+
   setStorageItem(STORAGE_KEYS.NOTES, filteredNotes);
   return true;
 }
@@ -139,7 +139,7 @@ export function createFolder(name: string, parentId: string | null = null): Fold
   const folders = getAllFolders();
   folders.push(folder);
   setStorageItem(STORAGE_KEYS.FOLDERS, folders);
-  
+
   return folder;
 }
 
@@ -159,7 +159,7 @@ export function createTag(name: string, color: string = '#3b82f6'): Tag {
   const tags = getAllTags();
   tags.push(tag);
   setStorageItem(STORAGE_KEYS.TAGS, tags);
-  
+
   return tag;
 }
 
@@ -167,23 +167,37 @@ export function createTag(name: string, color: string = '#3b82f6'): Tag {
 export function searchNotes(query: string): Note[] {
   const notes = getAllNotes();
   const lowerQuery = query.toLowerCase();
-  
-  return notes.filter((note) => 
+
+  return notes.filter((note) =>
     note.title.toLowerCase().includes(lowerQuery) ||
     note.markdownContent.toLowerCase().includes(lowerQuery) ||
     note.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
   );
 }
 
+// Find note by title (for wikilink resolution)
+export function findNoteByTitle(title: string): Note | null {
+  const notes = getAllNotes();
+  const lowerTitle = title.toLowerCase();
+
+  // Exact match first
+  const exact = notes.find(note => note.title.toLowerCase() === lowerTitle);
+  if (exact) return exact;
+
+  // Partial match fallback
+  const partial = notes.find(note => note.title.toLowerCase().includes(lowerTitle));
+  return partial || null;
+}
+
 // Initialize with a default note if none exist
 export function initializeStorage(): Note {
   const notes = getAllNotes();
-  
+
   if (notes.length === 0) {
     return createNote({
       title: 'Getting Started',
     });
   }
-  
+
   return notes[0];
 }

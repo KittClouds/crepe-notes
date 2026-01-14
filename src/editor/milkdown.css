@@ -1,0 +1,331 @@
+/* src/editor/milkdown.css */
+/* Custom Milkdown styles that work with Tailwind */
+
+/* Editor wrapper - needs left padding for Crepe's drag handles */
+.crepe-editor-wrapper {
+  @apply pl-12;
+  /* 48px left padding for drag handles */
+}
+
+/* Editor container */
+.milkdown {
+  @apply text-foreground bg-background;
+}
+
+.milkdown .editor {
+  @apply min-h-full p-4 outline-none;
+}
+
+/* Typography */
+.milkdown .editor h1 {
+  @apply text-3xl font-bold mt-6 mb-4 text-foreground;
+}
+
+.milkdown .editor h2 {
+  @apply text-2xl font-semibold mt-5 mb-3 text-foreground;
+}
+
+.milkdown .editor h3 {
+  @apply text-xl font-semibold mt-4 mb-2 text-foreground;
+}
+
+.milkdown .editor h4 {
+  @apply text-lg font-medium mt-3 mb-2 text-foreground;
+}
+
+.milkdown .editor p {
+  @apply my-3 leading-relaxed;
+}
+
+/* Lists */
+.milkdown .editor ul,
+.milkdown .editor ol {
+  @apply my-3 pl-6;
+}
+
+.milkdown .editor li {
+  @apply my-1;
+}
+
+.milkdown .editor ul>li {
+  list-style-type: disc;
+}
+
+.milkdown .editor ol>li {
+  list-style-type: decimal;
+}
+
+/* Blockquote */
+.milkdown .editor blockquote {
+  @apply border-l-4 border-primary/50 pl-4 my-4 italic text-muted-foreground;
+}
+
+/* Code */
+.milkdown .editor code {
+  @apply px-1.5 py-0.5 rounded bg-muted text-sm font-mono text-primary;
+}
+
+.milkdown .editor pre {
+  @apply my-4 p-4 rounded-lg bg-zinc-900 overflow-x-auto;
+}
+
+.milkdown .editor pre code {
+  @apply bg-transparent p-0 text-zinc-100;
+}
+
+/* Links */
+.milkdown .editor a {
+  @apply text-primary underline underline-offset-2 hover:text-primary/80 transition-colors;
+}
+
+/* Horizontal rule */
+.milkdown .editor hr {
+  @apply my-6 border-border;
+}
+
+/* Tables */
+.milkdown .editor table {
+  @apply w-full my-4 border-collapse;
+}
+
+.milkdown .editor th,
+.milkdown .editor td {
+  @apply border border-border px-3 py-2 text-left;
+}
+
+.milkdown .editor th {
+  @apply bg-muted font-semibold;
+}
+
+.milkdown .editor tr:hover {
+  @apply bg-muted/50;
+}
+
+/* Images */
+.milkdown .editor img {
+  @apply max-w-full h-auto rounded-lg my-4;
+}
+
+/* Task list checkboxes */
+.milkdown .editor input[type="checkbox"] {
+  @apply mr-2 rounded border-border;
+}
+
+/* Selection */
+.milkdown .editor ::selection {
+  @apply bg-primary/20;
+}
+
+/* Placeholder */
+.milkdown .editor .ProseMirror-placeholder {
+  @apply text-muted-foreground/50;
+}
+
+/* Focus ring for editable area */
+.milkdown .editor:focus {
+  @apply outline-none;
+}
+
+/* Code block language picker */
+.milkdown-code-block-language-picker {
+  @apply absolute top-2 right-2 text-xs text-muted-foreground bg-zinc-800 px-2 py-1 rounded;
+}
+
+/* ================================
+   Selection Toolbar
+   ================================ */
+.selection-toolbar {
+  @apply flex items-center gap-0.5 p-1;
+  @apply bg-popover text-popover-foreground;
+  @apply border border-border rounded-lg;
+  @apply shadow-lg;
+  z-index: 100;
+}
+
+.selection-toolbar .toolbar-btn {
+  @apply flex items-center justify-center;
+  @apply w-7 h-7 p-1;
+  @apply bg-transparent border-none rounded;
+  @apply cursor-pointer;
+  @apply text-popover-foreground;
+  @apply transition-colors duration-150;
+}
+
+.selection-toolbar .toolbar-btn:hover {
+  @apply bg-accent text-accent-foreground;
+}
+
+/* ================================
+   Slash Menu
+   ================================ */
+.slash-menu {
+  @apply flex flex-col;
+  @apply min-w-60 max-h-80 overflow-auto;
+  @apply bg-popover text-popover-foreground;
+  @apply border border-border rounded-lg;
+  @apply shadow-xl;
+  @apply p-1;
+  z-index: 100;
+}
+
+.slash-menu-item {
+  @apply flex items-center gap-3;
+  @apply px-3 py-2;
+  @apply bg-transparent border-none rounded-md;
+  @apply cursor-pointer text-left;
+  @apply transition-colors duration-100;
+}
+
+.slash-menu-item:hover,
+.slash-menu-item.active {
+  @apply bg-accent text-accent-foreground;
+}
+
+.slash-menu-item svg {
+  @apply opacity-70;
+}
+
+.slash-menu-item-label {
+  @apply font-medium text-sm;
+}
+
+.slash-menu-item-desc {
+  @apply text-xs opacity-60;
+}
+
+/* ================================
+   Block Handle (Drag Handle)
+   ================================ */
+.drag-handle-btn {
+  @apply bg-muted text-muted-foreground;
+  @apply hover:bg-accent hover:text-accent-foreground;
+  @apply transition-colors duration-150;
+  z-index: 50;
+}
+
+/* data-[show=true] is set by BlockProvider */
+.drag-handle-btn[data-show="true"] {
+  @apply block;
+}
+
+/* ================================
+   Entity Decorations (v1 style)
+   ================================ */
+
+/* Base entity mark */
+.entity-mark {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.entity-mark:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* Entity colors - CSS custom properties for theming */
+/* These are overwritten on app init by entityColorStore if user has custom colors */
+:root {
+  /* Core entities */
+  --entity-character: 280 70% 60%;
+  /* Purple */
+  --entity-location: 200 75% 55%;
+  /* Blue */
+  --entity-organization: 340 75% 55%;
+  /* Pink/Rose */
+  --entity-item: 45 90% 50%;
+  /* Gold */
+  --entity-concept: 170 65% 45%;
+  /* Teal */
+  --entity-event: 25 90% 55%;
+  /* Orange */
+  --entity-faction: 0 70% 55%;
+  /* Red */
+  --entity-creature: 120 50% 45%;
+  /* Green */
+  --entity-unknown: 220 10% 50%;
+  /* Gray */
+
+  /* Narrative structure */
+  --entity-act: 230 80% 55%;
+  /* Royal Blue */
+  --entity-arc: 270 70% 60%;
+  /* Violet */
+  --entity-beat: 320 70% 55%;
+  /* Magenta */
+  --entity-chapter: 175 65% 45%;
+  /* Teal */
+  --entity-narrative: 250 60% 55%;
+  /* Indigo */
+  --entity-network: 190 70% 50%;
+  /* Cyan */
+  --entity-scene: 330 70% 60%;
+  /* Pink */
+  --entity-timeline: 50 85% 50%;
+  /* Gold */
+  --entity-npc: 30 80% 55%;
+  /* Orange */
+
+  /* World building */
+  --entity-magic-system: 280 80% 55%;
+  /* Purple */
+  --entity-world: 160 60% 45%;
+  /* Teal-Green */
+  --entity-rule: 220 60% 50%;
+  /* Blue-Gray */
+}
+
+/* Individual entity kind styles - vivid mode */
+.entity-character {
+  background-color: hsl(var(--entity-character) / 0.2);
+  color: hsl(var(--entity-character));
+  border-bottom-color: hsl(var(--entity-character));
+}
+
+.entity-location {
+  background-color: hsl(var(--entity-location) / 0.2);
+  color: hsl(var(--entity-location));
+  border-bottom-color: hsl(var(--entity-location));
+}
+
+.entity-organization {
+  background-color: hsl(var(--entity-organization) / 0.2);
+  color: hsl(var(--entity-organization));
+  border-bottom-color: hsl(var(--entity-organization));
+}
+
+.entity-item {
+  background-color: hsl(var(--entity-item) / 0.2);
+  color: hsl(var(--entity-item));
+  border-bottom-color: hsl(var(--entity-item));
+}
+
+.entity-concept {
+  background-color: hsl(var(--entity-concept) / 0.2);
+  color: hsl(var(--entity-concept));
+  border-bottom-color: hsl(var(--entity-concept));
+}
+
+.entity-event {
+  background-color: hsl(var(--entity-event) / 0.2);
+  color: hsl(var(--entity-event));
+  border-bottom-color: hsl(var(--entity-event));
+}
+
+.entity-faction {
+  background-color: hsl(var(--entity-faction) / 0.2);
+  color: hsl(var(--entity-faction));
+  border-bottom-color: hsl(var(--entity-faction));
+}
+
+.entity-creature {
+  background-color: hsl(var(--entity-creature) / 0.2);
+  color: hsl(var(--entity-creature));
+  border-bottom-color: hsl(var(--entity-creature));
+}
+
+.entity-unknown {
+  background-color: hsl(var(--entity-unknown) / 0.2);
+  color: hsl(var(--entity-unknown));
+  border-bottom-color: hsl(var(--entity-unknown));
+}

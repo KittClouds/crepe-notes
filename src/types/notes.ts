@@ -1,13 +1,7 @@
-export interface Note {
-  id: string;
-  title: string;
-  markdownContent: string;
-  folderId: string | null;
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  ownerId: string;
-}
+// src/types/notes.ts
+// Re-export from noteTypes for backwards compatibility
+
+export * from './noteTypes';
 
 export interface NoteVersion {
   id: string;
@@ -15,22 +9,6 @@ export interface NoteVersion {
   markdownContent: string;
   createdAt: Date;
   createdBy: string;
-}
-
-export interface Folder {
-  id: string;
-  name: string;
-  parentId: string | null;
-  ownerId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Tag {
-  id: string;
-  name: string;
-  color: string;
-  ownerId: string;
 }
 
 export interface SharePermission {
@@ -49,11 +27,9 @@ export interface User {
   avatarUrl?: string;
 }
 
-export type SyncStatus = 'synced' | 'syncing' | 'offline' | 'error';
-
 export interface EditorState {
-  currentNote: Note | null;
-  syncStatus: SyncStatus;
+  currentNote: import('./noteTypes').Note | null;
+  syncStatus: import('./noteTypes').SyncStatus;
   collaborators: User[];
   isReadOnly: boolean;
 }

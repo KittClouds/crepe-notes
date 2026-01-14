@@ -1,0 +1,8010 @@
+﻿cargo :    Compiling varant 
+v0.1.0 (C:\Users\shuga\1kitt
+root\1code\daswundebar\src-t
+auri)
+At line:1 char:1
++ cargo build --lib 2>&1 | 
+Out-File -Encoding utf8 
+build_output.txt; Ge ...
++ ~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (   Co  
+  mpiling va...ebar\src-t   
+ auri):String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+warning: unused import: 
+`std::collections::HashMap`
+  --> src\temporal.rs:18:5
+   |
+18 | use 
+std::collections::HashMap;
+   |     
+^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: 
+`#[warn(unused_imports)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused import: 
+`TextRange`
+  --> src\attacher.rs:25:40
+   |
+25 | use 
+super::chunker::{Chunk, 
+ChunkKind, TextRange};
+   |                        
+                ^^^^^^^^^
+
+warning: unused imports: 
+`ProjectionStats`, 
+`project_all`, 
+`project_attributions`, 
+`project_quads`, and 
+`project_state_changes`
+  --> 
+src\reality\engine.rs:16:22
+   |
+16 |     project_triples, 
+project_quads, 
+project_attributions, 
+project_state_changes,
+   |                      
+^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^^^^^^^
+17 |     project_all, 
+project_all_with_stats,
+   |     ^^^^^^^^^^^
+18 |     Triple, QuadPlus, 
+Attribution, StateChange, 
+Projection, ProjectionStats,
+   |                        
+                            
+         ^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`EdgeKind`
+  --> 
+src\reality\engine.rs:20:60
+   |
+20 | use super::graph::{Conc
+eptGraph, ConceptNode, 
+ConceptEdge, EdgeKind};
+   |                        
+                            
+        ^^^^^^^^
+
+warning: unused import: 
+`ConceptEdge`
+  --> 
+src\reality\global.rs:11:47
+   |
+11 | use super::graph::{Conc
+eptGraph, ConceptNode, 
+ConceptEdge};
+   |                        
+                       
+^^^^^^^^^^^
+
+warning: unused imports: 
+`ConceptEdge` and 
+`ConceptNode`
+  --> src\reality\algorithms
+.rs:11:34
+   |
+11 | use super::graph::{Conc
+eptGraph, ConceptNode, 
+ConceptEdge, NodeIndex};
+   |                        
+          ^^^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: 
+`EdgeKind`
+ --> 
+src\reality\temporal.rs:9:60
+  |
+9 | use super::graph::{Conce
+ptGraph, ConceptNode, 
+ConceptEdge, EdgeKind};
+  |                         
+                            
+       ^^^^^^^^
+
+warning: unused imports: 
+`RealityLanguage` and 
+`SyntaxKind`
+  --> 
+src\reality\mod.rs:21:18
+   |
+21 | pub use 
+syntax::{SyntaxKind, 
+RealityLanguage};
+   |                  
+^^^^^^^^^^  ^^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`ConceptEdge`, 
+`ConceptGraph`, 
+`ConceptNode`, and 
+`EdgeKind`
+  --> 
+src\reality\mod.rs:22:17
+   |
+22 | pub use 
+graph::{ConceptGraph, 
+ConceptNode, ConceptEdge, 
+EdgeKind};
+   |                 
+^^^^^^^^^^^^  ^^^^^^^^^^^  
+^^^^^^^^^^^  ^^^^^^^^
+
+warning: unused import: 
+`synapse::SynapseBridge`
+  --> 
+src\reality\mod.rs:23:9
+   |
+23 | pub use 
+synapse::SynapseBridge;
+   |         
+^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`engine::RealityEngine`
+  --> 
+src\reality\mod.rs:24:9
+   |
+24 | pub use 
+engine::RealityEngine;
+   |         
+^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`Attribution`, 
+`Projection`, `QuadPlus`, 
+`StateChange`, and `Triple`
+  --> 
+src\reality\mod.rs:25:22
+   |
+25 | pub use 
+projection::{Triple, 
+QuadPlus, Attribution, 
+StateChange, Projection};
+   |                      
+^^^^^^  ^^^^^^^^  
+^^^^^^^^^^^  ^^^^^^^^^^^  
+^^^^^^^^^^
+
+warning: unused import: 
+`global::GlobalGraph`
+  --> 
+src\reality\mod.rs:26:9
+   |
+26 | pub use 
+global::GlobalGraph;
+   |         
+^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`unification::EntityUnifier`
+  --> 
+src\reality\mod.rs:27:9
+   |
+27 | pub use 
+unification::EntityUnifier;
+   |         
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`NamedRows`
+ --> 
+src\graph\registry.rs:6:35
+  |
+6 | use cozo::{DbInstance, 
+DataValue, NamedRows};
+  |                         
+          ^^^^^^^^^
+
+warning: unused import: 
+`schema::*`
+  --> src\graph\mod.rs:31:9
+   |
+31 | pub use schema::*;
+   |         ^^^^^^^^^
+
+warning: unused import: 
+`queries::*`
+  --> src\graph\mod.rs:34:9
+   |
+34 | pub use queries::*;
+   |         ^^^^^^^^^^
+
+warning: unused import: 
+`algorithms::*`
+  --> src\graph\mod.rs:35:9
+   |
+35 | pub use algorithms::*;
+   |         ^^^^^^^^^^^^^
+
+warning: unused import: 
+`cozo_graph::*`
+  --> src\graph\mod.rs:37:9
+   |
+37 | pub use cozo_graph::*;
+   |         ^^^^^^^^^^^^^
+
+warning: unused import: 
+`content_types::*`
+  --> src\graph\mod.rs:38:9
+   |
+38 | pub use 
+content_types::*;
+   |         
+^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`content_repos::*`
+  --> src\graph\mod.rs:39:9
+   |
+39 | pub use 
+content_repos::*;
+   |         
+^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`content_commands::*`
+  --> src\graph\mod.rs:40:9
+   |
+40 | pub use 
+content_commands::*;
+   |         
+^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`graph_backend::*`
+  --> src\graph\mod.rs:41:9
+   |
+41 | pub use 
+graph_backend::*;
+   |         
+^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`commands::*`
+  --> src\rag\mod.rs:15:9
+   |
+15 | pub use commands::*;
+   |         ^^^^^^^^^^^
+
+warning: unused import: `emb
+eddings::EmbeddingService`
+  --> src\rag\mod.rs:16:9
+   |
+16 | pub use embeddings::Emb
+eddingService;
+   |         
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`chunker::RagChunker`
+  --> src\rag\mod.rs:17:9
+   |
+17 | pub use 
+chunker::RagChunker;
+   |         
+^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`CorpusSize`, 
+`FieldParams`, and 
+`ResoRankConfig`
+  --> 
+src\resorank\mod.rs:21:18
+   |
+21 | pub use 
+config::{ResoRankConfig, 
+CorpusStatistics, 
+FieldParams, CorpusSize};
+   |                  
+^^^^^^^^^^^^^^              
+      ^^^^^^^^^^^  
+^^^^^^^^^^
+
+warning: unused import: `pro
+ximity::ProximityStrategy`
+  --> 
+src\resorank\mod.rs:22:9
+   |
+22 | pub use proximity::Prox
+imityStrategy;
+   |         
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`ScorerStats`
+  --> 
+src\resorank\mod.rs:23:34
+   |
+23 | pub use 
+scorer::{ResoRankScorer, 
+ScorerStats};
+   |                        
+          ^^^^^^^^^^^
+
+warning: unused imports: 
+`FieldContribution`, 
+`FieldOccurrence`, 
+`ScoreExplanation`, and 
+`TermBreakdown`
+  --> 
+src\resorank\mod.rs:25:38
+   |
+25 |     DocumentMetadata, 
+TokenMetadata, 
+FieldOccurrence,
+   |                        
+              
+^^^^^^^^^^^^^^^
+26 |     SearchResult, 
+ScoreExplanation, 
+TermBreakdown, 
+FieldContribution,
+   |                   
+^^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`std::sync::Arc`
+ --> 
+src\ai\model_manager.rs:7:5
+  |
+7 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+
+warning: unused import: 
+`std::sync::Arc`
+  --> src\ai\suggestion_laye
+r.rs:21:5
+   |
+21 | use std::sync::Arc;
+   |     ^^^^^^^^^^^^^^
+
+warning: unused import: 
+`std::sync::Arc`
+ --> src\ai\commands.rs:5:5
+  |
+5 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+
+warning: unused import: 
+`AnalysisResult`
+  --> 
+src\ai\commands.rs:13:34
+   |
+13 |     SuggestionLayer, 
+Suggestion, AnalysisResult, 
+InferredEntity,
+   |                        
+          ^^^^^^^^^^^^^^
+
+warning: unused import: 
+`AnalysisRequest`
+  --> src\ai\mod.rs:25:53
+   |
+25 | pub use 
+ner_service::{NerService, 
+NerServiceConfig, 
+AnalysisRequest, 
+AnalysisResult, 
+InferredEntity};
+   |                        
+                            
+ ^^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`AcceptResult` and 
+`SuggestionStatus`
+  --> src\ai\mod.rs:26:57
+   |
+26 | pub use suggestion_laye
+r::{SuggestionLayer, 
+Suggestion, 
+SuggestionStatus, 
+AcceptResult};
+   |                        
+                            
+     ^^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^
+
+warning: unused imports: 
+`CONDUCTOR`, 
+`IMPLICIT_CORTEX`, 
+`RELATION_ENGINE`, 
+`SCANNER`, 
+`TEMPORAL_CORTEX`, and 
+`TRIPLE_CORTEX`
+ --> src\api\core.rs:3:13
+  |
+3 | use crate::{SCANNER, 
+IMPLICIT_CORTEX, 
+TEMPORAL_CORTEX, 
+TRIPLE_CORTEX, 
+RELATION_ENGINE, CONDUCTOR};
+  |             ^^^^^^^  
+^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^  ^^^^^^^^^
+
+warning: unused import: `cra
+te::scanner::DecorationSpan`
+ --> src\api\core.rs:4:5
+  |
+4 | use crate::scanner::Deco
+rationSpan;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
+
+warning: unused import: `cra
+te::implicit::ImplicitMentio
+n`
+ --> src\api\core.rs:5:5
+  |
+5 | use crate::implicit::Imp
+licitMention;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^
+
+warning: unused import: `cra
+te::temporal::TemporalMentio
+n`
+ --> src\api\core.rs:6:5
+  |
+6 | use crate::temporal::Tem
+poralMention;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^
+
+warning: unused import: `cra
+te::triple::ExtractedTriple`
+ --> src\api\core.rs:7:5
+  |
+7 | use crate::triple::Extra
+ctedTriple;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
+
+error[E0271]: expected 
+`{async block@src\api\core.r
+s:161:11: 161:13}` to be a 
+future that resolves to 
+`Result<usize, String>`, 
+but it resolves to 
+`Result<String, String>`
+   --> 
+src\api\core.rs:161:11
+    |
+161 |     async fn 
+hydrate_entities(self, 
+entities_json: String) -> 
+Result<usize, String> {
+    |           ^^ expected 
+`Result<usize, String>`, 
+found `Result<String, 
+String>`
+    |
+    = note: expected enum 
+`std::result::Result<usize, 
+_>`
+               found enum `s
+td::result::Result<std::stri
+ng::String, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\core.rs:161:11: 
+161:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<usize, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-90629749203
+47489230.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0308]: mismatched 
+types
+    --> 
+src\api\core.rs:184:79
+     |
+ 184 |         let parsed: V
+ec<crate::resorank::SearchRe
+sult> = serde_json::from_str
+(&results)
+     |                      
+                            
+        
+-------------------- 
+^^^^^^^^ expected `&str`, 
+found `&Vec<SearchResult>`
+     |                      
+                            
+        |
+     |                      
+                            
+        arguments to this 
+function are incorrect
+     |
+     = note: expected 
+reference `&str`
+                found 
+reference `&std::vec::Vec<re
+sorank::types::SearchResult>
+`
+note: function defined here
+    --> C:\Users\shuga\.carg
+o\registry\src\index.crates.
+io-1949cf8c6b5b557f\serde_js
+on-1.0.149\src\de.rs:2699:8
+     |
+2699 | pub fn from_str<'a, 
+T>(s: &'a str) -> Result<T>
+     |        ^^^^^^^^
+
+error[E0308]: mismatched 
+types
+   --> 
+src\api\core.rs:188:20
+    |
+188 |             score: 
+r.score,
+    |                    
+^^^^^^^ expected `f64`, 
+found `f32`
+
+error[E0609]: no field 
+`title` on type `resorank::t
+ypes::SearchResult`
+   --> 
+src\api\core.rs:189:22
+    |
+189 |             title: 
+r.title,
+    |                      
+^^^^^ unknown field
+    |
+    = note: available 
+fields are: `doc_id`, 
+`score`, `normalized_score`
+
+error[E0308]: mismatched 
+types
+    --> 
+src\api\core.rs:203:61
+     |
+ 203 |         let stats: 
+serde_json::Value = serde_js
+on::from_str(&stats_json)
+     |                      
+                  
+-------------------- 
+^^^^^^^^^^^ expected 
+`&str`, found `&Value`
+     |                      
+                  |
+     |                      
+                  arguments 
+to this function are 
+incorrect
+     |
+     = note: expected 
+reference `&str`
+                found 
+reference 
+`&serde_json::Value`
+note: function defined here
+    --> C:\Users\shuga\.carg
+o\registry\src\index.crates.
+io-1949cf8c6b5b557f\serde_js
+on-1.0.149\src\de.rs:2699:8
+     |
+2699 | pub fn from_str<'a, 
+T>(s: &'a str) -> Result<T>
+     |        ^^^^^^^^
+
+error[E0271]: expected 
+`{async block@src\api\core.r
+s:211:11: 211:13}` to be a 
+future that resolves to 
+`Result<usize, String>`, 
+but it resolves to 
+`Result<String, String>`
+   --> 
+src\api\core.rs:211:11
+    |
+211 |     async fn 
+conductor_hydrate(self, 
+entities_json: String) -> 
+Result<usize, String> {
+    |           ^^ expected 
+`Result<usize, String>`, 
+found `Result<String, 
+String>`
+    |
+    = note: expected enum 
+`std::result::Result<usize, 
+_>`
+               found enum `s
+td::result::Result<std::stri
+ng::String, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\core.rs:211:11: 
+211:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<usize, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-90629749203
+47489230.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\core.r
+s:225:11: 225:13}` to be a 
+future that resolves to 
+`Result<(), String>`, but 
+it resolves to 
+`Result<String, String>`
+   --> 
+src\api\core.rs:225:11
+    |
+225 |     async fn 
+conductor_reset(self) -> 
+Result<(), String> {
+    |           ^^ expected 
+`Result<(), String>`, found 
+`Result<String, String>`
+    |
+    = note: expected enum 
+`std::result::Result<(), _>`
+               found enum `s
+td::result::Result<std::stri
+ng::String, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\core.rs:225:11: 
+225:13}>>` to `Pin<Box<dyn 
+Future<Output = Result<(), 
+String>> + Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-11622735271
+19660714.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 2 arguments but 3 
+arguments were supplied
+   --> src\api\core.rs:230:9
+    |
+230 |         crate::get_dec
+oration_spans(note_id, 
+text, content_hash)
+    |         
+^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+               ------------ 
+unexpected argument #3 of 
+type `std::string::String`
+    |
+note: function defined here
+   --> src\lib.rs:395:4
+    |
+395 | fn 
+get_decoration_spans(
+    |    
+^^^^^^^^^^^^^^^^^^^^
+help: remove the extra 
+argument
+    |
+230 -         crate::get_dec
+oration_spans(note_id, 
+text, content_hash)
+230 +         crate::get_dec
+oration_spans(note_id, text)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\core.r
+s:229:11: 229:13}` to be a 
+future that resolves to 
+`Result<String, String>`, 
+but it resolves to 
+`Result<Option<String>, 
+String>`
+   --> 
+src\api\core.rs:229:11
+    |
+229 |     async fn 
+get_decoration_spans(self, 
+note_id: String, text: 
+String, content_hash: 
+String) -> Result<String, 
+String> {
+    |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<Option<String>, 
+String>`
+    |
+    = note: expected enum `s
+td::result::Result<std::stri
+ng::String, _>`
+               found enum `s
+td::result::Result<std::opti
+on::Option<std::string::Stri
+ng>, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\core.rs:229:11: 
+229:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\core.r
+s:233:11: 233:13}` to be a 
+future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `Result<(), 
+String>`
+   --> 
+src\api\core.rs:233:11
+    |
+233 |     async fn 
+queue_note_scan(self, 
+note_id: String) -> 
+Result<bool, String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found `Result<(), String>`
+    |
+    = note: expected enum 
+`std::result::Result<bool, 
+_>`
+               found enum 
+`std::result::Result<(), _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\core.rs:233:11: 
+233:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 3 
+arguments were supplied
+   --> 
+src\api\graph.rs:126:22
+    |
+126 |         let result = c
+ommands::graph_register_node
+(kind, label, 
+attributes_json)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ ----  -----  
+--------------- unexpected 
+argument #3 of type `std::op
+tion::Option<std::string::St
+ring>`
+    |                       
+                            
+ |     |
+    |                       
+                            
+ |     unexpected argument 
+#2 of type 
+`std::string::String`
+    |                       
+                            
+ expected 
+`RegisterNodeRequest`, 
+found `String`
+    |
+note: function defined here
+   --> 
+src\graph\commands.rs:172:8
+    |
+172 | pub fn graph_register_
+node(request: 
+RegisterNodeRequest) -> 
+Result<NodeResponse, 
+String> {
+    |        
+^^^^^^^^^^^^^^^^^^^ 
+----------------------------
+help: remove the extra 
+arguments
+    |
+126 -         let result = c
+ommands::graph_register_node
+(kind, label, 
+attributes_json)?;
+126 +         let result = c
+ommands::graph_register_node
+(/* RegisterNodeRequest 
+*/)?;
+    |
+
+error[E0061]: this function 
+takes 1 argument but 4 
+arguments were supplied
+   --> 
+src\api\graph.rs:173:22
+    |
+173 |         let result = c
+ommands::graph_create_edge(s
+ource_id, target_id, 
+relation_type, 
+attributes_json)?;
+    |                      
+^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+---------  ---------  
+-------------  
+--------------- unexpected 
+argument #4 of type `std::op
+tion::Option<std::string::St
+ring>`
+    |                       
+                           
+|          |          |
+    |                       
+                           
+|          |          
+unexpected argument #3 of 
+type `std::string::String`
+    |                       
+                           
+|          unexpected 
+argument #2 of type 
+`std::string::String`
+    |                       
+                           
+expected 
+`CreateEdgeRequest`, found 
+`String`
+    |
+note: function defined here
+   --> 
+src\graph\commands.rs:281:8
+    |
+281 | pub fn 
+graph_create_edge(request: 
+CreateEdgeRequest) -> 
+Result<EdgeResponse, 
+String> {
+    |        
+^^^^^^^^^^^^^^^^^ 
+--------------------------
+help: remove the extra 
+arguments
+    |
+173 -         let result = c
+ommands::graph_create_edge(s
+ource_id, target_id, 
+relation_type, 
+attributes_json)?;
+173 +         let result = c
+ommands::graph_create_edge(/
+* CreateEdgeRequest */)?;
+    |
+
+error[E0061]: this function 
+takes 2 arguments but 3 
+arguments were supplied
+   --> 
+src\api\graph.rs:185:22
+    |
+185 |         let result = c
+ommands::graph_get_edges(sou
+rce_id, target_id, 
+relation_type)?;
+    |                      
+^^^^^^^^^^^^^^^^^^^^^^^^^   
+                    
+------------- unexpected 
+argument #3 of type `std::op
+tion::Option<std::string::St
+ring>`
+    |
+note: expected `String`, 
+found `Option<String>`
+   --> 
+src\api\graph.rs:185:48
+    |
+185 |         let result = c
+ommands::graph_get_edges(sou
+rce_id, target_id, 
+relation_type)?;
+    |                       
+                         
+^^^^^^^^^
+    = note: expected struct 
+`std::string::String`
+                 found enum 
+`std::option::Option<std::st
+ring::String>`
+note: function defined here
+   --> 
+src\graph\commands.rs:310:8
+    |
+310 | pub fn 
+graph_get_edges(node_id: 
+String, direction: 
+Option<String>) -> 
+Result<Vec<EdgeResponse>, 
+String> {
+    |        
+^^^^^^^^^^^^^^^ 
+---------------
+help: consider using 
+`Option::expect` to unwrap 
+the `std::option::Option<std
+::string::String>` value, 
+panicking if the value is 
+an `Option::None`
+    |
+185 |         let result = c
+ommands::graph_get_edges(sou
+rce_id.expect("REASON"), 
+target_id, relation_type)?;
+    |                       
+                            
+      +++++++++++++++++
+help: remove the extra 
+argument
+    |
+185 -         let result = c
+ommands::graph_get_edges(sou
+rce_id, target_id, 
+relation_type)?;
+185 +         let result = c
+ommands::graph_get_edges(/* 
+std::string::String */, 
+target_id)?;
+    |
+
+error[E0271]: expected 
+`{async block@src\api\graph.
+rs:195:11: 195:13}` to be a 
+future that resolves to 
+`Result<String, String>`, 
+but it resolves to 
+`Result<HydrateResponse, 
+String>`
+   --> 
+src\api\graph.rs:195:11
+    |
+195 |     async fn get_entit
+ies_for_hydration(self) -> 
+Result<String, String> {
+    |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<HydrateResponse, 
+String>`
+    |
+    = note: expected enum `s
+td::result::Result<std::stri
+ng::String, _>`
+               found enum `s
+td::result::Result<HydrateRe
+sponse, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\graph.rs:195:11: 
+195:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 2 
+arguments were supplied
+   --> 
+src\api\graph.rs:213:22
+    |
+213 |         let result = c
+ommands::graph_ingest_scan_r
+esult(note_id, 
+entities_json)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^ -------  
+------------- unexpected 
+argument #2 of type 
+`std::string::String`
+    |                       
+                            
+      |
+    |                       
+                            
+      expected 
+`IngestRequest`, found 
+`String`
+    |
+note: function defined here
+   --> 
+src\graph\commands.rs:408:8
+    |
+408 | pub fn graph_ingest_sc
+an_result(request: 
+IngestRequest) -> 
+Result<IngestResponse, 
+String> {
+    |        
+^^^^^^^^^^^^^^^^^^^^^^^^ 
+----------------------
+help: remove the extra 
+argument
+    |
+213 -         let result = c
+ommands::graph_ingest_scan_r
+esult(note_id, 
+entities_json)?;
+213 +         let result = c
+ommands::graph_ingest_scan_r
+esult(/* IngestRequest */)?;
+    |
+
+error[E0609]: no field 
+`node_count` on type 
+`serde_json::Value`
+   --> 
+src\api\graph.rs:220:32
+    |
+220 |             
+node_count: 
+result.node_count,
+    |                       
+         ^^^^^^^^^^ unknown 
+field
+
+error[E0609]: no field 
+`edge_count` on type 
+`serde_json::Value`
+   --> 
+src\api\graph.rs:221:32
+    |
+221 |             
+edge_count: 
+result.edge_count,
+    |                       
+         ^^^^^^^^^^ unknown 
+field
+
+error[E0061]: this function 
+takes 7 arguments but 4 
+arguments were supplied
+   --> 
+src\api\content.rs:133:22
+    |
+133 |         let result = c
+ontent_commands::cozo_create
+_note(world_id, folder_id, 
+title, content)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^-----------------------
+--------------
+    |                       
+                            
+     |          |          |
+    |                       
+                            
+     |          |          
+expected `std::option::Optio
+n<std::string::String>`, 
+found `std::string::String`
+    |                       
+                            
+     |          expected 
+`std::string::String`, 
+found `std::option::Option<s
+td::string::String>`
+    |                       
+                            
+     three arguments of 
+type `std::option::Option<st
+d::string::String>`, `std::o
+ption::Option<std::string::S
+tring>`, and 
+`std::option::Option<bool>` 
+are missing
+    |
+note: expected 
+`Option<String>`, found 
+`String`
+   --> 
+src\api\content.rs:133:85
+    |
+133 |         let result = c
+ontent_commands::cozo_create
+_note(world_id, folder_id, 
+title, content)?;
+    |                       
+                            
+                            
+      ^^^^^^^
+    = note: expected enum `s
+td::option::Option<std::stri
+ng::String>`
+             found struct 
+`std::string::String`
+note: function defined here
+   --> src\graph\content_com
+mands.rs:15:14
+    |
+ 15 | pub async fn 
+cozo_create_note(
+    |              
+^^^^^^^^^^^^^^^^
+...
+ 19 |     folder_id: 
+Option<String>,
+    |     
+-------------------------
+ 20 |     entity_kind: 
+Option<String>,
+    |     
+---------------------------
+ 21 |     entity_subtype: 
+Option<String>,
+    |     ------------------
+------------
+ 22 |     is_entity: 
+Option<bool>,
+    |     
+-----------------------
+help: try wrapping the 
+expression in `Some`
+    |
+133 |         let result = c
+ontent_commands::cozo_create
+_note(world_id, folder_id, 
+title, Some(content))?;
+    |                       
+                            
+                            
+      +++++       +
+help: did you mean
+    |
+133 -         let result = c
+ontent_commands::cozo_create
+_note(world_id, folder_id, 
+title, content)?;
+133 +         let result = c
+ontent_commands::cozo_create
+_note(world_id, title, 
+folder_id, /* std::option::O
+ption<std::string::String> 
+*/, /* std::option::Option<s
+td::string::String> */, /* s
+td::option::Option<std::stri
+ng::String> */, /* 
+std::option::Option<bool> 
+*/)?;
+    |
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:133:22
+    |
+133 |         let result = c
+ontent_commands::cozo_create
+_note(world_id, folder_id, 
+title, content)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Note, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Note, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-11712496315
+126891293.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+133 |         let result = c
+ontent_commands::cozo_create
+_note(world_id, folder_id, 
+title, content).await?;
+    |                       
+                            
+                            
+              ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:134:31
+    |
+134 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+    = note: `#[deny(dependen
+cy_on_unit_never_type_fallba
+ck)]` (part of `#[deny(rust_
+2024_compatibility)]`) on 
+by default
+help: use `()` annotations 
+to avoid fallback changes
+    |
+133 |         let result: 
+() = content_commands::cozo_
+create_note(world_id, 
+folder_id, title, content)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:137:22
+    |
+137 |         let result = c
+ontent_commands::cozo_get_no
+te(world_id, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Option<Note>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<Note>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-41404313028
+56190250.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+137 |         let result = c
+ontent_commands::cozo_get_no
+te(world_id, id).await?;
+    |                       
+                            
+                ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:144:22
+    |
+144 |         let result = c
+ontent_commands::cozo_list_n
+otes(world_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Vec<Note>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Note>, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-26136048804
+71047244.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+144 |         let result = c
+ontent_commands::cozo_list_n
+otes(world_id).await?;
+    |                       
+                            
+              ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:145:31
+    |
+145 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+144 |         let result: 
+() = content_commands::cozo_
+list_notes(world_id)?;
+    |                   ++++
+
+error[E0061]: this function 
+takes 10 arguments but 4 
+arguments were supplied
+   --> 
+src\api\content.rs:148:22
+    |
+148 |         let result = c
+ontent_commands::cozo_update
+_note(world_id, id, title, 
+content)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^-----------------------
+------- multiple arguments 
+are missing
+    |
+note: function defined here
+   --> src\graph\content_com
+mands.rs:55:14
+    |
+ 55 | pub async fn 
+cozo_update_note(
+    |              
+^^^^^^^^^^^^^^^^
+...
+ 60 |     folder_id: 
+Option<String>,
+    |     
+-------------------------
+ 61 |     entity_kind: 
+Option<String>,
+    |     
+---------------------------
+ 62 |     entity_subtype: 
+Option<String>,
+    |     ------------------
+------------
+ 63 |     is_entity: 
+Option<bool>,
+    |     
+-----------------------
+ 64 |     is_pinned: 
+Option<bool>,
+    |     
+-----------------------
+ 65 |     favorite: 
+Option<bool>,
+    |     
+----------------------
+help: provide the arguments
+    |
+148 |         let result = c
+ontent_commands::cozo_update
+_note(world_id, id, title, 
+content, /* std::option::Opt
+ion<std::string::String> 
+*/, /* std::option::Option<s
+td::string::String> */, /* s
+td::option::Option<std::stri
+ng::String> */, /* 
+std::option::Option<bool> 
+*/, /* 
+std::option::Option<bool> 
+*/, /* 
+std::option::Option<bool> 
+*/)?;
+    |                       
+                            
+                            
+      ++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
++++++++++++++++++++++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:148:22
+    |
+148 |         let result = c
+ontent_commands::cozo_update
+_note(world_id, id, title, 
+content)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Note, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Note, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17197187061
+026918321.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+148 |         let result = c
+ontent_commands::cozo_update
+_note(world_id, id, title, 
+content).await?;
+    |                       
+                            
+                            
+       ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:149:31
+    |
+149 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+148 |         let result: 
+() = content_commands::cozo_
+update_note(world_id, id, 
+title, content)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:151:11: 151:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:151:11
+    |
+151 |     async fn 
+delete_note(self, world_id: 
+String, id: String) -> 
+Result<bool, String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:151:11: 
+151:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 7 arguments but 3 
+arguments were supplied
+   --> 
+src\api\content.rs:157:22
+    |
+157 |         let result = c
+ontent_commands::cozo_create
+_folder(world_id, name, 
+parent_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^---------------------
+------ multiple arguments 
+are missing
+    |
+note: function defined here
+   --> src\graph\content_com
+mands.rs:107:14
+    |
+107 | pub async fn 
+cozo_create_folder(
+    |              
+^^^^^^^^^^^^^^^^^^
+...
+111 |     entity_kind: 
+Option<String>,
+    |     
+---------------------------
+112 |     entity_subtype: 
+Option<String>,
+    |     ------------------
+------------
+113 |     color: 
+Option<String>,
+    |     
+---------------------
+114 |     is_typed_root: 
+Option<bool>,
+    |     
+---------------------------
+help: provide the arguments
+    |
+157 |         let result = c
+ontent_commands::cozo_create
+_folder(world_id, name, 
+parent_id, /* std::option::O
+ption<std::string::String> 
+*/, /* std::option::Option<s
+td::string::String> */, /* s
+td::option::Option<std::stri
+ng::String> */, /* 
+std::option::Option<bool> 
+*/)?;
+    |                       
+                            
+                            
+     +++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:157:22
+    |
+157 |         let result = c
+ontent_commands::cozo_create
+_folder(world_id, name, 
+parent_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Folder, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Folder, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-89853766772
+14424871.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+157 |         let result = c
+ontent_commands::cozo_create
+_folder(world_id, name, 
+parent_id).await?;
+    |                       
+                            
+                            
+      ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:158:31
+    |
+158 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+157 |         let result: 
+() = content_commands::cozo_
+create_folder(world_id, 
+name, parent_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:161:22
+    |
+161 |         let result = c
+ontent_commands::cozo_get_fo
+lder(world_id, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Option<Folder>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<Folder>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-86146546061
+0035647.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+161 |         let result = c
+ontent_commands::cozo_get_fo
+lder(world_id, id).await?;
+    |                       
+                            
+                  ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:168:22
+    |
+168 |         let result = c
+ontent_commands::cozo_list_f
+olders(world_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Vec<Folder>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Folder>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12370424805
+161908157.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+168 |         let result = c
+ontent_commands::cozo_list_f
+olders(world_id).await?;
+    |                       
+                            
+                ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:169:31
+    |
+169 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+168 |         let result: 
+() = content_commands::cozo_
+list_folders(world_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:172:22
+    |
+172 |         let result = c
+ontent_commands::cozo_get_fo
+lder_tree(world_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^ the 
+`?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Vec<FolderTreeNode>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<FolderTreeNode>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-67277458852
+50891008.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+172 |         let result = c
+ontent_commands::cozo_get_fo
+lder_tree(world_id).await?;
+    |                       
+                            
+                   ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:173:31
+    |
+173 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+172 |         let result: 
+() = content_commands::cozo_
+get_folder_tree(world_id)?;
+    |                   ++++
+
+error[E0061]: this function 
+takes 8 arguments but 4 
+arguments were supplied
+   --> 
+src\api\content.rs:176:22
+    |
+176 |         let result = c
+ontent_commands::cozo_update
+_folder(world_id, id, name, 
+parent_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^---------------------
+---------- multiple 
+arguments are missing
+    |
+note: function defined here
+   --> src\graph\content_com
+mands.rs:154:14
+    |
+154 | pub async fn 
+cozo_update_folder(
+    |              
+^^^^^^^^^^^^^^^^^^
+...
+159 |     entity_kind: 
+Option<String>,
+    |     
+---------------------------
+160 |     entity_subtype: 
+Option<String>,
+    |     ------------------
+------------
+161 |     color: 
+Option<String>,
+    |     
+---------------------
+162 |     collapsed: 
+Option<bool>,
+    |     
+-----------------------
+help: provide the arguments
+    |
+176 |         let result = c
+ontent_commands::cozo_update
+_folder(world_id, id, name, 
+parent_id, /* std::option::O
+ption<std::string::String> 
+*/, /* std::option::Option<s
+td::string::String> */, /* s
+td::option::Option<std::stri
+ng::String> */, /* 
+std::option::Option<bool> 
+*/)?;
+    |                       
+                            
+                            
+         +++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:176:22
+    |
+176 |         let result = c
+ontent_commands::cozo_update
+_folder(world_id, id, name, 
+parent_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Folder, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Folder, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12263376770
+752915682.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+176 |         let result = c
+ontent_commands::cozo_update
+_folder(world_id, id, name, 
+parent_id).await?;
+    |                       
+                            
+                            
+          ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:177:31
+    |
+177 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+176 |         let result: 
+() = content_commands::cozo_
+update_folder(world_id, id, 
+name, parent_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:179:11: 179:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:179:11
+    |
+179 |     async fn 
+delete_folder(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:179:11: 
+179:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 8 arguments but 2 
+arguments were supplied
+   --> 
+src\api\content.rs:185:22
+    |
+185 |         let result = c
+ontent_commands::cozo_create
+_network(world_id, name)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^---------------- 
+multiple arguments are 
+missing
+    |
+note: function defined here
+   --> src\graph\content_com
+mands.rs:191:14
+    |
+191 | pub async fn 
+cozo_create_network(
+    |              
+^^^^^^^^^^^^^^^^^^^
+...
+194 |     schema_id: String,
+    |     -----------------
+195 |     root_folder_id: 
+Option<String>,
+    |     ------------------
+------------
+196 |     root_entity_id: 
+Option<String>,
+    |     ------------------
+------------
+197 |     namespace: 
+Option<String>,
+    |     
+-------------------------
+198 |     description: 
+Option<String>,
+    |     
+---------------------------
+199 |     tags: 
+Option<Vec<String>>,
+    |     
+-------------------------
+help: provide the arguments
+    |
+185 |         let result = c
+ontent_commands::cozo_create
+_network(world_id, name, /* 
+std::string::String */, /* s
+td::option::Option<std::stri
+ng::String> */, /* std::opti
+on::Option<std::string::Stri
+ng> */, /* std::option::Opti
+on<std::string::String> */, 
+/* std::option::Option<std::
+string::String> */, /* std::
+option::Option<std::vec::Vec
+<std::string::String>> */)?;
+    |                       
+                            
+                       +++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
++++++++++++++++++++++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:185:22
+    |
+185 |         let result = c
+ontent_commands::cozo_create
+_network(world_id, name)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^ 
+the `?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Network, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Network, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-89361783680
+58025300.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+185 |         let result = c
+ontent_commands::cozo_create
+_network(world_id, 
+name).await?;
+    |                       
+                            
+                        
+++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:186:31
+    |
+186 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+185 |         let result: 
+() = content_commands::cozo_
+create_network(world_id, 
+name)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:189:22
+    |
+189 |         let result = c
+ontent_commands::cozo_get_ne
+twork(world_id, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^ the 
+`?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Option<Network>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<Network>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12409756522
+865656229.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+189 |         let result = c
+ontent_commands::cozo_get_ne
+twork(world_id, id).await?;
+    |                       
+                            
+                   ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:196:22
+    |
+196 |         let result = c
+ontent_commands::cozo_list_n
+etworks(world_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Vec<Network>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Network>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-34774830395
+98674438.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+196 |         let result = c
+ontent_commands::cozo_list_n
+etworks(world_id).await?;
+    |                       
+                            
+                 ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:197:31
+    |
+197 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+196 |         let result: 
+() = content_commands::cozo_
+list_networks(world_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:199:11: 199:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:199:11
+    |
+199 |     async fn 
+delete_network(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:199:11: 
+199:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0308]: arguments to 
+this function are incorrect
+   --> 
+src\api\content.rs:205:22
+    |
+205 | ...   let result = con
+tent_commands::cozo_create_e
+ntity(world_id, label, 
+entity_kind, 
+entity_subtype, note_id, 
+folder_id, aliases, 
+attrib...
+    |                    ^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^
+    |
+note: expected 
+`Option<Vec<String>>`, 
+found `String`
+   --> 
+src\api\content.rs:205:125
+    |
+205 | ...   let result = con
+tent_commands::cozo_create_e
+ntity(world_id, label, 
+entity_kind, 
+entity_subtype, note_id, 
+folder_id, aliases, 
+attrib...
+    |                       
+                            
+                            
+                            
+                ^^^^^^^
+    = note: expected enum `s
+td::option::Option<std::vec:
+:Vec<std::string::String>>`
+             found struct 
+`std::string::String`
+note: expected 
+`Option<Value>`, found 
+`String`
+   --> 
+src\api\content.rs:205:134
+    |
+205 | ...el, entity_kind, 
+entity_subtype, note_id, 
+folder_id, aliases, 
+attributes)?;
+    |                       
+                            
+               ^^^^^^^^^^
+    = note: expected enum `s
+td::option::Option<serde_jso
+n::Value>`
+             found struct 
+`std::string::String`
+note: function defined here
+   --> src\graph\content_com
+mands.rs:244:14
+    |
+244 | pub async fn 
+cozo_create_entity(
+    |              
+^^^^^^^^^^^^^^^^^^
+...
+251 |     aliases: 
+Option<Vec<String>>,
+    |     
+----------------------------
+252 |     attributes: 
+Option<serde_json::Value>,
+    |     ------------------
+-------------------
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:205:22
+    |
+205 | ... = content_commands
+::cozo_create_entity(world_i
+d, label, entity_kind, 
+entity_subtype, note_id, 
+folder_id, aliases, 
+attributes)?;
+    |       ^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^ 
+the `?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Entity, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Entity, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17347088028
+186823586.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+205 |         let result = c
+ontent_commands::cozo_create
+_entity(world_id, label, 
+entity_kind, 
+entity_subtype, note_id, 
+folder_id, aliases, 
+attributes).await?;
+    |                       
+                            
+                            
+                            
+                            
+          ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:206:31
+    |
+206 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+205 |         let result: 
+() = content_commands::cozo_
+create_entity(world_id, 
+label, entity_kind, 
+entity_subtype, note_id, 
+folder_id, aliases, 
+attributes)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:209:22
+    |
+209 |         let result = c
+ontent_commands::cozo_get_en
+tity(world_id, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Option<Entity>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<Entity>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-84085357408
+71627967.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+209 |         let result = c
+ontent_commands::cozo_get_en
+tity(world_id, id).await?;
+    |                       
+                            
+                  ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:216:22
+    |
+216 |         let result = c
+ontent_commands::cozo_list_e
+ntities_by_kind(world_id, 
+kind)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Vec<Entity>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Entity>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-29913298336
+14668017.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+216 |         let result = c
+ontent_commands::cozo_list_e
+ntities_by_kind(world_id, 
+kind).await?;
+    |                       
+                            
+                            
+   ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:217:31
+    |
+217 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+216 |         let result: 
+() = content_commands::cozo_
+list_entities_by_kind(world_
+id, kind)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:220:22
+    |
+220 |         let result = c
+ontent_commands::cozo_list_e
+ntities(world_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Vec<Entity>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Entity>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-13324201223
+593774013.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+220 |         let result = c
+ontent_commands::cozo_list_e
+ntities(world_id).await?;
+    |                       
+                            
+                 ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:221:31
+    |
+221 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+220 |         let result: 
+() = content_commands::cozo_
+list_entities(world_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:223:11: 223:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:223:11
+    |
+223 |     async fn 
+delete_entity(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:223:11: 
+223:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 10 arguments but 5 
+arguments were supplied
+   --> 
+src\api\content.rs:229:22
+    |
+229 |         let result = c
+ontent_commands::cozo_create
+_relationship(world_id, 
+source_id, target_id, 
+relation_type, attributes)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^---------------
+----------------------------
+---------------- multiple 
+arguments are missing
+    |
+note: expected 
+`Option<String>`, found 
+`String`
+   --> 
+src\api\content.rs:229:112
+    |
+229 |         let result = c
+ontent_commands::cozo_create
+_relationship(world_id, 
+source_id, target_id, 
+relation_type, attributes)?;
+    |                       
+                            
+                            
+                            
+     ^^^^^^^^^^
+    = note: expected enum `s
+td::option::Option<std::stri
+ng::String>`
+             found struct 
+`std::string::String`
+note: function defined here
+   --> src\graph\content_com
+mands.rs:304:14
+    |
+304 | pub async fn 
+cozo_create_relationship(
+    |              
+^^^^^^^^^^^^^^^^^^^^^^^^
+...
+309 |     network_id: 
+Option<String>,
+    |     
+--------------------------
+310 |     strength: 
+Option<f32>,
+    |     
+---------------------
+311 |     start_date: 
+Option<f64>,
+    |     
+-----------------------
+312 |     end_date: 
+Option<f64>,
+    |     
+---------------------
+313 |     notes: 
+Option<String>,
+    |     
+---------------------
+314 |     attributes: 
+Option<serde_json::Value>,
+    |     ------------------
+-------------------
+help: try wrapping the 
+expression in `Some`
+    |
+229 |         let result = c
+ontent_commands::cozo_create
+_relationship(world_id, 
+source_id, target_id, 
+relation_type, 
+Some(attributes))?;
+    |                       
+                            
+                            
+                            
+     +++++          +
+help: provide the arguments
+    |
+229 -         let result = c
+ontent_commands::cozo_create
+_relationship(world_id, 
+source_id, target_id, 
+relation_type, attributes)?;
+229 +         let result = c
+ontent_commands::cozo_create
+_relationship(world_id, 
+source_id, target_id, 
+relation_type, /* std::optio
+n::Option<std::string::Strin
+g> */, /* 
+std::option::Option<f32> 
+*/, /* 
+std::option::Option<f64> 
+*/, /* 
+std::option::Option<f64> 
+*/, /* std::option::Option<s
+td::string::String> */, /* s
+td::option::Option<serde_jso
+n::Value> */)?;
+    |
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:229:22
+    |
+229 |         let result = c
+ontent_commands::cozo_create
+_relationship(world_id, 
+source_id, target_id, 
+relation_type, attributes)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Relationship, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Relationship, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-95179802881
+95542356.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+229 |         let result = c
+ontent_commands::cozo_create
+_relationship(world_id, 
+source_id, target_id, 
+relation_type, 
+attributes).await?;
+    |                       
+                            
+                            
+                            
+                ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:230:31
+    |
+230 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+229 |         let result: 
+() = content_commands::cozo_
+create_relationship(world_id
+, source_id, target_id, 
+relation_type, attributes)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:233:22
+    |
+233 |         let result = c
+ontent_commands::cozo_get_re
+lationship(world_id, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^ 
+the `?` operator cannot be 
+applied to type `impl 
+Future<Output = Result<Optio
+n<Relationship>, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = Result
+<Option<Relationship>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-14735342695
+985445662.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+233 |         let result = c
+ontent_commands::cozo_get_re
+lationship(world_id, 
+id).await?;
+    |                       
+                            
+                        
+++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:240:22
+    |
+240 |         let result = c
+ontent_commands::cozo_get_en
+tity_relationships(world_id,
+ entity_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Vec<Relationship>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Relationship>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-81906118421
+47334421.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+240 |         let result = c
+ontent_commands::cozo_get_en
+tity_relationships(world_id,
+ entity_id).await?;
+    |                       
+                            
+                            
+           ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:241:31
+    |
+241 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+240 |         let result: 
+() = content_commands::cozo_
+get_entity_relationships(wor
+ld_id, entity_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:243:11: 243:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:243:11
+    |
+243 |     async fn 
+delete_relationship(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:243:11: 
+243:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 22 arguments but 7 
+arguments were supplied
+   --> 
+src\api\content.rs:249:22
+    |
+249 |         let result = c
+ontent_commands::cozo_create
+_cal_event(world_id, title, 
+start_date, end_date, 
+all_day, note_id, 
+attributes)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^------------------
+----------------------------
+-----------------------
+    |                       
+                            
+          |                 
+            |
+    |                       
+                            
+          |                 
+            three arguments 
+of type `i32`, `i32`, and 
+`i32` are missing
+    |                       
+                            
+          argument #9 of 
+type 
+`std::option::Option<i32>` 
+is missing
+    |                       
+                            
+          multiple 
+arguments are missing
+    |
+note: expected 
+`Option<i32>`, found `bool`
+   --> 
+src\api\content.rs:249:101
+    |
+249 |         let result = c
+ontent_commands::cozo_create
+_cal_event(world_id, title, 
+start_date, end_date, 
+all_day, note_id, 
+attributes)?;
+    |                       
+                            
+                            
+                      
+^^^^^^^
+    = note: expected enum 
+`std::option::Option<i32>`
+               found type 
+`bool`
+note: expected 
+`Option<i32>`, found 
+`String`
+   --> 
+src\api\content.rs:249:119
+    |
+249 |         let result = c
+ontent_commands::cozo_create
+_cal_event(world_id, title, 
+start_date, end_date, 
+all_day, note_id, 
+attributes)?;
+    |                       
+                            
+                            
+                            
+            ^^^^^^^^^^
+    = note: expected enum 
+`std::option::Option<i32>`
+             found struct 
+`std::string::String`
+note: function defined here
+   --> src\graph\content_com
+mands.rs:362:14
+    |
+362 | pub async fn 
+cozo_create_cal_event(
+    |              
+^^^^^^^^^^^^^^^^^^^^^
+...
+366 |     date_year: i32,
+    |     --------------
+367 |     date_month: i32,
+    |     ---------------
+368 |     date_day: i32,
+    |     -------------
+369 |     description: 
+Option<String>,
+370 |     date_hour: 
+Option<i32>,
+    |     
+----------------------
+371 |     date_minute: 
+Option<i32>,
+    |     
+------------------------
+372 |     era_id: 
+Option<String>,
+373 |     end_year: 
+Option<i32>,
+    |     
+---------------------
+374 |     end_month: 
+Option<i32>,
+    |     
+----------------------
+375 |     end_day: 
+Option<i32>,
+    |     
+--------------------
+376 |     is_all_day: 
+Option<bool>,
+    |     
+------------------------
+377 |     importance: 
+Option<String>,
+    |     
+--------------------------
+378 |     category: 
+Option<String>,
+    |     
+------------------------
+379 |     tags: 
+Option<Vec<String>>,
+    |     
+-------------------------
+380 |     color: 
+Option<String>,
+    |     
+---------------------
+381 |     icon: 
+Option<String>,
+    |     
+--------------------
+382 |     entity_id: 
+Option<String>,
+    |     
+-------------------------
+383 |     entity_kind: 
+Option<String>,
+    |     
+---------------------------
+384 |     source_note_id: 
+Option<String>,
+    |     ------------------
+------------
+help: provide the arguments
+    |
+249 -         let result = c
+ontent_commands::cozo_create
+_cal_event(world_id, title, 
+start_date, end_date, 
+all_day, note_id, 
+attributes)?;
+249 +         let result = c
+ontent_commands::cozo_create
+_cal_event(world_id, title, 
+start_date, /* i32 */, /* 
+i32 */, /* i32 */, 
+end_date, /* 
+std::option::Option<i32> 
+*/, /* 
+std::option::Option<i32> 
+*/, note_id, /* 
+std::option::Option<i32> 
+*/, /* 
+std::option::Option<i32> 
+*/, /* 
+std::option::Option<i32> 
+*/, /* 
+std::option::Option<bool> 
+*/, /* std::option::Option<s
+td::string::String> */, /* s
+td::option::Option<std::stri
+ng::String> */, /* std::opti
+on::Option<std::vec::Vec<std
+::string::String>> */, /* st
+d::option::Option<std::strin
+g::String> */, /* std::optio
+n::Option<std::string::Strin
+g> */, /* std::option::Optio
+n<std::string::String> */, 
+/* std::option::Option<std::
+string::String> */, /* std::
+option::Option<std::string::
+String> */)?;
+    |
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:249:22
+    |
+249 |         let result = c
+ontent_commands::cozo_create
+_cal_event(world_id, title, 
+start_date, end_date, 
+all_day, note_id, 
+attributes)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^ 
+the `?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<CalEvent, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<CalEvent, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17725931439
+863750.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+249 |         let result = c
+ontent_commands::cozo_create
+_cal_event(world_id, title, 
+start_date, end_date, 
+all_day, note_id, 
+attributes).await?;
+    |                       
+                            
+                            
+                            
+                       
+++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:250:31
+    |
+250 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+249 |         let result: 
+() = content_commands::cozo_
+create_cal_event(world_id, 
+title, start_date, 
+end_date, all_day, note_id, 
+attributes)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:253:22
+    |
+253 |         let result = c
+ontent_commands::cozo_get_ca
+l_event(world_id, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^ the 
+`?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Option<CalEvent>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<CalEvent>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-54623023300
+5481197.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+253 |         let result = c
+ontent_commands::cozo_get_ca
+l_event(world_id, 
+id).await?;
+    |                       
+                            
+                     ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:260:22
+    |
+260 |         let result = c
+ontent_commands::cozo_list_c
+al_events(world_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^ the 
+`?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Vec<CalEvent>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<CalEvent>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-14625901509
+488321070.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+260 |         let result = c
+ontent_commands::cozo_list_c
+al_events(world_id).await?;
+    |                       
+                            
+                   ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:261:31
+    |
+261 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+260 |         let result: 
+() = content_commands::cozo_
+list_cal_events(world_id)?;
+    |                   ++++
+
+error[E0308]: mismatched 
+types
+   --> 
+src\api\content.rs:264:86
+    |
+264 |         let result = c
+ontent_commands::cozo_list_c
+al_events_by_month(world_id,
+ year, month)?;
+    |                      -
+----------------------------
+------------------          
+       ^^^^^ expected 
+`i32`, found `u32`
+    |                      |
+    |                      
+arguments to this function 
+are incorrect
+    |
+note: function defined here
+   --> src\graph\content_com
+mands.rs:433:14
+    |
+433 | pub async fn cozo_list
+_cal_events_by_month(world_i
+d: String, year: i32, 
+month: i32) -> 
+Result<Vec<CalEvent>, 
+String> {
+    |              ^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^        
+                      
+----------
+help: you can convert a 
+`u32` to an `i32` and panic 
+if the converted value 
+doesn't fit
+    |
+264 |         let result = c
+ontent_commands::cozo_list_c
+al_events_by_month(world_id,
+ year, 
+month.try_into().unwrap())?;
+    |                       
+                            
+                            
+            
+++++++++++++++++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:264:22
+    |
+264 |         let result = c
+ontent_commands::cozo_list_c
+al_events_by_month(world_id,
+ year, month)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Vec<CalEvent>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<CalEvent>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-11424148468
+268925452.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+264 |         let result = c
+ontent_commands::cozo_list_c
+al_events_by_month(world_id,
+ year, month).await?;
+    |                       
+                            
+                            
+             ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:265:31
+    |
+265 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+264 |         let result: 
+() = content_commands::cozo_
+list_cal_events_by_month(wor
+ld_id, year, month)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:267:11: 267:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:267:11
+    |
+267 |     async fn 
+delete_cal_event(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:267:11: 
+267:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 25 arguments but 7 
+arguments were supplied
+   --> 
+src\api\content.rs:273:22
+    |
+273 |         let result = c
+ontent_commands::cozo_create
+_period(world_id, name, 
+period_type, parent_id, 
+start_date, end_date, 
+attributes)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^---------------------
+----------------------------
+-------------------------
+    |                       
+                            
+       |                    
+         |                  
+              |
+    |                       
+                            
+       |                    
+         |                  
+              expected `std:
+:option::Option<std::string:
+:String>`, found 
+`std::string::String`
+    |                       
+                            
+       |                    
+         argument #4 of 
+type `i32` is missing
+    |                       
+                            
+       |                    
+         expected 
+`std::string::String`, 
+found `std::option::Option<s
+td::string::String>`
+    |                       
+                            
+       three arguments of 
+type 
+`std::option::Option<i32>`, 
+`std::option::Option<i32>`, 
+and 
+`std::option::Option<i32>` 
+are missing
+    |                       
+                            
+       multiple arguments 
+are missing
+    |
+note: function defined here
+   --> src\graph\content_com
+mands.rs:451:14
+    |
+451 | pub async fn 
+cozo_create_period(
+    |              
+^^^^^^^^^^^^^^^^^^
+...
+455 |     start_year: i32,
+    |     ---------------
+...
+458 |     start_month: 
+Option<i32>,
+    |     
+------------------------
+459 |     end_year: 
+Option<i32>,
+    |     
+---------------------
+460 |     end_month: 
+Option<i32>,
+    |     
+----------------------
+...
+463 |     icon: 
+Option<String>,
+    |     
+--------------------
+464 |     abbreviation: 
+Option<String>,
+    |     
+----------------------------
+465 |     direction: 
+Option<String>,
+    |     
+-------------------------
+466 |     triggered_by: 
+Option<String>,
+    |     
+----------------------------
+467 |     ends_when: 
+Option<String>,
+    |     
+-------------------------
+468 |     arc_type: 
+Option<String>,
+    |     
+------------------------
+469 |     dominant_theme: 
+Option<String>,
+    |     ------------------
+------------
+470 |     protagonist_id: 
+Option<String>,
+    |     ------------------
+------------
+471 |     antagonist_id: 
+Option<String>,
+    |     ------------------
+-----------
+472 |     summary: 
+Option<String>,
+    |     
+-----------------------
+473 |     detailed_notes: 
+Option<String>,
+    |     ------------------
+------------
+474 |     show_on_timeline: 
+Option<bool>,
+    |     ------------------
+------------
+475 |     timeline_color: 
+Option<String>,
+    |     ------------------
+------------
+476 |     timeline_icon: 
+Option<String>,
+    |     ------------------
+-----------
+help: did you mean
+    |
+273 -         let result = c
+ontent_commands::cozo_create
+_period(world_id, name, 
+period_type, parent_id, 
+start_date, end_date, 
+attributes)?;
+273 +         let result = c
+ontent_commands::cozo_create
+_period(world_id, name, 
+period_type, /* i32 */, 
+attributes, end_date, /* 
+std::option::Option<i32> 
+*/, /* 
+std::option::Option<i32> 
+*/, /* 
+std::option::Option<i32> 
+*/, parent_id, start_date, 
+/* std::option::Option<std::
+string::String> */, /* std::
+option::Option<std::string::
+String> */, /* std::option::
+Option<std::string::String> 
+*/, /* std::option::Option<s
+td::string::String> */, /* s
+td::option::Option<std::stri
+ng::String> */, /* std::opti
+on::Option<std::string::Stri
+ng> */, /* std::option::Opti
+on<std::string::String> */, 
+/* std::option::Option<std::
+string::String> */, /* std::
+option::Option<std::string::
+String> */, /* std::option::
+Option<std::string::String> 
+*/, /* std::option::Option<s
+td::string::String> */, /* 
+std::option::Option<bool> 
+*/, /* std::option::Option<s
+td::string::String> */, /* s
+td::option::Option<std::stri
+ng::String> */)?;
+    |
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:273:22
+    |
+273 |         let result = c
+ontent_commands::cozo_create
+_period(world_id, name, 
+period_type, parent_id, 
+start_date, end_date, 
+attributes)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+the `?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Period, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Period, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12353467207
+290369537.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+273 |         let result = c
+ontent_commands::cozo_create
+_period(world_id, name, 
+period_type, parent_id, 
+start_date, end_date, 
+attributes).await?;
+    |                       
+                            
+                            
+                            
+                         
+++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:274:31
+    |
+274 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+273 |         let result: 
+() = content_commands::cozo_
+create_period(world_id, 
+name, period_type, 
+parent_id, start_date, 
+end_date, attributes)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:277:22
+    |
+277 |         let result = c
+ontent_commands::cozo_get_pe
+riod(world_id, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Option<Period>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<Period>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-15689968879
+366983975.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+277 |         let result = c
+ontent_commands::cozo_get_pe
+riod(world_id, id).await?;
+    |                       
+                            
+                  ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:284:22
+    |
+284 |         let result = c
+ontent_commands::cozo_list_p
+eriods(world_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Vec<Period>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Period>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-78941288474
+53306798.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+284 |         let result = c
+ontent_commands::cozo_list_p
+eriods(world_id).await?;
+    |                       
+                            
+                ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:285:31
+    |
+285 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+284 |         let result: 
+() = content_commands::cozo_
+list_periods(world_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:288:22
+    |
+288 |         let result = c
+ontent_commands::cozo_get_pe
+riod_children(world_id, 
+parent_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Vec<Period>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Period>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-15366416366
+680559789.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+288 |         let result = c
+ontent_commands::cozo_get_pe
+riod_children(world_id, 
+parent_id).await?;
+    |                       
+                            
+                            
+      ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:289:31
+    |
+289 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+288 |         let result: 
+() = content_commands::cozo_
+get_period_children(world_id
+, parent_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:291:11: 291:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:291:11
+    |
+291 |     async fn 
+delete_period(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:291:11: 
+291:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 10 arguments but 4 
+arguments were supplied
+   --> 
+src\api\content.rs:297:22
+    |
+297 |         let result = c
+ontent_commands::cozo_create
+_binding(world_id, 
+entity_id, field_id, 
+value)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^--------------------
+------------------ multiple 
+arguments are missing
+    |
+note: function defined here
+   --> src\graph\content_com
+mands.rs:545:14
+    |
+545 | pub async fn 
+cozo_create_binding(
+    |              
+^^^^^^^^^^^^^^^^^^^
+...
+550 |     
+target_field_name: String,
+    |     
+-------------------------
+551 |     binding_type: 
+String,
+    |     
+--------------------
+552 |     transform: 
+Option<serde_json::Value>,
+    |     ------------------
+------------------
+553 |     aggregation_fn: 
+Option<String>,
+    |     ------------------
+------------
+554 |     
+aggregation_filter: 
+Option<serde_json::Value>,
+    |     ------------------
+---------------------------
+555 |     allow_override: 
+Option<bool>,
+    |     
+----------------------------
+help: provide the arguments
+    |
+297 |         let result = c
+ontent_commands::cozo_create
+_binding(world_id, 
+entity_id, field_id, value, 
+/* std::string::String */, 
+/* std::string::String */, 
+/* std::option::Option<serde
+_json::Value> */, /* std::op
+tion::Option<std::string::St
+ring> */, /* std::option::Op
+tion<serde_json::Value> */, 
+/* 
+std::option::Option<bool> 
+*/)?;
+    |                       
+                            
+                            
+                 +++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++
+++++++++++++++++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:297:22
+    |
+297 |         let result = c
+ontent_commands::cozo_create
+_binding(world_id, 
+entity_id, field_id, 
+value)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<FieldBinding, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<FieldBinding, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-57131434064
+32283504.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+297 |         let result = c
+ontent_commands::cozo_create
+_binding(world_id, 
+entity_id, field_id, 
+value).await?;
+    |                       
+                            
+                            
+                  ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:298:31
+    |
+298 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+297 |         let result: 
+() = content_commands::cozo_
+create_binding(world_id, 
+entity_id, field_id, 
+value)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:301:22
+    |
+301 |         let result = c
+ontent_commands::cozo_get_bi
+nding(world_id, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^ the 
+`?` operator cannot be 
+applied to type `impl 
+Future<Output = Result<Optio
+n<FieldBinding>, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = Result
+<Option<FieldBinding>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-65615193093
+55993278.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+301 |         let result = c
+ontent_commands::cozo_get_bi
+nding(world_id, id).await?;
+    |                       
+                            
+                   ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:308:22
+    |
+308 |         let result = c
+ontent_commands::cozo_list_b
+indings(world_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Vec<FieldBinding>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<FieldBinding>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-35395476503
+94784673.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+308 |         let result = c
+ontent_commands::cozo_list_b
+indings(world_id).await?;
+    |                       
+                            
+                 ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:309:31
+    |
+309 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+308 |         let result: 
+() = content_commands::cozo_
+list_bindings(world_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:312:22
+    |
+312 |         let result = c
+ontent_commands::cozo_list_b
+indings_by_entity(world_id, 
+entity_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Vec<FieldBinding>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<FieldBinding>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-82154994188
+70300240.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+312 |         let result = c
+ontent_commands::cozo_list_b
+indings_by_entity(world_id, 
+entity_id).await?;
+    |                       
+                            
+                            
+          ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:129:1
+    |
+129 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: 
+_::_serde::Serialize` will 
+fail
+   --> 
+src\api\content.rs:313:31
+    |
+313 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+312 |         let result: 
+() = content_commands::cozo_
+list_bindings_by_entity(worl
+d_id, entity_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:315:11: 315:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:315:11
+    |
+315 |     async fn 
+delete_binding(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:315:11: 
+315:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0609]: no field 
+`success` on type `ai::comma
+nds::DownloadResponse`
+   --> src\api\ner.rs:116:29
+    |
+116 |             success: 
+result.success,
+    |                       
+      ^^^^^^^ unknown field
+    |
+    = note: available 
+fields are: `started`, 
+`message`
+
+error[E0609]: no field 
+`suggestion_id` on type 
+`ActionResponse`
+   --> src\api\ner.rs:170:35
+    |
+170 |             
+suggestion_id: result.sugges
+tion_id.unwrap_or_default(),
+    |                       
+            ^^^^^^^^^^^^^ 
+unknown field
+    |
+    = note: available 
+fields are: `success`, 
+`message`, `entity_id`
+
+error[E0609]: no field 
+`confidence_threshold` on 
+type 
+`ai::commands::NerSettings`
+   --> src\api\ner.rs:214:44
+    |
+214 |             
+confidence_threshold: settin
+gs.confidence_threshold,
+    |                       
+                     
+^^^^^^^^^^^^^^^^^^^^ 
+unknown field
+    |
+    = note: available 
+fields are: `enabled`, 
+`auto_promote_threshold`, 
+`suggest_threshold`
+
+error[E0609]: no field 
+`auto_accept_threshold` on 
+type 
+`ai::commands::NerSettings`
+   --> src\api\ner.rs:215:45
+    |
+215 |             
+auto_accept_threshold: setti
+ngs.auto_accept_threshold,
+    |                       
+                      
+^^^^^^^^^^^^^^^^^^^^^ 
+unknown field
+    |
+help: a field with a 
+similar name exists
+    |
+215 -             
+auto_accept_threshold: setti
+ngs.auto_accept_threshold,
+215 +             
+auto_accept_threshold: setti
+ngs.auto_promote_threshold,
+    |
+
+error[E0061]: this function 
+takes 1 argument but 3 
+arguments were supplied
+   --> src\api\ner.rs:220:22
+    |
+220 |         let result = c
+ommands::ner_update_settings
+(
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+221 |             
+settings.enabled,
+    |             
+---------------- expected 
+`NerSettings`, found `bool`
+222 |             settings.c
+onfidence_threshold,
+    |             ----------
+------------------- 
+unexpected argument #2 of 
+type `f32`
+223 |             settings.a
+uto_accept_threshold,
+    |             ----------
+-------------------- 
+unexpected argument #3 of 
+type `f32`
+    |
+note: function defined here
+   --> 
+src\ai\commands.rs:325:8
+    |
+325 | pub fn ner_update_sett
+ings(settings: NerSettings) 
+-> Result<NerSettings, 
+String> {
+    |        
+^^^^^^^^^^^^^^^^^^^ 
+---------------------
+help: remove the extra 
+arguments
+    |
+221 -             
+settings.enabled,
+221 +             /* 
+ai::commands::NerSettings 
+*/,
+    |
+
+error[E0609]: no field 
+`confidence_threshold` on 
+type 
+`ai::commands::NerSettings`
+   --> src\api\ner.rs:227:42
+    |
+227 |             
+confidence_threshold: 
+result.confidence_threshold,
+    |                       
+                   
+^^^^^^^^^^^^^^^^^^^^ 
+unknown field
+    |
+    = note: available 
+fields are: `enabled`, 
+`auto_promote_threshold`, 
+`suggest_threshold`
+
+error[E0609]: no field 
+`auto_accept_threshold` on 
+type 
+`ai::commands::NerSettings`
+   --> src\api\ner.rs:228:43
+    |
+228 |             
+auto_accept_threshold: resul
+t.auto_accept_threshold,
+    |                       
+                    
+^^^^^^^^^^^^^^^^^^^^^ 
+unknown field
+    |
+help: a field with a 
+similar name exists
+    |
+228 -             
+auto_accept_threshold: resul
+t.auto_accept_threshold,
+228 +             
+auto_accept_threshold: resul
+t.auto_promote_threshold,
+    |
+
+error[E0061]: this function 
+takes 1 argument but 0 
+arguments were supplied
+  --> src\api\rag.rs:31:9
+   |
+31 |         commands::rag_i
+nit_embedder().await
+   |         ^^^^^^^^^^^^^^^
+^^^^^^^^^^^^-- argument #1 
+of type 
+`std::string::String` is 
+missing
+   |
+note: function defined here
+  --> 
+src\rag\commands.rs:99:14
+   |
+99 | pub async fn 
+rag_init_embedder(model_id: 
+String) -> Result<InitEmbedd
+erResponse, String> {
+   |              
+^^^^^^^^^^^^^^^^^ 
+----------------
+help: provide the argument
+   |
+31 |         commands::rag_i
+nit_embedder(/* 
+std::string::String 
+*/).await
+   |                        
+             
++++++++++++++++++++++++++
+
+error[E0271]: expected 
+`{async 
+block@src\api\rag.rs:30:11: 
+30:13}` to be a future that 
+resolves to `Result<bool, 
+String>`, but it resolves 
+to `Result<InitEmbedderRespo
+nse, String>`
+  --> src\api\rag.rs:30:11
+   |
+30 |     async fn 
+init_embedder(self) -> 
+Result<bool, String> {
+   |           ^^ expected 
+`Result<bool, String>`, 
+found `Result<InitEmbedderRe
+sponse, String>`
+   |
+   = note: expected enum 
+`std::result::Result<bool, 
+_>`
+              found enum `st
+d::result::Result<InitEmbedd
+erResponse, _>`
+   = note: required for the 
+cast from `Pin<Box<{async 
+block@src\api\rag.rs:30:11: 
+30:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0308]: mismatched 
+types
+   --> src\api\rag.rs:35:29
+    |
+ 35 |         commands::rag_
+embed(text).await
+    |         
+------------------- ^^^^ 
+expected `Vec<String>`, 
+found `String`
+    |         |
+    |         arguments to 
+this function are incorrect
+    |
+    = note: expected struct 
+`std::vec::Vec<std::string::
+String>`
+               found struct 
+`std::string::String`
+note: function defined here
+   --> 
+src\rag\commands.rs:115:14
+    |
+115 | pub async fn 
+rag_embed(texts: 
+Vec<String>) -> 
+Result<EmbedResponse, 
+String> {
+    |              
+^^^^^^^^^ ------------------
+
+error[E0271]: expected 
+`{async 
+block@src\api\rag.rs:34:11: 
+34:13}` to be a future that 
+resolves to `Result<String, 
+String>`, but it resolves 
+to `Result<EmbedResponse, 
+String>`
+  --> src\api\rag.rs:34:11
+   |
+34 |     async fn 
+embed(self, text: String) 
+-> Result<String, String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<EmbedResponse, 
+String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum `st
+d::result::Result<EmbedRespo
+nse, _>`
+   = note: required for the 
+cast from `Pin<Box<{async 
+block@src\api\rag.rs:34:11: 
+34:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async 
+block@src\api\rag.rs:38:11: 
+38:13}` to be a future that 
+resolves to `Result<bool, 
+String>`, but it resolves 
+to `bool`
+  --> src\api\rag.rs:38:11
+   |
+38 |     async fn 
+embedder_ready(self) -> 
+Result<bool, String> {
+   |           ^^ expected 
+`Result<bool, String>`, 
+found `bool`
+   |
+   = note: expected enum 
+`std::result::Result<bool, 
+std::string::String>`
+              found type 
+`bool`
+   = note: required for the 
+cast from `Pin<Box<{async 
+block@src\api\rag.rs:38:11: 
+38:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 3 arguments but 2 
+arguments were supplied
+   --> src\api\rag.rs:43:9
+    |
+ 43 |         commands::rag_
+chunk_text(text, max_tokens)
+    |         
+^^^^^^^^^^^^^^^^^^^^^^^^    
+   ---------- argument #2 
+of type 
+`std::string::String` is 
+missing
+    |
+note: function defined here
+   --> 
+src\rag\commands.rs:140:8
+    |
+140 | pub fn rag_chunk_text(
+    |        ^^^^^^^^^^^^^^
+141 |     note_id: String,
+142 |     text: String,
+    |     ------------
+help: provide the argument
+    |
+ 43 |         commands::rag_
+chunk_text(text, /* 
+std::string::String */, 
+max_tokens)
+    |                       
+                 
+++++++++++++++++++++++++++
+
+error[E0271]: expected 
+`{async 
+block@src\api\rag.rs:42:11: 
+42:13}` to be a future that 
+resolves to `Result<String, 
+String>`, but it resolves 
+to `Vec<ChunkOutput>`
+  --> src\api\rag.rs:42:11
+   |
+42 |     async fn 
+chunk_text(self, text: 
+String, max_tokens: 
+Option<usize>) -> 
+Result<String, String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found `Vec<ChunkOutput>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, 
+std::string::String>`
+            found struct 
+`std::vec::Vec<ChunkOutput>`
+   = note: required for the 
+cast from `Pin<Box<{async 
+block@src\api\rag.rs:42:11: 
+42:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 3 
+arguments were supplied
+   --> src\api\rag.rs:47:9
+    |
+ 47 |         commands::rag_
+index_note(note_id, title, 
+content).await
+    |         
+^^^^^^^^^^^^^^^^^^^^^^^^ 
+-------  -----  ------- 
+unexpected argument #3 of 
+type `std::string::String`
+    |                       
+           |        |
+    |                       
+           |        
+unexpected argument #2 of 
+type `std::string::String`
+    |                       
+           expected 
+`NoteInput`, found `String`
+    |
+note: function defined here
+   --> 
+src\rag\commands.rs:172:14
+    |
+172 | pub async fn 
+rag_index_note(note: 
+NoteInput) -> 
+Result<IndexResult, String> 
+{
+    |              
+^^^^^^^^^^^^^^ 
+---------------
+help: remove the extra 
+arguments
+    |
+ 47 -         commands::rag_
+index_note(note_id, title, 
+content).await
+ 47 +         
+commands::rag_index_note(/* 
+rag::commands::NoteInput 
+*/).await
+    |
+
+error[E0271]: expected 
+`{async 
+block@src\api\rag.rs:46:11: 
+46:13}` to be a future that 
+resolves to `Result<usize, 
+String>`, but it resolves 
+to `Result<IndexResult, 
+String>`
+  --> src\api\rag.rs:46:11
+   |
+46 |     async fn 
+index_note(self, note_id: 
+String, title: String, 
+content: String) -> 
+Result<usize, String> {
+   |           ^^ expected 
+`Result<usize, String>`, 
+found `Result<IndexResult, 
+String>`
+   |
+   = note: expected enum 
+`std::result::Result<usize, 
+_>`
+              found enum `st
+d::result::Result<IndexResul
+t, _>`
+   = note: required for the 
+cast from `Pin<Box<{async 
+block@src\api\rag.rs:46:11: 
+46:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<usize, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-90629749203
+47489230.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async 
+block@src\api\rag.rs:50:11: 
+50:13}` to be a future that 
+resolves to `Result<String, 
+String>`, but it resolves 
+to 
+`Result<Vec<SearchResult>, 
+String>`
+  --> src\api\rag.rs:50:11
+   |
+50 |     async fn 
+search(self, query: String, 
+k: usize) -> Result<String, 
+String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<Vec<SearchResult>, 
+String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum `st
+d::result::Result<std::vec::
+Vec<rag::commands::SearchRes
+ult>, _>`
+   = note: required for the 
+cast from `Pin<Box<{async 
+block@src\api\rag.rs:50:11: 
+50:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async 
+block@src\api\rag.rs:54:11: 
+54:13}` to be a future that 
+resolves to `Result<String, 
+String>`, but it resolves 
+to `impl Future<Output = 
+Result<Vec<ChunkOutput>, 
+String>>`
+  --> src\api\rag.rs:54:11
+   |
+54 |     async fn 
+get_chunks(self, note_id: 
+String) -> Result<String, 
+String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found future
+   |
+   = note: required for the 
+cast from `Pin<Box<{async 
+block@src\api\rag.rs:54:11: 
+54:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async 
+block@src\api\rag.rs:58:11: 
+58:13}` to be a future that 
+resolves to `Result<usize, 
+String>`, but it resolves 
+to `impl Future<Output = 
+Result<usize, String>>`
+  --> src\api\rag.rs:58:11
+   |
+58 |     async fn 
+delete_note_chunks(self, 
+note_id: String) -> 
+Result<usize, String> {
+   |           ^^ expected 
+`Result<usize, String>`, 
+found future
+   |
+   = note: required for the 
+cast from `Pin<Box<{async 
+block@src\api\rag.rs:58:11: 
+58:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<usize, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-90629749203
+47489230.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:64:11: 64:13}` to be 
+a future that resolves to 
+`Result<String, String>`, 
+but it resolves to 
+`Result<(), String>`
+  --> 
+src\api\blueprint.rs:64:11
+   |
+64 |     async fn 
+init(self) -> 
+Result<String, String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found `Result<(), String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum 
+`std::result::Result<(), _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\blueprint.rs:64:
+11: 64:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 2 
+arguments were supplied
+   --> 
+src\api\blueprint.rs:69:9
+    |
+ 69 |         commands::blue
+print_create(name, 
+description)
+    |         
+^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+----  ----------- 
+unexpected argument #2 of 
+type `std::option::Option<st
+d::string::String>`
+    |                       
+             |
+    |                       
+             expected 
+`CreateBlueprintInput`, 
+found `String`
+    |
+note: function defined here
+   --> 
+src\blueprint.rs:677:12
+    |
+677 |     pub fn 
+blueprint_create(input: 
+CreateBlueprintInput) -> 
+Result<BlueprintMeta, 
+String> {
+    |            
+^^^^^^^^^^^^^^^^ 
+---------------------------
+help: remove the extra 
+argument
+    |
+ 69 -         commands::blue
+print_create(name, 
+description)
+ 69 +         commands::blue
+print_create(/* 
+CreateBlueprintInput */)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:68:11: 68:13}` to be 
+a future that resolves to 
+`Result<String, String>`, 
+but it resolves to 
+`Result<BlueprintMeta, 
+String>`
+  --> 
+src\api\blueprint.rs:68:11
+   |
+68 |     async fn 
+create(self, name: String, 
+description: 
+Option<String>) -> 
+Result<String, String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<BlueprintMeta, 
+String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum `st
+d::result::Result<blueprint:
+:BlueprintMeta, _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\blueprint.rs:68:
+11: 68:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:72:11: 72:13}` to be 
+a future that resolves to 
+`Result<Option<String>, 
+String>`, but it resolves 
+to `Result<Option<BlueprintM
+eta>, String>`
+  --> 
+src\api\blueprint.rs:72:11
+   |
+72 |     async fn get(self, 
+id: String) -> 
+Result<Option<String>, 
+String> {
+   |           ^^ expected 
+`Result<Option<String>, 
+String>`, found `Result<Opti
+on<BlueprintMeta>, String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::optio
+n::Option<std::string::Strin
+g>, _>`
+              found enum `st
+d::result::Result<std::optio
+n::Option<blueprint::Bluepri
+ntMeta>, _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\blueprint.rs:72:
+11: 72:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<Option<String>, 
+String>> + Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-37798300241
+30919615.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:76:11: 76:13}` to be 
+a future that resolves to 
+`Result<String, String>`, 
+but it resolves to 
+`Result<Vec<BlueprintMeta>, 
+String>`
+  --> 
+src\api\blueprint.rs:76:11
+   |
+76 |     async fn 
+list(self) -> 
+Result<String, String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<Vec<BlueprintMeta>, 
+String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum `st
+d::result::Result<std::vec::
+Vec<blueprint::BlueprintMeta
+>, _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\blueprint.rs:76:
+11: 76:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 2 arguments but 3 
+arguments were supplied
+   --> 
+src\api\blueprint.rs:81:9
+    |
+ 81 |         commands::blue
+print_update(id, name, 
+description)
+    |         
+^^^^^^^^^^^^^^^^^^^^^^^^^^  
+         ----------- 
+unexpected argument #3 of 
+type `std::option::Option<st
+d::string::String>`
+    |
+note: expected 
+`CreateBlueprintInput`, 
+found `Option<String>`
+   --> 
+src\api\blueprint.rs:81:40
+    |
+ 81 |         commands::blue
+print_update(id, name, 
+description)
+    |                       
+                 ^^^^
+    = note: expected struct 
+`CreateBlueprintInput`
+                 found enum 
+`std::option::Option<std::st
+ring::String>`
+note: function defined here
+   --> 
+src\blueprint.rs:715:12
+    |
+715 |     pub fn 
+blueprint_update(
+    |            
+^^^^^^^^^^^^^^^^
+716 |         blueprint_id: 
+String,
+717 |         updates: 
+CreateBlueprintInput,
+    |         --------------
+---------------
+help: remove the extra 
+argument
+    |
+ 81 -         commands::blue
+print_update(id, name, 
+description)
+ 81 +         commands::blue
+print_update(id, /* 
+CreateBlueprintInput */)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:80:11: 80:13}` to be 
+a future that resolves to 
+`Result<String, String>`, 
+but it resolves to 
+`Result<BlueprintMeta, 
+String>`
+  --> 
+src\api\blueprint.rs:80:11
+   |
+80 |     async fn 
+update(self, id: String, 
+name: Option<String>, 
+description: 
+Option<String>) -> 
+Result<String, String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<BlueprintMeta, 
+String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum `st
+d::result::Result<blueprint:
+:BlueprintMeta, _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\blueprint.rs:80:
+11: 80:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:84:11: 84:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `Result<(), 
+String>`
+  --> 
+src\api\blueprint.rs:84:11
+   |
+84 |     async fn 
+delete(self, id: String) -> 
+Result<bool, String> {
+   |           ^^ expected 
+`Result<bool, String>`, 
+found `Result<(), String>`
+   |
+   = note: expected enum 
+`std::result::Result<bool, 
+_>`
+              found enum 
+`std::result::Result<(), _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\blueprint.rs:84:
+11: 84:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<bool, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 2 
+arguments were supplied
+   --> 
+src\api\blueprint.rs:89:9
+    |
+ 89 |         commands::blue
+print_version_create(bluepri
+nt_id, version)
+    |         ^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^ 
+------------  ------- 
+unexpected argument #2 of 
+type `std::string::String`
+    |                       
+                     |
+    |                       
+                     
+expected 
+`CreateVersionInput`, found 
+`String`
+    |
+note: function defined here
+   --> 
+src\blueprint.rs:766:12
+    |
+766 |     pub fn blueprint_v
+ersion_create(input: 
+CreateVersionInput) -> 
+Result<BlueprintVersion, 
+String> {
+    |            
+^^^^^^^^^^^^^^^^^^^^^^^^ 
+-------------------------
+help: remove the extra 
+argument
+    |
+ 89 -         commands::blue
+print_version_create(bluepri
+nt_id, version)
+ 89 +         commands::blue
+print_version_create(/* 
+CreateVersionInput */)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:88:11: 88:13}` to be 
+a future that resolves to 
+`Result<String, String>`, 
+but it resolves to 
+`Result<BlueprintVersion, 
+String>`
+  --> 
+src\api\blueprint.rs:88:11
+   |
+88 |     async fn 
+version_create(self, 
+blueprint_id: String, 
+version: String) -> 
+Result<String, String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<BlueprintVersion, 
+String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum `st
+d::result::Result<blueprint:
+:BlueprintVersion, _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\blueprint.rs:88:
+11: 88:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:92:11: 92:13}` to be 
+a future that resolves to 
+`Result<String, String>`, 
+but it resolves to `Result<V
+ec<BlueprintVersion>, 
+String>`
+  --> 
+src\api\blueprint.rs:92:11
+   |
+92 |     async fn 
+version_list(self, 
+blueprint_id: String) -> 
+Result<String, String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found `Result<Vec<BlueprintV
+ersion>, String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum `st
+d::result::Result<std::vec::
+Vec<blueprint::BlueprintVers
+ion>, _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\blueprint.rs:92:
+11: 92:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:96:11: 96:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `Result<(), 
+String>`
+  --> 
+src\api\blueprint.rs:96:11
+   |
+96 |     async fn 
+version_delete(self, 
+version_id: String) -> 
+Result<bool, String> {
+   |           ^^ expected 
+`Result<bool, String>`, 
+found `Result<(), String>`
+   |
+   = note: expected enum 
+`std::result::Result<bool, 
+_>`
+              found enum 
+`std::result::Result<(), _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\blueprint.rs:96:
+11: 96:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<bool, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 4 
+arguments were supplied
+   --> 
+src\api\blueprint.rs:101:9
+    |
+101 |         commands::blue
+print_entity_type_create(ver
+sion_id, name, color, icon)
+    |         ^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^ 
+----------  ----  -----  
+---- unexpected argument #4 
+of type `std::option::Option
+<std::string::String>`
+    |                       
+                         |  
+         |     |
+    |                       
+                         |  
+         |     unexpected 
+argument #3 of type `std::op
+tion::Option<std::string::St
+ring>`
+    |                       
+                         |  
+         unexpected 
+argument #2 of type 
+`std::string::String`
+    |                       
+                         
+expected 
+`CreateEntityTypeInput`, 
+found `String`
+    |
+note: function defined here
+   --> 
+src\blueprint.rs:815:12
+    |
+815 |     pub fn blueprint_e
+ntity_type_create(input: 
+CreateEntityTypeInput) -> 
+Result<EntityTypeDef, 
+String> {
+    |            ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^ 
+----------------------------
+help: remove the extra 
+arguments
+    |
+101 -         commands::blue
+print_entity_type_create(ver
+sion_id, name, color, icon)
+101 +         commands::blue
+print_entity_type_create(/* 
+CreateEntityTypeInput */)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:100:11: 100:13}` to 
+be a future that resolves 
+to `Result<String, 
+String>`, but it resolves 
+to `Result<EntityTypeDef, 
+String>`
+   --> 
+src\api\blueprint.rs:100:11
+    |
+100 |     async fn 
+entity_type_create(self, 
+version_id: String, name: 
+String, color: 
+Option<String>, icon: 
+Option<String>) -> 
+Result<String, St...
+    |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<EntityTypeDef, 
+String>`
+    |
+    = note: expected enum `s
+td::result::Result<std::stri
+ng::String, _>`
+               found enum `s
+td::result::Result<blueprint
+::EntityTypeDef, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\blueprint.rs:100:11: 
+100:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:104:11: 104:13}` to 
+be a future that resolves 
+to `Result<String, 
+String>`, but it resolves 
+to 
+`Result<Vec<EntityTypeDef>, 
+String>`
+   --> 
+src\api\blueprint.rs:104:11
+    |
+104 |     async fn 
+entity_type_list(self, 
+version_id: String) -> 
+Result<String, String> {
+    |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<Vec<EntityTypeDef>, 
+String>`
+    |
+    = note: expected enum `s
+td::result::Result<std::stri
+ng::String, _>`
+               found enum `s
+td::result::Result<std::vec:
+:Vec<blueprint::EntityTypeDe
+f>, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\blueprint.rs:104:11: 
+104:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:108:11: 108:13}` to 
+be a future that resolves 
+to `Result<bool, String>`, 
+but it resolves to 
+`Result<(), String>`
+   --> 
+src\api\blueprint.rs:108:11
+    |
+108 |     async fn 
+entity_type_delete(self, 
+id: String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found `Result<(), String>`
+    |
+    = note: expected enum 
+`std::result::Result<bool, 
+_>`
+               found enum 
+`std::result::Result<(), _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\blueprint.rs:108:11: 
+108:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 4 
+arguments were supplied
+   --> 
+src\api\blueprint.rs:113:9
+    |
+113 |         commands::blue
+print_field_create(entity_ty
+pe_id, name, field_type, 
+required)
+    |         ^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^ 
+--------------  ----  
+----------  -------- 
+unexpected argument #4 of 
+type `bool`
+    |                       
+                   |        
+       |     |
+    |                       
+                   |        
+       |     unexpected 
+argument #3 of type 
+`std::string::String`
+    |                       
+                   |        
+       unexpected argument 
+#2 of type 
+`std::string::String`
+    |                       
+                   expected 
+`CreateFieldInput`, found 
+`String`
+    |
+note: function defined here
+   --> 
+src\blueprint.rs:871:12
+    |
+871 |     pub fn blueprint_f
+ield_create(input: 
+CreateFieldInput) -> 
+Result<FieldDef, String> {
+    |            
+^^^^^^^^^^^^^^^^^^^^^^ 
+-----------------------
+help: remove the extra 
+arguments
+    |
+113 -         commands::blue
+print_field_create(entity_ty
+pe_id, name, field_type, 
+required)
+113 +         commands::blue
+print_field_create(/* 
+CreateFieldInput */)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:112:11: 112:13}` to 
+be a future that resolves 
+to `Result<String, 
+String>`, but it resolves 
+to `Result<FieldDef, 
+String>`
+   --> 
+src\api\blueprint.rs:112:11
+    |
+112 |     async fn 
+field_create(self, 
+entity_type_id: String, 
+name: String, field_type: 
+String, required: bool) -> 
+Result<String, String> {
+    |           ^^ expected 
+`Result<String, String>`, 
+found `Result<FieldDef, 
+String>`
+    |
+    = note: expected enum `s
+td::result::Result<std::stri
+ng::String, _>`
+               found enum `s
+td::result::Result<blueprint
+::FieldDef, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\blueprint.rs:112:11: 
+112:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:116:11: 116:13}` to 
+be a future that resolves 
+to `Result<String, 
+String>`, but it resolves 
+to `Result<Vec<FieldDef>, 
+String>`
+   --> 
+src\api\blueprint.rs:116:11
+    |
+116 |     async fn 
+field_list(self, 
+entity_type_id: String) -> 
+Result<String, String> {
+    |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<Vec<FieldDef>, 
+String>`
+    |
+    = note: expected enum `s
+td::result::Result<std::stri
+ng::String, _>`
+               found enum `s
+td::result::Result<std::vec:
+:Vec<blueprint::FieldDef>, 
+_>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\blueprint.rs:116:11: 
+116:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:120:11: 120:13}` to 
+be a future that resolves 
+to `Result<bool, String>`, 
+but it resolves to 
+`Result<(), String>`
+   --> 
+src\api\blueprint.rs:120:11
+    |
+120 |     async fn 
+field_delete(self, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found `Result<(), String>`
+    |
+    = note: expected enum 
+`std::result::Result<bool, 
+_>`
+               found enum 
+`std::result::Result<(), _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\blueprint.rs:120:11: 
+120:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 4 
+arguments were supplied
+   --> 
+src\api\blueprint.rs:125:9
+    |
+125 |         commands::blue
+print_relationship_type_crea
+te(version_id, name, 
+source_type_id, 
+target_type_id)
+    |         ^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^ ----------  ----  
+--------------  
+-------------- unexpected 
+argument #4 of type 
+`std::string::String`
+    |                       
+                            
+   |           |     |
+    |                       
+                            
+   |           |     
+unexpected argument #3 of 
+type `std::string::String`
+    |                       
+                            
+   |           unexpected 
+argument #2 of type 
+`std::string::String`
+    |                       
+                            
+   expected `CreateRelations
+hipTypeInput`, found 
+`String`
+    |
+note: function defined here
+   --> 
+src\blueprint.rs:931:12
+    |
+931 |     pub fn blueprint_r
+elationship_type_create(inpu
+t: CreateRelationshipTypeInp
+ut) -> 
+Result<RelationshipTypeDef, 
+String> {
+    |            ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^ ----
+----------------------------
+--
+help: remove the extra 
+arguments
+    |
+125 -         commands::blue
+print_relationship_type_crea
+te(version_id, name, 
+source_type_id, 
+target_type_id)
+125 +         commands::blue
+print_relationship_type_crea
+te(/* 
+CreateRelationshipTypeInput 
+*/)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:124:11: 124:13}` to 
+be a future that resolves 
+to `Result<String, 
+String>`, but it resolves 
+to `Result<RelationshipTypeD
+ef, String>`
+   --> 
+src\api\blueprint.rs:124:11
+    |
+124 |     async fn relations
+hip_type_create(self, 
+version_id: String, name: 
+String, source_type_id: 
+String, target_type_id: 
+String) -> Result<S...
+    |           ^^ expected 
+`Result<String, String>`, 
+found `Result<RelationshipTy
+peDef, String>`
+    |
+    = note: expected enum `s
+td::result::Result<std::stri
+ng::String, _>`
+               found enum `s
+td::result::Result<blueprint
+::RelationshipTypeDef, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\blueprint.rs:124:11: 
+124:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:128:11: 128:13}` to 
+be a future that resolves 
+to `Result<String, 
+String>`, but it resolves 
+to `Result<Vec<RelationshipT
+ypeDef>, String>`
+   --> 
+src\api\blueprint.rs:128:11
+    |
+128 |     async fn relations
+hip_type_list(self, 
+version_id: String) -> 
+Result<String, String> {
+    |           ^^ expected 
+`Result<String, String>`, 
+found `Result<Vec<Relationsh
+ipTypeDef>, String>`
+    |
+    = note: expected enum `s
+td::result::Result<std::stri
+ng::String, _>`
+               found enum `s
+td::result::Result<std::vec:
+:Vec<blueprint::Relationship
+TypeDef>, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\blueprint.rs:128:11: 
+128:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\bluepr
+int.rs:132:11: 132:13}` to 
+be a future that resolves 
+to `Result<bool, String>`, 
+but it resolves to 
+`Result<(), String>`
+   --> 
+src\api\blueprint.rs:132:11
+    |
+132 |     async fn relations
+hip_type_delete(self, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found `Result<(), String>`
+    |
+    = note: expected enum 
+`std::result::Result<bool, 
+_>`
+               found enum 
+`std::result::Result<(), _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\blueprint.rs:132:11: 
+132:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-12306055968
+264872041.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 4 
+arguments were supplied
+   --> src\api\time_registry
+.rs:48:9
+    |
+ 48 |         commands::time
+_registry_record_entity_chan
+ge(entity_id, change_type, 
+old_value, new_value)
+    |         ^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^ ---------  -----------  
+---------  --------- 
+unexpected argument #4 of 
+type `std::option::Option<st
+d::string::String>`
+    |                       
+                            
+   |          |            |
+    |                       
+                            
+   |          |            
+unexpected argument #3 of 
+type `std::option::Option<st
+d::string::String>`
+    |                       
+                            
+   |          unexpected 
+argument #2 of type 
+`std::string::String`
+    |                       
+                            
+   expected 
+`RecordChangeInput`, found 
+`String`
+    |
+note: function defined here
+   --> 
+src\time_registry.rs:268:12
+    |
+268 |     pub fn time_regist
+ry_record_entity_change(inpu
+t: RecordChangeInput) -> 
+Result<(), String> {
+    |            ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^ 
+------------------------
+help: remove the extra 
+arguments
+    |
+ 48 -         commands::time
+_registry_record_entity_chan
+ge(entity_id, change_type, 
+old_value, new_value)
+ 48 +         commands::time
+_registry_record_entity_chan
+ge(/* RecordChangeInput */)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\time_r
+egistry.rs:41:11: 41:13}` 
+to be a future that 
+resolves to `Result<String, 
+String>`, but it resolves 
+to `Result<(), String>`
+  --> src\api\time_registry.
+rs:41:11
+   |
+41 |     async fn 
+record_entity_change(
+   |           ^^ expected 
+`Result<String, String>`, 
+found `Result<(), String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum 
+`std::result::Result<(), _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\time_registry.rs
+:41:11: 41:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 2 
+arguments were supplied
+   --> src\api\time_registry
+.rs:52:9
+    |
+ 52 |         commands::time
+_registry_get_entity_history
+(entity_id, limit)
+    |         ^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            ----- 
+unexpected argument #2 of 
+type 
+`std::option::Option<usize>`
+    |
+note: function defined here
+   --> 
+src\time_registry.rs:276:12
+    |
+276 |     pub fn time_regist
+ry_get_entity_history(entity
+_id: String) -> 
+Result<Vec<HistoryEntry>, 
+String> {
+    |            ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+help: remove the extra 
+argument
+    |
+ 52 -         commands::time
+_registry_get_entity_history
+(entity_id, limit)
+ 52 +         commands::time
+_registry_get_entity_history
+(entity_id)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\time_r
+egistry.rs:51:11: 51:13}` 
+to be a future that 
+resolves to `Result<String, 
+String>`, but it resolves 
+to 
+`Result<Vec<HistoryEntry>, 
+String>`
+  --> src\api\time_registry.
+rs:51:11
+   |
+51 |     async fn 
+get_entity_history(self, 
+entity_id: String, limit: 
+Option<usize>) -> 
+Result<String, String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<Vec<HistoryEntry>, 
+String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum `st
+d::result::Result<std::vec::
+Vec<time_registry::HistoryEn
+try>, _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\time_registry.rs
+:51:11: 51:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 1 argument but 4 
+arguments were supplied
+   --> src\api\time_registry
+.rs:62:9
+    |
+ 62 |         commands::time
+_registry_record_edge_change
+(edge_id, change_type, 
+old_value, new_value)
+    |         ^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ -------  -----------  
+---------  --------- 
+unexpected argument #4 of 
+type `std::option::Option<st
+d::string::String>`
+    |                       
+                            
+ |        |            |
+    |                       
+                            
+ |        |            
+unexpected argument #3 of 
+type `std::option::Option<st
+d::string::String>`
+    |                       
+                            
+ |        unexpected 
+argument #2 of type 
+`std::string::String`
+    |                       
+                            
+ expected 
+`RecordEdgeChangeInput`, 
+found `String`
+    |
+note: function defined here
+   --> 
+src\time_registry.rs:283:12
+    |
+283 |     pub fn time_regist
+ry_record_edge_change(input:
+ RecordEdgeChangeInput) -> 
+Result<(), String> {
+    |            ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^ 
+----------------------------
+help: remove the extra 
+arguments
+    |
+ 62 -         commands::time
+_registry_record_edge_change
+(edge_id, change_type, 
+old_value, new_value)
+ 62 +         commands::time
+_registry_record_edge_change
+(/* RecordEdgeChangeInput 
+*/)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\time_r
+egistry.rs:55:11: 55:13}` 
+to be a future that 
+resolves to `Result<String, 
+String>`, but it resolves 
+to `Result<(), String>`
+  --> src\api\time_registry.
+rs:55:11
+   |
+55 |     async fn 
+record_edge_change(
+   |           ^^ expected 
+`Result<String, String>`, 
+found `Result<(), String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum 
+`std::result::Result<(), _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\time_registry.rs
+:55:11: 55:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0308]: mismatched 
+types
+   --> src\api\time_registry
+.rs:66:59
+    |
+ 66 |         commands::time
+_registry_get_edge_history(e
+dge_id, limit)
+    |         --------------
+--------------------------  
+        ^^^^^ expected 
+`String`, found 
+`Option<usize>`
+    |         |
+    |         arguments to 
+this function are incorrect
+    |
+    = note: expected struct 
+`std::string::String`
+                 found enum 
+`std::option::Option<usize>`
+note: function defined here
+   --> 
+src\time_registry.rs:291:12
+    |
+291 |     pub fn time_regist
+ry_get_edge_history(source_i
+d: String, target_id: 
+String) -> Result<Vec<EdgeHi
+storyEntry>, String> {
+    |            ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^         
+           -----------------
+
+error[E0271]: expected 
+`{async block@src\api\time_r
+egistry.rs:65:11: 65:13}` 
+to be a future that 
+resolves to `Result<String, 
+String>`, but it resolves 
+to `Result<Vec<EdgeHistoryEn
+try>, String>`
+  --> src\api\time_registry.
+rs:65:11
+   |
+65 |     async fn 
+get_edge_history(self, 
+edge_id: String, limit: 
+Option<usize>) -> 
+Result<String, String> {
+   |           ^^ expected 
+`Result<String, String>`, 
+found `Result<Vec<EdgeHistor
+yEntry>, String>`
+   |
+   = note: expected enum `st
+d::result::Result<std::strin
+g::String, _>`
+              found enum `st
+d::result::Result<std::vec::
+Vec<time_registry::EdgeHisto
+ryEntry>, _>`
+   = note: required for the 
+cast from `Pin<Box<{async bl
+ock@src\api\time_registry.rs
+:65:11: 65:13}>>` to 
+`Pin<Box<dyn Future<Output 
+= Result<String, String>> + 
+Send>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17658241916
+536657624.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct `CoreApiImpl` in 
+the current scope
+   --> src\api\mod.rs:32:45
+    |
+ 32 |         .merge(core::C
+oreApiImpl::default().into_h
+andler())
+    |                       
+                      
+^^^^^^^^^^^^
+    |
+   ::: src\api\core.rs:96:1
+    |
+ 96 | 
+#[taurpc::procedures(path = 
+"core", export_to = 
+"../src/bindings.ts")]
+    | ----------------------
+----------------------------
+-------------------- the 
+method is available for 
+`CoreApiImpl` here
+...
+134 | pub struct 
+CoreApiImpl;
+    | 
+---------------------- 
+method `into_handler` not 
+found for this struct
+    |
+    = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `CoreApi` which 
+provides `into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+    |
+ 19 + use 
+crate::api::core::CoreApi;
+    |
+help: there is a method 
+`into_raw` with a similar 
+name
+    |
+ 32 -         .merge(core::C
+oreApiImpl::default().into_h
+andler())
+ 32 +         .merge(core::C
+oreApiImpl::default().into_r
+aw())
+    |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct `GraphApiImpl` 
+in the current scope
+   --> src\api\mod.rs:33:47
+    |
+ 33 |         .merge(graph::
+GraphApiImpl::default().into
+_handler())
+    |                       
+                        
+^^^^^^^^^^^^
+    |
+   ::: src\api\graph.rs:65:1
+    |
+ 65 | 
+#[taurpc::procedures(path = 
+"graph", export_to = 
+"../src/bindings.ts")]
+    | ----------------------
+----------------------------
+--------------------- the 
+method is available for 
+`GraphApiImpl` here
+...
+116 | pub struct 
+GraphApiImpl;
+    | 
+----------------------- 
+method `into_handler` not 
+found for this struct
+    |
+    = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `GraphApi` 
+which provides 
+`into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+    |
+ 19 + use 
+crate::api::graph::GraphApi;
+    |
+help: there is a method 
+`into_raw` with a similar 
+name
+    |
+ 33 -         .merge(graph::
+GraphApiImpl::default().into
+_handler())
+ 33 +         .merge(graph::
+GraphApiImpl::default().into
+_raw())
+    |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct `ContentApiImpl` 
+in the current scope
+   --> src\api\mod.rs:34:51
+    |
+ 34 |         .merge(content
+::ContentApiImpl::default().
+into_handler())
+    |                       
+                            
+^^^^^^^^^^^^
+    |
+   ::: 
+src\api\content.rs:9:1
+    |
+  9 | 
+#[taurpc::procedures(path = 
+"content", export_to = 
+"../src/bindings.ts")]
+    | ----------------------
+----------------------------
+----------------------- the 
+method is available for 
+`ContentApiImpl` here
+...
+127 | pub struct 
+ContentApiImpl;
+    | 
+------------------------- 
+method `into_handler` not 
+found for this struct
+    |
+    = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `ContentApi` 
+which provides 
+`into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+    |
+ 19 + use crate::api::conten
+t::ContentApi;
+    |
+help: there is a method 
+`into_raw` with a similar 
+name
+    |
+ 34 -         .merge(content
+::ContentApiImpl::default().
+into_handler())
+ 34 +         .merge(content
+::ContentApiImpl::default().
+into_raw())
+    |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct `NerApiImpl` in 
+the current scope
+   --> src\api\mod.rs:35:43
+    |
+ 35 |         .merge(ner::Ne
+rApiImpl::default().into_han
+dler())
+    |                       
+                    
+^^^^^^^^^^^^
+    |
+   ::: src\api\ner.rs:60:1
+    |
+ 60 | 
+#[taurpc::procedures(path = 
+"ner", export_to = 
+"../src/bindings.ts")]
+    | ----------------------
+----------------------------
+------------------- the 
+method is available for 
+`NerApiImpl` here
+...
+100 | pub struct NerApiImpl;
+    | --------------------- 
+method `into_handler` not 
+found for this struct
+    |
+    = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `NerApi` which 
+provides `into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+    |
+ 19 + use 
+crate::api::ner::NerApi;
+    |
+help: there is a method 
+`into_raw` with a similar 
+name
+    |
+ 35 -         .merge(ner::Ne
+rApiImpl::default().into_han
+dler())
+ 35 +         .merge(ner::Ne
+rApiImpl::default().into_raw
+())
+    |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct `RagApiImpl` in 
+the current scope
+  --> src\api\mod.rs:36:43
+   |
+36 |         .merge(rag::Rag
+ApiImpl::default().into_hand
+ler())
+   |                        
+                   
+^^^^^^^^^^^^
+   |
+  ::: src\api\rag.rs:9:1
+   |
+ 9 | 
+#[taurpc::procedures(path = 
+"rag", export_to = 
+"../src/bindings.ts")]
+   | -----------------------
+----------------------------
+------------------ the 
+method is available for 
+`RagApiImpl` here
+...
+26 | pub struct RagApiImpl;
+   | --------------------- 
+method `into_handler` not 
+found for this struct
+   |
+   = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `RagApi` which 
+provides `into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+   |
+19 + use 
+crate::api::rag::RagApi;
+   |
+help: there is a method 
+`into_raw` with a similar 
+name
+   |
+36 -         .merge(rag::Rag
+ApiImpl::default().into_hand
+ler())
+36 +         .merge(rag::Rag
+ApiImpl::default().into_raw(
+))
+   |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct 
+`BlueprintApiImpl` in the 
+current scope
+  --> src\api\mod.rs:37:55
+   |
+37 |         .merge(blueprin
+t::BlueprintApiImpl::default
+().into_handler())
+   |                        
+                            
+   ^^^^^^^^^^^^
+   |
+  ::: 
+src\api\blueprint.rs:9:1
+   |
+ 9 | 
+#[taurpc::procedures(path = 
+"blueprint", export_to = 
+"../src/bindings.ts")]
+   | -----------------------
+----------------------------
+------------------------ 
+the method is available for 
+`BlueprintApiImpl` here
+...
+60 | pub struct 
+BlueprintApiImpl;
+   | 
+--------------------------- 
+method `into_handler` not 
+found for this struct
+   |
+   = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `BlueprintApi` 
+which provides 
+`into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+   |
+19 + use crate::api::bluepri
+nt::BlueprintApi;
+   |
+help: there is a method 
+`into_raw` with a similar 
+name
+   |
+37 -         .merge(blueprin
+t::BlueprintApiImpl::default
+().into_handler())
+37 +         .merge(blueprin
+t::BlueprintApiImpl::default
+().into_raw())
+   |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct 
+`TimeRegistryApiImpl` in 
+the current scope
+  --> src\api\mod.rs:38:62
+   |
+38 |         .merge(time_reg
+istry::TimeRegistryApiImpl::
+default().into_handler())
+   |                        
+                            
+          ^^^^^^^^^^^^
+   |
+  ::: 
+src\api\time_registry.rs:9:1
+   |
+ 9 | 
+#[taurpc::procedures(path = 
+"time_registry", export_to 
+= "../src/bindings.ts")]
+   | -----------------------
+----------------------------
+----------------------------
+ the method is available 
+for `TimeRegistryApiImpl` 
+here
+...
+33 | pub struct 
+TimeRegistryApiImpl;
+   | -----------------------
+------- method 
+`into_handler` not found 
+for this struct
+   |
+   = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait 
+`TimeRegistryApi` which 
+provides `into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+   |
+19 + use crate::api::time_re
+gistry::TimeRegistryApi;
+   |
+help: there is a method 
+`into_raw` with a similar 
+name
+   |
+38 -         .merge(time_reg
+istry::TimeRegistryApiImpl::
+default().into_handler())
+38 +         .merge(time_reg
+istry::TimeRegistryApiImpl::
+default().into_raw())
+   |
+
+error[E0277]: the trait 
+bound `impl Fn(Invoke) -> 
+bool: TauRpcHandler<_>` is 
+not satisfied
+   --> src\lib.rs:471:52
+    |
+471 |         .invoke_handle
+r(taurpc::create_ipc_handler
+(api::create_router().into_h
+andler()))
+    |                       
+  
+-------------------------- ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^ the trait 
+`TauRpcHandler<_>` is not 
+implemented for `impl 
+Fn(Invoke) -> bool`
+    |                       
+  |
+    |                       
+  required by a bound 
+introduced by this call
+    |
+    = help: the following 
+other types implement trait 
+`TauRpcHandler<R>`:
+              
+TauRpcBlueprintApiHandler<P>
+              
+TauRpcContentApiHandler<P>
+              
+TauRpcCoreApiHandler<P>
+              
+TauRpcGraphApiHandler<P>
+              
+TauRpcNerApiHandler<P>
+              
+TauRpcRagApiHandler<P>
+              TauRpcTimeRegi
+stryApiHandler<P>
+note: required by a bound 
+in `create_ipc_handler`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\taurpc-0.
+5.2\src\lib.rs:88:8
+    |
+ 84 | pub fn 
+create_ipc_handler<H, R: 
+Runtime>(
+    |        
+------------------ required 
+by a bound in this function
+...
+ 88 |     H: 
+TauRpcHandler<R> + Send + 
+Sync + 'static + Clone,
+    |        
+^^^^^^^^^^^^^^^^ required 
+by this bound in 
+`create_ipc_handler`
+
+error[E0277]: the trait 
+bound `impl Fn(Invoke) -> 
+bool: Clone` is not 
+satisfied
+   --> src\lib.rs:471:52
+    |
+471 |         .invoke_handle
+r(taurpc::create_ipc_handler
+(api::create_router().into_h
+andler()))
+    |                       
+  
+-------------------------- ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^ the trait `Clone` is 
+not implemented for `impl 
+Fn(Invoke) -> bool`
+    |                       
+  |
+    |                       
+  required by a bound 
+introduced by this call
+    |
+note: required by a bound 
+in `create_ipc_handler`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\taurpc-0.
+5.2\src\lib.rs:88:51
+    |
+ 84 | pub fn 
+create_ipc_handler<H, R: 
+Runtime>(
+    |        
+------------------ required 
+by a bound in this function
+...
+ 88 |     H: 
+TauRpcHandler<R> + Send + 
+Sync + 'static + Clone,
+    |                       
+                            
+^^^^^ required by this 
+bound in 
+`create_ipc_handler`
+help: use parentheses to 
+call this opaque type
+    |
+471 |         .invoke_handle
+r(taurpc::create_ipc_handler
+(api::create_router().into_h
+andler()(/* Invoke */)))
+    |                       
+                            
+                            
+        ++++++++++++++
+
+error[E0277]: the trait 
+bound `impl Fn(Invoke) -> 
+bool: TauRpcHandler<_>` is 
+not satisfied
+   --> src\lib.rs:471:25
+    |
+471 |         .invoke_handle
+r(taurpc::create_ipc_handler
+(api::create_router().into_h
+andler()))
+    |                       
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^ the trait 
+`TauRpcHandler<_>` is not 
+implemented for `impl 
+Fn(Invoke) -> bool`
+    |
+    = help: the following 
+other types implement trait 
+`TauRpcHandler<R>`:
+              
+TauRpcBlueprintApiHandler<P>
+              
+TauRpcContentApiHandler<P>
+              
+TauRpcCoreApiHandler<P>
+              
+TauRpcGraphApiHandler<P>
+              
+TauRpcNerApiHandler<P>
+              
+TauRpcRagApiHandler<P>
+              TauRpcTimeRegi
+stryApiHandler<P>
+note: required by a bound 
+in `create_ipc_handler`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\taurpc-0.
+5.2\src\lib.rs:88:8
+    |
+ 84 | pub fn 
+create_ipc_handler<H, R: 
+Runtime>(
+    |        
+------------------ required 
+by a bound in this function
+...
+ 88 |     H: 
+TauRpcHandler<R> + Send + 
+Sync + 'static + Clone,
+    |        
+^^^^^^^^^^^^^^^^ required 
+by this bound in 
+`create_ipc_handler`
+
+error[E0277]: the trait 
+bound `impl Fn(Invoke) -> 
+bool: Clone` is not 
+satisfied
+   --> src\lib.rs:471:25
+    |
+471 |         .invoke_handle
+r(taurpc::create_ipc_handler
+(api::create_router().into_h
+andler()))
+    |                       
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^ the trait `Clone` 
+is not implemented for 
+`impl Fn(Invoke) -> bool`
+    |
+note: required by a bound 
+in `create_ipc_handler`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\taurpc-0.
+5.2\src\lib.rs:88:51
+    |
+ 84 | pub fn 
+create_ipc_handler<H, R: 
+Runtime>(
+    |        
+------------------ required 
+by a bound in this function
+...
+ 88 |     H: 
+TauRpcHandler<R> + Send + 
+Sync + 'static + Clone,
+    |                       
+                            
+^^^^^ required by this 
+bound in 
+`create_ipc_handler`
+
+error[E0277]: the trait 
+bound `impl Fn(Invoke) -> 
+bool: TauRpcHandler<tauri_ru
+ntime_wry::Wry<EventLoopMess
+age>>` is not satisfied
+   --> src\lib.rs:444:5
+    |
+444 | /     
+tauri::Builder::default()
+445 | |         
+.setup(|app| {
+446 | |             if 
+cfg!(debug_assertions) {
+447 | |                 
+app.handle().plugin(
+...   |
+471 | |         .invoke_hand
+ler(taurpc::create_ipc_handl
+er(api::create_router().into
+_handler()))
+    | |_____________________
+____________________________
+____________________________
+___________^ the trait `TauR
+pcHandler<tauri_runtime_wry:
+:Wry<EventLoopMessage>>` is 
+not implemented for `impl 
+Fn(Invoke) -> bool`
+    |
+    = help: the following 
+other types implement trait 
+`TauRpcHandler<R>`:
+              
+TauRpcBlueprintApiHandler<P>
+              
+TauRpcContentApiHandler<P>
+              
+TauRpcCoreApiHandler<P>
+              
+TauRpcGraphApiHandler<P>
+              
+TauRpcNerApiHandler<P>
+              
+TauRpcRagApiHandler<P>
+              TauRpcTimeRegi
+stryApiHandler<P>
+note: required by a bound 
+in `create_ipc_handler`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\taurpc-0.
+5.2\src\lib.rs:88:8
+    |
+ 84 | pub fn 
+create_ipc_handler<H, R: 
+Runtime>(
+    |        
+------------------ required 
+by a bound in this function
+...
+ 88 |     H: 
+TauRpcHandler<R> + Send + 
+Sync + 'static + Clone,
+    |        
+^^^^^^^^^^^^^^^^ required 
+by this bound in 
+`create_ipc_handler`
+
+error[E0277]: the trait 
+bound `impl Fn(Invoke) -> 
+bool: Clone` is not 
+satisfied
+   --> src\lib.rs:444:5
+    |
+444 | /     
+tauri::Builder::default()
+445 | |         
+.setup(|app| {
+446 | |             if 
+cfg!(debug_assertions) {
+447 | |                 
+app.handle().plugin(
+...   |
+471 | |         .invoke_hand
+ler(taurpc::create_ipc_handl
+er(api::create_router().into
+_handler()))
+    | |_____________________
+____________________________
+____________________________
+___________^ the trait 
+`Clone` is not implemented 
+for `impl Fn(Invoke) -> 
+bool`
+    |
+note: required by a bound 
+in `create_ipc_handler`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\taurpc-0.
+5.2\src\lib.rs:88:51
+    |
+ 84 | pub fn 
+create_ipc_handler<H, R: 
+Runtime>(
+    |        
+------------------ required 
+by a bound in this function
+...
+ 88 |     H: 
+TauRpcHandler<R> + Send + 
+Sync + 'static + Clone,
+    |                       
+                            
+^^^^^ required by this 
+bound in 
+`create_ipc_handler`
+
+warning: value assigned to 
+`head_idx` is never read
+   --> src\chunker.rs:464:28
+    |
+464 |         let mut 
+head_idx = None;
+    |                       
+     ^^^^
+    |
+    = help: maybe it is 
+overwritten before being 
+read?
+    = note: `#[warn(unused_a
+ssignments)]` (part of 
+`#[warn(unused)]`) on by 
+default
+
+warning: unused variable: 
+`world_id`
+   --> 
+src\reality\engine.rs:399:9
+    |
+399 |         world_id: 
+&str,
+    |         ^^^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_world_id`
+    |
+    = note: 
+`#[warn(unused_variables)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused variable: 
+`query`
+   --> 
+src\graph\queries.rs:392:13
+    |
+392 |         let query = 
+r#"
+    |             ^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_query`
+
+warning: variable does not 
+need to be mutable
+   --> 
+src\rag\chunker.rs:110:62
+    |
+110 |     fn 
+find_break_point(&self, 
+chars: &[char], start: 
+usize, mut end: usize) -> 
+usize {
+    |                       
+                            
+           ----^^^
+    |                       
+                            
+           |
+    |                       
+                            
+           help: remove 
+this `mut`
+    |
+    = note: 
+`#[warn(unused_mut)]` (part 
+of `#[warn(unused)]`) on by 
+default
+
+Some errors have detailed 
+explanations: E0061, E0271, 
+E0277, E0308, E0599, E0609.
+For more information about 
+an error, try `rustc 
+--explain E0061`.
+warning: `varant` (lib) 
+generated 45 warnings
+error: could not compile 
+`varant` (lib) due to 177 
+previous errors; 45 
+warnings emitted

@@ -1,0 +1,4345 @@
+﻿cargo :    Compiling varant 
+v0.1.0 (C:\Users\shuga\1kitt
+root\1code\daswundebar\src-t
+auri)
+At line:1 char:1
++ cargo build --lib 2>&1 | 
+Out-File -Encoding utf8 
+errors4.txt; Select- ...
++ ~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (   Co  
+  mpiling va...ebar\src-t   
+ auri):String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+warning: unused import: 
+`std::collections::HashMap`
+  --> src\temporal.rs:18:5
+   |
+18 | use 
+std::collections::HashMap;
+   |     
+^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: 
+`#[warn(unused_imports)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused import: 
+`TextRange`
+  --> src\attacher.rs:25:40
+   |
+25 | use 
+super::chunker::{Chunk, 
+ChunkKind, TextRange};
+   |                        
+                ^^^^^^^^^
+
+warning: unused imports: 
+`ProjectionStats`, 
+`project_all`, 
+`project_attributions`, 
+`project_quads`, and 
+`project_state_changes`
+  --> 
+src\reality\engine.rs:16:22
+   |
+16 |     project_triples, 
+project_quads, 
+project_attributions, 
+project_state_changes,
+   |                      
+^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^^^^^^^
+17 |     project_all, 
+project_all_with_stats,
+   |     ^^^^^^^^^^^
+18 |     Triple, QuadPlus, 
+Attribution, StateChange, 
+Projection, ProjectionStats,
+   |                        
+                            
+         ^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`EdgeKind`
+  --> 
+src\reality\engine.rs:20:60
+   |
+20 | use super::graph::{Conc
+eptGraph, ConceptNode, 
+ConceptEdge, EdgeKind};
+   |                        
+                            
+        ^^^^^^^^
+
+warning: unused import: 
+`ConceptEdge`
+  --> 
+src\reality\global.rs:11:47
+   |
+11 | use super::graph::{Conc
+eptGraph, ConceptNode, 
+ConceptEdge};
+   |                        
+                       
+^^^^^^^^^^^
+
+warning: unused imports: 
+`ConceptEdge` and 
+`ConceptNode`
+  --> src\reality\algorithms
+.rs:11:34
+   |
+11 | use super::graph::{Conc
+eptGraph, ConceptNode, 
+ConceptEdge, NodeIndex};
+   |                        
+          ^^^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: 
+`EdgeKind`
+ --> 
+src\reality\temporal.rs:9:60
+  |
+9 | use super::graph::{Conce
+ptGraph, ConceptNode, 
+ConceptEdge, EdgeKind};
+  |                         
+                            
+       ^^^^^^^^
+
+warning: unused imports: 
+`RealityLanguage` and 
+`SyntaxKind`
+  --> 
+src\reality\mod.rs:21:18
+   |
+21 | pub use 
+syntax::{SyntaxKind, 
+RealityLanguage};
+   |                  
+^^^^^^^^^^  ^^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`ConceptEdge`, 
+`ConceptGraph`, 
+`ConceptNode`, and 
+`EdgeKind`
+  --> 
+src\reality\mod.rs:22:17
+   |
+22 | pub use 
+graph::{ConceptGraph, 
+ConceptNode, ConceptEdge, 
+EdgeKind};
+   |                 
+^^^^^^^^^^^^  ^^^^^^^^^^^  
+^^^^^^^^^^^  ^^^^^^^^
+
+warning: unused import: 
+`synapse::SynapseBridge`
+  --> 
+src\reality\mod.rs:23:9
+   |
+23 | pub use 
+synapse::SynapseBridge;
+   |         
+^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`engine::RealityEngine`
+  --> 
+src\reality\mod.rs:24:9
+   |
+24 | pub use 
+engine::RealityEngine;
+   |         
+^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`Attribution`, 
+`Projection`, `QuadPlus`, 
+`StateChange`, and `Triple`
+  --> 
+src\reality\mod.rs:25:22
+   |
+25 | pub use 
+projection::{Triple, 
+QuadPlus, Attribution, 
+StateChange, Projection};
+   |                      
+^^^^^^  ^^^^^^^^  
+^^^^^^^^^^^  ^^^^^^^^^^^  
+^^^^^^^^^^
+
+warning: unused import: 
+`global::GlobalGraph`
+  --> 
+src\reality\mod.rs:26:9
+   |
+26 | pub use 
+global::GlobalGraph;
+   |         
+^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`unification::EntityUnifier`
+  --> 
+src\reality\mod.rs:27:9
+   |
+27 | pub use 
+unification::EntityUnifier;
+   |         
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`NamedRows`
+ --> 
+src\graph\registry.rs:6:35
+  |
+6 | use cozo::{DbInstance, 
+DataValue, NamedRows};
+  |                         
+          ^^^^^^^^^
+
+warning: unused imports: 
+`Deserialize` and 
+`Serialize`
+ --> 
+src\graph\commands.rs:7:13
+  |
+7 | use 
+serde::{Deserialize, 
+Serialize};
+  |             ^^^^^^^^^^^ 
+ ^^^^^^^^^
+
+warning: unused import: 
+`schema::*`
+  --> src\graph\mod.rs:31:9
+   |
+31 | pub use schema::*;
+   |         ^^^^^^^^^
+
+warning: unused import: 
+`queries::*`
+  --> src\graph\mod.rs:34:9
+   |
+34 | pub use queries::*;
+   |         ^^^^^^^^^^
+
+warning: unused import: 
+`algorithms::*`
+  --> src\graph\mod.rs:35:9
+   |
+35 | pub use algorithms::*;
+   |         ^^^^^^^^^^^^^
+
+warning: unused import: 
+`cozo_graph::*`
+  --> src\graph\mod.rs:37:9
+   |
+37 | pub use cozo_graph::*;
+   |         ^^^^^^^^^^^^^
+
+warning: unused import: 
+`content_types::*`
+  --> src\graph\mod.rs:38:9
+   |
+38 | pub use 
+content_types::*;
+   |         
+^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`content_repos::*`
+  --> src\graph\mod.rs:39:9
+   |
+39 | pub use 
+content_repos::*;
+   |         
+^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`content_commands::*`
+  --> src\graph\mod.rs:40:9
+   |
+40 | pub use 
+content_commands::*;
+   |         
+^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`graph_backend::*`
+  --> src\graph\mod.rs:41:9
+   |
+41 | pub use 
+graph_backend::*;
+   |         
+^^^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`Deserialize` and 
+`Serialize`
+ --> 
+src\rag\commands.rs:6:13
+  |
+6 | use 
+serde::{Deserialize, 
+Serialize};
+  |             ^^^^^^^^^^^ 
+ ^^^^^^^^^
+
+warning: unused import: 
+`commands::*`
+  --> src\rag\mod.rs:15:9
+   |
+15 | pub use commands::*;
+   |         ^^^^^^^^^^^
+
+warning: unused import: `emb
+eddings::EmbeddingService`
+  --> src\rag\mod.rs:16:9
+   |
+16 | pub use embeddings::Emb
+eddingService;
+   |         
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`chunker::RagChunker`
+  --> src\rag\mod.rs:17:9
+   |
+17 | pub use 
+chunker::RagChunker;
+   |         
+^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`CorpusSize`, 
+`FieldParams`, and 
+`ResoRankConfig`
+  --> 
+src\resorank\mod.rs:21:18
+   |
+21 | pub use 
+config::{ResoRankConfig, 
+CorpusStatistics, 
+FieldParams, CorpusSize};
+   |                  
+^^^^^^^^^^^^^^              
+      ^^^^^^^^^^^  
+^^^^^^^^^^
+
+warning: unused import: `pro
+ximity::ProximityStrategy`
+  --> 
+src\resorank\mod.rs:22:9
+   |
+22 | pub use proximity::Prox
+imityStrategy;
+   |         
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`ScorerStats`
+  --> 
+src\resorank\mod.rs:23:34
+   |
+23 | pub use 
+scorer::{ResoRankScorer, 
+ScorerStats};
+   |                        
+          ^^^^^^^^^^^
+
+warning: unused imports: 
+`FieldContribution`, 
+`FieldOccurrence`, 
+`ScoreExplanation`, and 
+`TermBreakdown`
+  --> 
+src\resorank\mod.rs:25:38
+   |
+25 |     DocumentMetadata, 
+TokenMetadata, 
+FieldOccurrence,
+   |                        
+              
+^^^^^^^^^^^^^^^
+26 |     SearchResult, 
+ScoreExplanation, 
+TermBreakdown, 
+FieldContribution,
+   |                   
+^^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`Deserialize` and 
+`Serialize`
+ --> src\blueprint.rs:7:13
+  |
+7 | use 
+serde::{Deserialize, 
+Serialize};
+  |             ^^^^^^^^^^^ 
+ ^^^^^^^^^
+
+warning: unused imports: 
+`Deserialize` and 
+`Serialize`
+  --> 
+src\time_registry.rs:12:13
+   |
+12 | use 
+serde::{Deserialize, 
+Serialize};
+   |             
+^^^^^^^^^^^  ^^^^^^^^^
+
+warning: unused import: 
+`std::sync::Arc`
+ --> 
+src\ai\model_manager.rs:7:5
+  |
+7 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+
+warning: unused import: 
+`std::sync::Arc`
+  --> src\ai\suggestion_laye
+r.rs:21:5
+   |
+21 | use std::sync::Arc;
+   |     ^^^^^^^^^^^^^^
+
+warning: unused import: 
+`std::sync::Arc`
+ --> src\ai\commands.rs:5:5
+  |
+5 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`Deserialize` and 
+`Serialize`
+ --> src\ai\commands.rs:8:13
+  |
+8 | use serde::{Serialize, 
+Deserialize};
+  |             ^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: 
+`AnalysisResult`
+  --> 
+src\ai\commands.rs:13:34
+   |
+13 |     SuggestionLayer, 
+Suggestion, AnalysisResult, 
+InferredEntity,
+   |                        
+          ^^^^^^^^^^^^^^
+
+warning: unused import: 
+`AnalysisRequest`
+  --> src\ai\mod.rs:25:53
+   |
+25 | pub use 
+ner_service::{NerService, 
+NerServiceConfig, 
+AnalysisRequest, 
+AnalysisResult, 
+InferredEntity};
+   |                        
+                            
+ ^^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`AcceptResult` and 
+`SuggestionStatus`
+  --> src\ai\mod.rs:26:57
+   |
+26 | pub use suggestion_laye
+r::{SuggestionLayer, 
+Suggestion, 
+SuggestionStatus, 
+AcceptResult};
+   |                        
+                            
+     ^^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^
+
+warning: unused macro 
+definition: `parse_call`
+  --> 
+src\api\content.rs:74:14
+   |
+74 | macro_rules! 
+parse_call {
+   |              ^^^^^^^^^^
+   |
+   = note: 
+`#[warn(unused_macros)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+error[E0271]: expected 
+`{async block@src\api\core.r
+s:126:11: 126:13}` to be a 
+future that resolves to 
+`Result<(), String>`, but 
+it resolves to 
+`Result<String, String>`
+   --> 
+src\api\core.rs:126:11
+    |
+126 |     async fn 
+conductor_reset(self) -> 
+Result<(), String> {
+    |           ^^ expected 
+`Result<(), String>`, found 
+`Result<String, String>`
+    |
+    = note: expected enum 
+`std::result::Result<(), _>`
+               found enum `s
+td::result::Result<std::stri
+ng::String, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\core.rs:126:11: 
+126:13}>>` to `Pin<Box<dyn 
+Future<Output = Result<(), 
+String>> + Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-16488679684
+631839453.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 2 arguments but 3 
+arguments were supplied
+   --> src\api\core.rs:131:9
+    |
+131 |         crate::get_dec
+oration_spans(note_id, 
+text, content_hash)
+    |         
+^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+               ------------ 
+unexpected argument #3 of 
+type `std::string::String`
+    |
+note: function defined here
+   --> src\lib.rs:395:4
+    |
+395 | fn 
+get_decoration_spans(
+    |    
+^^^^^^^^^^^^^^^^^^^^
+help: remove the extra 
+argument
+    |
+131 -         crate::get_dec
+oration_spans(note_id, 
+text, content_hash)
+131 +         crate::get_dec
+oration_spans(note_id, text)
+    |
+
+error[E0271]: expected 
+`{async block@src\api\core.r
+s:130:11: 130:13}` to be a 
+future that resolves to 
+`Result<String, String>`, 
+but it resolves to 
+`Result<Option<String>, 
+String>`
+   --> 
+src\api\core.rs:130:11
+    |
+130 |     async fn 
+get_decoration_spans(self, 
+note_id: String, text: 
+String, content_hash: 
+String) -> Result<String, 
+String> {
+    |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<Option<String>, 
+String>`
+    |
+    = note: expected enum `s
+td::result::Result<std::stri
+ng::String, _>`
+               found enum `s
+td::result::Result<std::opti
+on::Option<std::string::Stri
+ng>, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\core.rs:130:11: 
+130:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-61566873033
+88157020.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0271]: expected 
+`{async block@src\api\graph.
+rs:103:11: 103:13}` to be a 
+future that resolves to 
+`Result<String, String>`, 
+but it resolves to 
+`Result<HydrateResponse, 
+String>`
+   --> 
+src\api\graph.rs:103:11
+    |
+103 |     async fn get_entit
+ies_for_hydration(self) -> 
+Result<String, String> {
+    |           ^^ expected 
+`Result<String, String>`, 
+found 
+`Result<HydrateResponse, 
+String>`
+    |
+    = note: expected enum `s
+td::result::Result<std::stri
+ng::String, _>`
+               found enum `s
+td::result::Result<HydrateRe
+sponse, _>`
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\graph.rs:103:11: 
+103:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<String, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-61566873033
+88157020.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+  --> 
+src\api\content.rs:99:22
+   |
+99 |         let result = cm
+d::cozo_create_note(p.world_
+id, p.title, p.content, 
+p.folder_id, p.entity_kind, 
+p.entity_subtype, 
+p.is_entity)?;
+   |                      ^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+the `?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Note, String>>`
+   |
+   = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Note, String>>`
+   = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-69181406842
+36603801.txt'
+   = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+   |
+99 |         let result = cm
+d::cozo_create_note(p.world_
+id, p.title, p.content, 
+p.folder_id, p.entity_kind, 
+p.entity_subtype, 
+p.is_entity).await?;
+   |                        
+                            
+                            
+                            
+                          
+++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:100:31
+    |
+100 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+    = note: `#[deny(dependen
+cy_on_unit_never_type_fallba
+ck)]` (part of `#[deny(rust_
+2024_compatibility)]`) on 
+by default
+help: use `()` annotations 
+to avoid fallback changes
+    |
+ 99 |         let result: 
+() = cmd::cozo_create_note(p
+.world_id, p.title, 
+p.content, p.folder_id, 
+p.entity_kind, 
+p.entity_subtype, 
+p.is_entity)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:104:22
+    |
+104 |         let result = c
+md::cozo_get_note(world_id, 
+id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Option<Note>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<Note>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-14282015494
+321876882.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+104 |         let result = c
+md::cozo_get_note(world_id, 
+id).await?;
+    |                       
+                            
+   ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:112:22
+    |
+112 |         let result = c
+md::cozo_list_notes(world_id
+)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^ the `?` operator cannot 
+be applied to type `impl 
+Future<Output = 
+Result<Vec<Note>, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Note>, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-67373802996
+65242124.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+112 |         let result = c
+md::cozo_list_notes(world_id
+).await?;
+    |                       
+                            
+ ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:113:31
+    |
+113 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+112 |         let result: 
+() = cmd::cozo_list_notes(wo
+rld_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:120:22
+    |
+120 | ... = cmd::cozo_update
+_note(p.world_id, p.id, 
+p.title, p.content, 
+p.folder_id, p.entity_kind, 
+p.entity_subtype, 
+p.is_entity, p.is_pinned, 
+p.favorite)?;
+    |       ^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Note, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Note, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-89717505916
+66013752.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+120 |         let result = c
+md::cozo_update_note(p.world
+_id, p.id, p.title, 
+p.content, p.folder_id, 
+p.entity_kind, 
+p.entity_subtype, 
+p.is_entity, p.is_pinned, 
+p.favorite).await?;
+    |                       
+                            
+                            
+                            
+                            
+                            
+  ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:121:31
+    |
+121 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+120 |         let result: 
+() = cmd::cozo_update_note(p
+.world_id, p.id, p.title, 
+p.content, p.folder_id, 
+p.entity_kind, 
+p.entity_subtype, 
+p.is_entity, p.is_pinned, 
+p.favorite)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:124:11: 124:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:124:11
+    |
+124 |     async fn 
+delete_note(self, world_id: 
+String, id: String) -> 
+Result<bool, String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:124:11: 
+124:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17090998791
+832003765.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:133:22
+    |
+133 |         let result = c
+md::cozo_create_folder(p.wor
+ld_id, p.name, p.parent_id, 
+p.entity_kind, 
+p.entity_subtype, p.color, 
+p.is_typed_root)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^ the `?` operator cannot 
+be applied to type `impl 
+Future<Output = 
+Result<Folder, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Folder, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-19424261623
+9199155.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+133 |         let result = c
+md::cozo_create_folder(p.wor
+ld_id, p.name, p.parent_id, 
+p.entity_kind, 
+p.entity_subtype, p.color, 
+p.is_typed_root).await?;
+    |                       
+                            
+                            
+                            
+                            
+  ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:134:31
+    |
+134 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+133 |         let result: 
+() = cmd::cozo_create_folder
+(p.world_id, p.name, 
+p.parent_id, p.entity_kind, 
+p.entity_subtype, p.color, 
+p.is_typed_root)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:138:22
+    |
+138 |         let result = c
+md::cozo_get_folder(world_id
+, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Option<Folder>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<Folder>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-51030192509
+22244537.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+138 |         let result = c
+md::cozo_get_folder(world_id
+, id).await?;
+    |                       
+                            
+     ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:146:22
+    |
+146 |         let result = c
+md::cozo_list_folders(world_
+id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Vec<Folder>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Folder>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-15473810256
+138182838.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+146 |         let result = c
+md::cozo_list_folders(world_
+id).await?;
+    |                       
+                            
+   ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:147:31
+    |
+147 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+146 |         let result: 
+() = cmd::cozo_list_folders(
+world_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:151:22
+    |
+151 |         let result = c
+md::cozo_get_folder_tree(wor
+ld_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Vec<FolderTreeNode>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<FolderTreeNode>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-13824369867
+621198923.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+151 |         let result = c
+md::cozo_get_folder_tree(wor
+ld_id).await?;
+    |                       
+                            
+      ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:152:31
+    |
+152 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+151 |         let result: 
+() = cmd::cozo_get_folder_tr
+ee(world_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:159:22
+    |
+159 |         let result = c
+md::cozo_update_folder(p.wor
+ld_id, p.id, p.name, 
+p.parent_id, p.entity_kind, 
+p.entity_subtype, p.color, 
+p.collapsed)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Folder, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Folder, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-15418235627
+300967333.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+159 |         let result = c
+md::cozo_update_folder(p.wor
+ld_id, p.id, p.name, 
+p.parent_id, p.entity_kind, 
+p.entity_subtype, p.color, 
+p.collapsed).await?;
+    |                       
+                            
+                            
+                            
+                            
+    ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:160:31
+    |
+160 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+159 |         let result: 
+() = cmd::cozo_update_folder
+(p.world_id, p.id, p.name, 
+p.parent_id, p.entity_kind, 
+p.entity_subtype, p.color, 
+p.collapsed)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:163:11: 163:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:163:11
+    |
+163 |     async fn 
+delete_folder(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:163:11: 
+163:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17090998791
+832003765.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:172:22
+    |
+172 | ... = cmd::cozo_create
+_network(p.world_id, 
+p.name, p.schema_id, 
+p.root_folder_id, 
+p.root_entity_id, 
+p.namespace, p.description, 
+p.tags)?;
+    |       ^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^ the `?` operator cannot 
+be applied to type `impl 
+Future<Output = 
+Result<Network, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Network, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-87425695875
+55211797.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+172 |         let result = c
+md::cozo_create_network(p.wo
+rld_id, p.name, 
+p.schema_id, 
+p.root_folder_id, 
+p.root_entity_id, 
+p.namespace, p.description, 
+p.tags).await?;
+    |                       
+                            
+                            
+                            
+                            
+                ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:173:31
+    |
+173 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+172 |         let result: 
+() = cmd::cozo_create_networ
+k(p.world_id, p.name, 
+p.schema_id, 
+p.root_folder_id, 
+p.root_entity_id, 
+p.namespace, p.description, 
+p.tags)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:177:22
+    |
+177 |         let result = c
+md::cozo_get_network(world_i
+d, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Option<Network>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<Network>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-13192051724
+242909893.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+177 |         let result = c
+md::cozo_get_network(world_i
+d, id).await?;
+    |                       
+                            
+      ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:185:22
+    |
+185 |         let result = c
+md::cozo_list_networks(world
+_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Vec<Network>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Network>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-16479660065
+447923027.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+185 |         let result = c
+md::cozo_list_networks(world
+_id).await?;
+    |                       
+                            
+    ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:186:31
+    |
+186 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+185 |         let result: 
+() = cmd::cozo_list_networks
+(world_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:189:11: 189:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:189:11
+    |
+189 |     async fn 
+delete_network(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:189:11: 
+189:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17090998791
+832003765.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:198:22
+    |
+198 | ... = cmd::cozo_create
+_entity(p.world_id, 
+p.label, p.entity_kind, 
+p.entity_subtype, 
+p.note_id, p.folder_id, 
+p.aliases, p.attributes)?;
+    |       ^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+the `?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Entity, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Entity, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17557220581
+598258740.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+198 |         let result = c
+md::cozo_create_entity(p.wor
+ld_id, p.label, 
+p.entity_kind, 
+p.entity_subtype, 
+p.note_id, p.folder_id, 
+p.aliases, 
+p.attributes).await?;
+    |                       
+                            
+                            
+                            
+                            
+             ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:199:31
+    |
+199 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+198 |         let result: 
+() = cmd::cozo_create_entity
+(p.world_id, p.label, 
+p.entity_kind, 
+p.entity_subtype, 
+p.note_id, p.folder_id, 
+p.aliases, p.attributes)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:203:22
+    |
+203 |         let result = c
+md::cozo_get_entity(world_id
+, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Option<Entity>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<Entity>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-45968559770
+14021239.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+203 |         let result = c
+md::cozo_get_entity(world_id
+, id).await?;
+    |                       
+                            
+     ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:211:22
+    |
+211 |         let result = c
+md::cozo_list_entities_by_ki
+nd(world_id, kind)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Vec<Entity>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Entity>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-18313704012
+281697335.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+211 |         let result = c
+md::cozo_list_entities_by_ki
+nd(world_id, kind).await?;
+    |                       
+                            
+                  ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:212:31
+    |
+212 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+211 |         let result: 
+() = cmd::cozo_list_entities
+_by_kind(world_id, kind)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:216:22
+    |
+216 |         let result = c
+md::cozo_list_entities(world
+_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Vec<Entity>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Entity>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-10715091765
+890345909.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+216 |         let result = c
+md::cozo_list_entities(world
+_id).await?;
+    |                       
+                            
+    ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:217:31
+    |
+217 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+216 |         let result: 
+() = cmd::cozo_list_entities
+(world_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:220:11: 220:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:220:11
+    |
+220 |     async fn 
+delete_entity(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:220:11: 
+220:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17090998791
+832003765.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:229:22
+    |
+229 | ... = cmd::cozo_create
+_relationship(p.world_id, 
+p.source_id, p.target_id, 
+p.relationship_code, 
+p.network_id, p.strength, 
+p.start_date, p.end_date, 
+p.notes, p.attributes)?;
+    |       ^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Relationship, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Relationship, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17798212984
+946186381.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+229 |         let result = c
+md::cozo_create_relationship
+(p.world_id, p.source_id, 
+p.target_id, 
+p.relationship_code, 
+p.network_id, p.strength, 
+p.start_date, p.end_date, 
+p.notes, 
+p.attributes).await?;
+    |                       
+                            
+                            
+                            
+                            
+                            
+                      ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:230:31
+    |
+230 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+229 |         let result: 
+() = cmd::cozo_create_relati
+onship(p.world_id, 
+p.source_id, p.target_id, 
+p.relationship_code, 
+p.network_id, p.strength, 
+p.start_date, p.end_date, 
+p.notes, p.attributes)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:234:22
+    |
+234 |         let result = c
+md::cozo_get_relationship(wo
+rld_id, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^ the `?` 
+operator cannot be applied 
+to type `impl Future<Output 
+= Result<Option<Relationship
+>, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = Result
+<Option<Relationship>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-13813110137
+195645113.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+234 |         let result = c
+md::cozo_get_relationship(wo
+rld_id, id).await?;
+    |                       
+                            
+           ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:242:22
+    |
+242 |         let result = c
+md::cozo_get_entity_relation
+ships(world_id, entity_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+the `?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Vec<Relationship>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Relationship>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-99292801250
+76324724.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+242 |         let result = c
+md::cozo_get_entity_relation
+ships(world_id, 
+entity_id).await?;
+    |                       
+                            
+                          
+++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:243:31
+    |
+243 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+242 |         let result: 
+() = cmd::cozo_get_entity_re
+lationships(world_id, 
+entity_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:246:11: 246:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:246:11
+    |
+246 |     async fn 
+delete_relationship(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:246:11: 
+246:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17090998791
+832003765.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 22 arguments but 23 
+arguments were supplied
+   --> 
+src\api\content.rs:255:22
+    |
+255 | ...   let result = cmd
+::cozo_create_cal_event(p.wo
+rld_id, p.calendar_id, 
+p.title, p.date_year, 
+p.date_month, p.date_day, 
+p.description, p...
+    |                    
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: function defined here
+   --> src\graph\content_com
+mands.rs:362:14
+    |
+362 | pub async fn 
+cozo_create_cal_event(
+    |              
+^^^^^^^^^^^^^^^^^^^^^
+...
+380 |     color: 
+Option<String>,
+    |     
+---------------------
+help: did you mean
+    |
+255 -         let result = c
+md::cozo_create_cal_event(p.
+world_id, p.calendar_id, 
+p.title, p.date_year, 
+p.date_month, p.date_day, 
+p.description, p.date_hour, 
+p.date_minute, p.end_year, 
+p.end_month, p.end_day, 
+p.end_hour, p.end_minute, 
+p.all_day, p.recurrence, 
+p.category, p.tags, 
+p.color, p.icon, 
+p.entity_id, p.entity_kind, 
+p.source_note_id)?;
+255 +         let result = c
+md::cozo_create_cal_event(p.
+world_id, p.calendar_id, 
+p.title, p.date_year, 
+p.date_month, p.date_day, 
+p.description, p.date_hour, 
+p.date_minute, p.category, 
+p.end_month, p.end_day, 
+p.end_hour, p.all_day, 
+p.source_note_id, 
+p.recurrence, p.tags, /* std
+::option::Option<std::string
+::String> */, p.color, 
+p.icon, p.entity_id, 
+p.entity_kind)?;
+    |
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:255:22
+    |
+255 | ... = cmd::cozo_create
+_cal_event(p.world_id, 
+p.calendar_id, p...id, 
+p.entity_kind, 
+p.source_note_id)?;
+    |       ^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^...^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^ the 
+`?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<CalEvent, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<CalEvent, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-92783502499
+19292221.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+255 |         let result = c
+md::cozo_create_cal_event(p.
+world_id, p.calendar_id, 
+p.title, p.date_year, 
+p.date_month, p.date_day, 
+p.description, p.date_hour, 
+p.date_minute, p.end_year, 
+p.end_month, p.end_day, 
+p.end_hour, p.end_minute, 
+p.all_day, p.recurrence, 
+p.category, p.tags, 
+p.color, p.icon, 
+p.entity_id, p.entity_kind, 
+p.source_note_id).await?;
+    |                       
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+     ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:256:31
+    |
+256 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+255 |         let result: 
+() = cmd::cozo_create_cal_ev
+ent(p.world_id, 
+p.calendar_id, p.title, 
+p.date_year, p.date_month, 
+p.date_day, p.description, 
+p.date_hour, p.date_minute, 
+p.end_year, p.end_month, 
+p.end_day, p.end_hour, 
+p.end_minute, p.all_day, 
+p.recurrence, p.category, 
+p.tags, p.color, p.icon, 
+p.entity_id, p.entity_kind, 
+p.source_note_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:260:22
+    |
+260 |         let result = c
+md::cozo_get_cal_event(world
+_id, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Option<CalEvent>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<CalEvent>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17269596787
+938625788.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+260 |         let result = c
+md::cozo_get_cal_event(world
+_id, id).await?;
+    |                       
+                            
+        ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:268:22
+    |
+268 |         let result = c
+md::cozo_list_cal_events(wor
+ld_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Vec<CalEvent>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<CalEvent>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-53910921332
+88633283.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+268 |         let result = c
+md::cozo_list_cal_events(wor
+ld_id).await?;
+    |                       
+                            
+      ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:269:31
+    |
+269 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+268 |         let result: 
+() = cmd::cozo_list_cal_even
+ts(world_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:273:22
+    |
+273 |         let result = c
+md::cozo_list_cal_events_by_
+month(world_id, year, 
+month)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^ the `?` operator cannot 
+be applied to type `impl 
+Future<Output = 
+Result<Vec<CalEvent>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<CalEvent>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-76445202921
+12138707.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+273 |         let result = c
+md::cozo_list_cal_events_by_
+month(world_id, year, 
+month).await?;
+    |                       
+                            
+                            
+++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:274:31
+    |
+274 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+273 |         let result: 
+() = cmd::cozo_list_cal_even
+ts_by_month(world_id, year, 
+month)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:277:11: 277:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:277:11
+    |
+277 |     async fn 
+delete_cal_event(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:277:11: 
+277:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17090998791
+832003765.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0061]: this function 
+takes 25 arguments but 21 
+arguments were supplied
+   --> 
+src\api\content.rs:286:22
+    |
+286 | ... = cmd::cozo_create
+_period(p.world_id, 
+p.calendar_id, p.name, 
+p.start_year, p.color, 
+p.description, 
+p.start_month, p.end_year, 
+p.end_month, p.parent_id, 
+p.period_type, 
+p.importance, p.tags, 
+p.major_events, 
+p.protagonists, 
+p.antagonist_id, p.summary, 
+p.detailed_notes, 
+p.show_on_timeline, 
+p.timeline_color, 
+p.timeline_icon)?;
+    |       ^^^^^^^^^^^^^^^^
+^^^^^^^---------------------
+----------------------------
+----------------------------
+----------------------------
+----------------------------
+----------------------------
+----------------------------
+----------------------------
+----------------------------
+----------------------------
+-----------------------
+    |                       
+       |                    
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                         |
+    |                       
+       |                    
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                         
+argument #19 of type `std::o
+ption::Option<std::string::S
+tring>` is missing
+    |                       
+       argument #22 of type 
+`std::option::Option<std::st
+ring::String>` is missing
+    |                       
+       two arguments of 
+type `std::option::Option<st
+d::string::String>` and `std
+::option::Option<std::string
+::String>` are missing
+    |
+note: expected 
+`Option<String>`, found 
+`Option<i32>`
+   --> 
+src\api\content.rs:286:187
+    |
+286 | ..._month, 
+p.end_year, p.end_month, 
+p.parent_id, p.period_type, 
+p.importance, p.tags, 
+p.major_events, 
+p.protagonists, 
+p.antagonist_id, p....
+    |                       
+                            
+              ^^^^^^^^^^^^
+    = note: expected enum `s
+td::option::Option<std::stri
+ng::String>`
+               found enum 
+`std::option::Option<i32>`
+note: expected 
+`Option<String>`, found 
+`Option<Vec<String>>`
+   --> 
+src\api\content.rs:286:201
+    |
+286 | ...nd_year, 
+p.end_month, p.parent_id, 
+p.period_type, 
+p.importance, p.tags, 
+p.major_events, 
+p.protagonists, 
+p.antagonist_id, p.summary, 
+p....
+    |                       
+                            
+                 ^^^^^^
+    = note: expected enum `s
+td::option::Option<std::stri
+ng::String>`
+               found enum `s
+td::option::Option<std::vec:
+:Vec<std::string::String>>`
+note: expected 
+`Option<String>`, found 
+`Option<Vec<String>>`
+   --> 
+src\api\content.rs:286:209
+    |
+286 | ...nd_month, 
+p.parent_id, p.period_type, 
+p.importance, p.tags, 
+p.major_events, 
+p.protagonists, 
+p.antagonist_id, p.summary, 
+p.detailed_not...
+    |                       
+                            
+             ^^^^^^^^^^^^^^
+    = note: expected enum `s
+td::option::Option<std::stri
+ng::String>`
+               found enum `s
+td::option::Option<std::vec:
+:Vec<std::string::String>>`
+note: expected 
+`Option<String>`, found 
+`Option<Vec<String>>`
+   --> 
+src\api\content.rs:286:225
+    |
+286 | ...nt_id, 
+p.period_type, 
+p.importance, p.tags, 
+p.major_events, 
+p.protagonists, 
+p.antagonist_id, p.summary, 
+p.detailed_notes, 
+p.show_on_ti...
+    |                       
+                            
+             ^^^^^^^^^^^^^^
+    = note: expected enum `s
+td::option::Option<std::stri
+ng::String>`
+               found enum `s
+td::option::Option<std::vec:
+:Vec<std::string::String>>`
+note: function defined here
+   --> src\graph\content_com
+mands.rs:451:14
+    |
+451 | pub async fn 
+cozo_create_period(
+    |              
+^^^^^^^^^^^^^^^^^^
+...
+463 |     icon: 
+Option<String>,
+    |     
+--------------------
+464 |     abbreviation: 
+Option<String>,
+    |     
+----------------------------
+465 |     direction: 
+Option<String>,
+    |     
+-------------------------
+466 |     triggered_by: 
+Option<String>,
+    |     
+----------------------------
+...
+470 |     protagonist_id: 
+Option<String>,
+    |     ------------------
+------------
+...
+473 |     detailed_notes: 
+Option<String>,
+    |     ------------------
+------------
+474 |     show_on_timeline: 
+Option<bool>,
+475 |     timeline_color: 
+Option<String>,
+    |     ------------------
+------------
+476 |     timeline_icon: 
+Option<String>,
+    |     ------------------
+-----------
+help: provide the arguments
+    |
+286 -         let result = c
+md::cozo_create_period(p.wor
+ld_id, p.calendar_id, 
+p.name, p.start_year, 
+p.color, p.description, 
+p.start_month, p.end_year, 
+p.end_month, p.parent_id, 
+p.period_type, 
+p.importance, p.tags, 
+p.major_events, 
+p.protagonists, 
+p.antagonist_id, p.summary, 
+p.detailed_notes, 
+p.show_on_timeline, 
+p.timeline_color, 
+p.timeline_icon)?;
+286 +         let result = c
+md::cozo_create_period(p.wor
+ld_id, p.calendar_id, 
+p.name, p.start_year, 
+p.color, p.description, 
+p.start_month, p.end_year, 
+p.end_month, p.parent_id, 
+p.period_type, /* std::optio
+n::Option<std::string::Strin
+g> */, /* std::option::Optio
+n<std::string::String> */, 
+/* std::option::Option<std::
+string::String> */, /* std::
+option::Option<std::string::
+String> */, 
+p.antagonist_id, p.summary, 
+p.detailed_notes, /* std::op
+tion::Option<std::string::St
+ring> */, p.timeline_color, 
+p.timeline_icon, /* std::opt
+ion::Option<std::string::Str
+ing> */, 
+p.show_on_timeline, /* std::
+option::Option<std::string::
+String> */, /* std::option::
+Option<std::string::String> 
+*/)?;
+    |
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:286:22
+    |
+286 | ... = cmd::cozo_create
+_period(p.world_id, 
+p.calendar_id, p.na..., 
+p.timeline_color, 
+p.timeline_icon)?;
+    |       ^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^...^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^ the 
+`?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Period, String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Period, String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17373058906
+468441881.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+286 |         let result = c
+md::cozo_create_period(p.wor
+ld_id, p.calendar_id, 
+p.name, p.start_year, 
+p.color, p.description, 
+p.start_month, p.end_year, 
+p.end_month, p.parent_id, 
+p.period_type, 
+p.importance, p.tags, 
+p.major_events, 
+p.protagonists, 
+p.antagonist_id, p.summary, 
+p.detailed_notes, 
+p.show_on_timeline, 
+p.timeline_color, 
+p.timeline_icon).await?;
+    |                       
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+          ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:287:31
+    |
+287 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+286 |         let result: 
+() = cmd::cozo_create_period
+(p.world_id, p.calendar_id, 
+p.name, p.start_year, 
+p.color, p.description, 
+p.start_month, p.end_year, 
+p.end_month, p.parent_id, 
+p.period_type, 
+p.importance, p.tags, 
+p.major_events, 
+p.protagonists, 
+p.antagonist_id, p.summary, 
+p.detailed_notes, 
+p.show_on_timeline, 
+p.timeline_color, 
+p.timeline_icon)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:291:22
+    |
+291 |         let result = c
+md::cozo_get_period(world_id
+, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Option<Period>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Option<Period>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-77862979458
+61300310.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+291 |         let result = c
+md::cozo_get_period(world_id
+, id).await?;
+    |                       
+                            
+     ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:299:22
+    |
+299 |         let result = c
+md::cozo_list_periods(world_
+id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Vec<Period>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Period>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-62165208949
+2293678.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+299 |         let result = c
+md::cozo_list_periods(world_
+id).await?;
+    |                       
+                            
+   ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:300:31
+    |
+300 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+299 |         let result: 
+() = cmd::cozo_list_periods(
+world_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:304:22
+    |
+304 |         let result = c
+md::cozo_get_period_children
+(world_id, parent_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^ the 
+`?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Vec<Period>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<Period>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-37139333661
+56845173.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+304 |         let result = c
+md::cozo_get_period_children
+(world_id, 
+parent_id).await?;
+    |                       
+                            
+                     ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:305:31
+    |
+305 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+304 |         let result: 
+() = cmd::cozo_get_period_ch
+ildren(world_id, 
+parent_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:308:11: 308:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:308:11
+    |
+308 |     async fn 
+delete_period(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:308:11: 
+308:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17090998791
+832003765.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:317:22
+    |
+317 | ... = cmd::cozo_create
+_binding(p.world_id, 
+p.source_entity_id, 
+p.source_field_name, 
+p.target_entity_id, 
+p.target_field_name, 
+p.binding_type, 
+p.transform, 
+p.aggregation_fn, 
+p.aggregation_filter, 
+p.allow_override)?;
+    |       ^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^ the 
+`?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<FieldBinding, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<FieldBinding, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-78417659215
+40902111.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+317 |         let result = c
+md::cozo_create_binding(p.wo
+rld_id, p.source_entity_id, 
+p.source_field_name, 
+p.target_entity_id, 
+p.target_field_name, 
+p.binding_type, 
+p.transform, 
+p.aggregation_fn, 
+p.aggregation_filter, 
+p.allow_override).await?;
+    |                       
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+        ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:318:31
+    |
+318 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+317 |         let result: 
+() = cmd::cozo_create_bindin
+g(p.world_id, 
+p.source_entity_id, 
+p.source_field_name, 
+p.target_entity_id, 
+p.target_field_name, 
+p.binding_type, 
+p.transform, 
+p.aggregation_fn, 
+p.aggregation_filter, 
+p.allow_override)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:322:22
+    |
+322 |         let result = c
+md::cozo_get_binding(world_i
+d, id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = Result
+<Option<FieldBinding>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = Result
+<Option<FieldBinding>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-58769058729
+6907752.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+322 |         let result = c
+md::cozo_get_binding(world_i
+d, id).await?;
+    |                       
+                            
+      ++++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:330:22
+    |
+330 |         let result = c
+md::cozo_list_bindings(world
+_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^ the `?` operator 
+cannot be applied to type 
+`impl Future<Output = 
+Result<Vec<FieldBinding>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<FieldBinding>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-42413321913
+06329550.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+330 |         let result = c
+md::cozo_list_bindings(world
+_id).await?;
+    |                       
+                            
+    ++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:331:31
+    |
+331 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+330 |         let result: 
+() = cmd::cozo_list_bindings
+(world_id)?;
+    |                   ++++
+
+error[E0277]: the `?` 
+operator can only be 
+applied to values that 
+implement `Try`
+   --> 
+src\api\content.rs:335:22
+    |
+335 |         let result = c
+md::cozo_list_bindings_by_en
+tity(world_id, entity_id)?;
+    |                      ^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+the `?` operator cannot be 
+applied to type `impl 
+Future<Output = 
+Result<Vec<FieldBinding>, 
+String>>`
+    |
+    = help: the trait `Try` 
+is not implemented for 
+`impl Future<Output = 
+Result<Vec<FieldBinding>, 
+String>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-66729158114
+32404682.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+help: consider `await`ing 
+on the `Future`
+    |
+335 |         let result = c
+md::cozo_list_bindings_by_en
+tity(world_id, 
+entity_id).await?;
+    |                       
+                            
+                         
+++++++
+
+error: this function 
+depends on never type 
+fallback being `()`
+   --> 
+src\api\content.rs:92:1
+    |
+ 92 | #[taurpc::resolvers]
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+    = warning: this was 
+previously accepted by the 
+compiler but is being 
+phased out; it will become 
+a hard error in Rust 2024 
+and in a future release in 
+all editions!
+    = note: for more 
+information, see <https://do
+c.rust-lang.org/edition-guid
+e/rust-2024/never-type-fallb
+ack.html>
+    = help: specify the 
+types explicitly
+note: in edition 2024, the 
+requirement `!: Serialize` 
+will fail
+   --> 
+src\api\content.rs:336:31
+    |
+336 |         serde_json::to
+_string(&result).map_err(|e|
+ e.to_string())
+    |                       
+        ^^^^^^^
+help: use `()` annotations 
+to avoid fallback changes
+    |
+335 |         let result: 
+() = cmd::cozo_list_bindings
+_by_entity(world_id, 
+entity_id)?;
+    |                   ++++
+
+error[E0271]: expected 
+`{async block@src\api\conten
+t.rs:339:11: 339:13}` to be 
+a future that resolves to 
+`Result<bool, String>`, but 
+it resolves to `impl 
+Future<Output = 
+Result<bool, String>>`
+   --> 
+src\api\content.rs:339:11
+    |
+339 |     async fn 
+delete_binding(self, 
+world_id: String, id: 
+String) -> Result<bool, 
+String> {
+    |           ^^ expected 
+`Result<bool, String>`, 
+found future
+    |
+    = note: required for 
+the cast from 
+`Pin<Box<{async block@src\ap
+i\content.rs:339:11: 
+339:13}>>` to `Pin<Box<dyn 
+Future<Output = 
+Result<bool, String>> + 
+Send>>`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\daswundebar\s
+rc-tauri\target\debug\deps\a
+pp_lib.long-type-17090998791
+832003765.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct `CoreApiImpl` in 
+the current scope
+  --> src\api\mod.rs:32:45
+   |
+32 |         .merge(core::Co
+reApiImpl::default().into_ha
+ndler())
+   |                        
+                     
+^^^^^^^^^^^^
+   |
+  ::: src\api\core.rs:19:1
+   |
+19 | 
+#[taurpc::procedures(path = 
+"core", export_to = 
+"../src/bindings.ts")]
+   | -----------------------
+----------------------------
+------------------- the 
+method is available for 
+`CoreApiImpl` here
+...
+57 | pub struct CoreApiImpl;
+   | ---------------------- 
+method `into_handler` not 
+found for this struct
+   |
+   = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `CoreApi` which 
+provides `into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+   |
+19 + use 
+crate::api::core::CoreApi;
+   |
+help: there is a method 
+`into_raw` with a similar 
+name
+   |
+32 -         .merge(core::Co
+reApiImpl::default().into_ha
+ndler())
+32 +         .merge(core::Co
+reApiImpl::default().into_ra
+w())
+   |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct `GraphApiImpl` 
+in the current scope
+  --> src\api\mod.rs:33:47
+   |
+33 |         .merge(graph::G
+raphApiImpl::default().into_
+handler())
+   |                        
+                       
+^^^^^^^^^^^^
+   |
+  ::: src\api\graph.rs:15:1
+   |
+15 | 
+#[taurpc::procedures(path = 
+"graph", export_to = 
+"../src/bindings.ts")]
+   | -----------------------
+----------------------------
+-------------------- the 
+method is available for 
+`GraphApiImpl` here
+...
+47 | pub struct 
+GraphApiImpl;
+   | 
+----------------------- 
+method `into_handler` not 
+found for this struct
+   |
+   = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `GraphApi` 
+which provides 
+`into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+   |
+19 + use 
+crate::api::graph::GraphApi;
+   |
+help: there is a method 
+`into_raw` with a similar 
+name
+   |
+33 -         .merge(graph::G
+raphApiImpl::default().into_
+handler())
+33 +         .merge(graph::G
+raphApiImpl::default().into_
+raw())
+   |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct `NerApiImpl` in 
+the current scope
+  --> src\api\mod.rs:34:43
+   |
+34 |         .merge(ner::Ner
+ApiImpl::default().into_hand
+ler())
+   |                        
+                   
+^^^^^^^^^^^^
+   |
+  ::: src\api\ner.rs:11:1
+   |
+11 | 
+#[taurpc::procedures(path = 
+"ner", export_to = 
+"../src/bindings.ts")]
+   | -----------------------
+----------------------------
+------------------ the 
+method is available for 
+`NerApiImpl` here
+...
+51 | pub struct NerApiImpl;
+   | --------------------- 
+method `into_handler` not 
+found for this struct
+   |
+   = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `NerApi` which 
+provides `into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+   |
+19 + use 
+crate::api::ner::NerApi;
+   |
+help: there is a method 
+`into_raw` with a similar 
+name
+   |
+34 -         .merge(ner::Ner
+ApiImpl::default().into_hand
+ler())
+34 +         .merge(ner::Ner
+ApiImpl::default().into_raw(
+))
+   |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct `RagApiImpl` in 
+the current scope
+  --> src\api\mod.rs:35:43
+   |
+35 |         .merge(rag::Rag
+ApiImpl::default().into_hand
+ler())
+   |                        
+                   
+^^^^^^^^^^^^
+   |
+  ::: src\api\rag.rs:9:1
+   |
+ 9 | 
+#[taurpc::procedures(path = 
+"rag", export_to = 
+"../src/bindings.ts")]
+   | -----------------------
+----------------------------
+------------------ the 
+method is available for 
+`RagApiImpl` here
+...
+26 | pub struct RagApiImpl;
+   | --------------------- 
+method `into_handler` not 
+found for this struct
+   |
+   = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `RagApi` which 
+provides `into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+   |
+19 + use 
+crate::api::rag::RagApi;
+   |
+help: there is a method 
+`into_raw` with a similar 
+name
+   |
+35 -         .merge(rag::Rag
+ApiImpl::default().into_hand
+ler())
+35 +         .merge(rag::Rag
+ApiImpl::default().into_raw(
+))
+   |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct 
+`BlueprintApiImpl` in the 
+current scope
+  --> src\api\mod.rs:36:55
+   |
+36 |         .merge(blueprin
+t::BlueprintApiImpl::default
+().into_handler())
+   |                        
+                            
+   ^^^^^^^^^^^^
+   |
+  ::: 
+src\api\blueprint.rs:9:1
+   |
+ 9 | 
+#[taurpc::procedures(path = 
+"blueprint", export_to = 
+"../src/bindings.ts")]
+   | -----------------------
+----------------------------
+------------------------ 
+the method is available for 
+`BlueprintApiImpl` here
+...
+45 | pub struct 
+BlueprintApiImpl;
+   | 
+--------------------------- 
+method `into_handler` not 
+found for this struct
+   |
+   = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `BlueprintApi` 
+which provides 
+`into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+   |
+19 + use crate::api::bluepri
+nt::BlueprintApi;
+   |
+help: there is a method 
+`into_raw` with a similar 
+name
+   |
+36 -         .merge(blueprin
+t::BlueprintApiImpl::default
+().into_handler())
+36 +         .merge(blueprin
+t::BlueprintApiImpl::default
+().into_raw())
+   |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct 
+`TimeRegistryApiImpl` in 
+the current scope
+  --> src\api\mod.rs:37:62
+   |
+37 |         .merge(time_reg
+istry::TimeRegistryApiImpl::
+default().into_handler())
+   |                        
+                            
+          ^^^^^^^^^^^^
+   |
+  ::: 
+src\api\time_registry.rs:9:1
+   |
+ 9 | 
+#[taurpc::procedures(path = 
+"time_registry", export_to 
+= "../src/bindings.ts")]
+   | -----------------------
+----------------------------
+----------------------------
+ the method is available 
+for `TimeRegistryApiImpl` 
+here
+...
+23 | pub struct 
+TimeRegistryApiImpl;
+   | -----------------------
+------- method 
+`into_handler` not found 
+for this struct
+   |
+   = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait 
+`TimeRegistryApi` which 
+provides `into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+   |
+19 + use crate::api::time_re
+gistry::TimeRegistryApi;
+   |
+help: there is a method 
+`into_raw` with a similar 
+name
+   |
+37 -         .merge(time_reg
+istry::TimeRegistryApiImpl::
+default().into_handler())
+37 +         .merge(time_reg
+istry::TimeRegistryApiImpl::
+default().into_raw())
+   |
+
+error[E0599]: no method 
+named `into_handler` found 
+for struct `ContentApiImpl` 
+in the current scope
+  --> src\api\mod.rs:38:51
+   |
+38 |         .merge(content:
+:ContentApiImpl::default().i
+nto_handler())
+   |                        
+                           
+^^^^^^^^^^^^
+   |
+  ::: 
+src\api\content.rs:12:1
+   |
+12 | 
+#[taurpc::procedures(path = 
+"content", export_to = 
+"../src/bindings.ts")]
+   | -----------------------
+----------------------------
+---------------------- the 
+method is available for 
+`ContentApiImpl` here
+...
+90 | pub struct 
+ContentApiImpl;
+   | 
+------------------------- 
+method `into_handler` not 
+found for this struct
+   |
+   = help: items from 
+traits can only be used if 
+the trait is in scope
+help: trait `ContentApi` 
+which provides 
+`into_handler` is 
+implemented but not in 
+scope; perhaps you want to 
+import it
+   |
+19 + use crate::api::content
+::ContentApi;
+   |
+help: there is a method 
+`into_raw` with a similar 
+name
+   |
+38 -         .merge(content:
+:ContentApiImpl::default().i
+nto_handler())
+38 +         .merge(content:
+:ContentApiImpl::default().i
+nto_raw())
+   |
+
+warning: value assigned to 
+`head_idx` is never read
+   --> src\chunker.rs:464:28
+    |
+464 |         let mut 
+head_idx = None;
+    |                       
+     ^^^^
+    |
+    = help: maybe it is 
+overwritten before being 
+read?
+    = note: `#[warn(unused_a
+ssignments)]` (part of 
+`#[warn(unused)]`) on by 
+default
+
+warning: unused variable: 
+`world_id`
+   --> 
+src\reality\engine.rs:399:9
+    |
+399 |         world_id: 
+&str,
+    |         ^^^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_world_id`
+    |
+    = note: 
+`#[warn(unused_variables)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused variable: 
+`query`
+   --> 
+src\graph\queries.rs:392:13
+    |
+392 |         let query = 
+r#"
+    |             ^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_query`
+
+warning: variable does not 
+need to be mutable
+   --> 
+src\rag\chunker.rs:110:62
+    |
+110 |     fn 
+find_break_point(&self, 
+chars: &[char], start: 
+usize, mut end: usize) -> 
+usize {
+    |                       
+                            
+           ----^^^
+    |                       
+                            
+           |
+    |                       
+                            
+           help: remove 
+this `mut`
+    |
+    = note: 
+`#[warn(unused_mut)]` (part 
+of `#[warn(unused)]`) on by 
+default
+
+Some errors have detailed 
+explanations: E0061, E0271, 
+E0277, E0599.
+For more information about 
+an error, try `rustc 
+--explain E0061`.
+warning: `varant` (lib) 
+generated 46 warnings
+error: could not compile 
+`varant` (lib) due to 98 
+previous errors; 46 
+warnings emitted

@@ -1,5 +1,10 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { smartGraphRegistry } from "./lib/registry";
+
+// Initialize entity registry
+smartGraphRegistry.init().catch(console.error);
 
 createRoot(document.getElementById("root")!).render(<App />);
+

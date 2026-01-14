@@ -1,41 +1,40 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Crepe } from '@milkdown/crepe';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
+
+// Entity highlighter plugin
+import { entityHighlighter } from '../../editor/plugins/entityHighlighter';
+
+// Types
+import type { SaveStatus } from '../../api';
 
 export interface RichTextEditorProps {
   noteId: string;
   initialMarkdown: string;
   onMarkdownChange: (markdown: string) => void;
+  saveStatus?: SaveStatus;
   readOnly?: boolean;
 }
-
-type SaveStatus = 'saved' | 'saving' | 'unsaved';
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   noteId,
   initialMarkdown,
   onMarkdownChange,
+  saveStatus = 'saved',
   readOnly = false,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const crepeRef = useRef<Crepe | null>(null);
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializedRef = useRef(false);
 
+  // Stable callback ref to avoid recreating editor
+  const onChangeRef = useRef(onMarkdownChange);
+  onChangeRef.current = onMarkdownChange;
+
   const handleMarkdownUpdate = useCallback((markdown: string) => {
-    setSaveStatus('saving');
-    onMarkdownChange(markdown);
-    
-    // Simulate autosave completion
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-    debounceTimerRef.current = setTimeout(() => {
-      setSaveStatus('saved');
-    }, 800);
-  }, [onMarkdownChange]);
+    onChangeRef.current(markdown);
+  }, []);
 
   useEffect(() => {
     if (!editorRef.current || isInitializedRef.current) return;
@@ -72,8 +71,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           });
         });
 
+        // Add custom entity highlighter plugin
+        crepe.editor.use(entityHighlighter);
+
         await crepe.create();
-        
+
         if (readOnly) {
           crepe.setReadonly(true);
         }
@@ -93,9 +95,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         crepeRef.current = null;
         isInitializedRef.current = false;
       }
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
     };
   }, [noteId]);
 
@@ -112,11 +111,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div className="flex items-center justify-end px-4 py-2 border-b border-border bg-card">
         <StatusBadge status={saveStatus} />
       </div>
-      
+
       {/* Editor */}
       <div className="flex-1 overflow-auto scrollbar-thin">
-        <div 
-          ref={editorRef} 
+        <div
+          ref={editorRef}
           className="milkdown-editor-wrapper min-h-full"
         />
       </div>
@@ -157,6 +156,15 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
         </svg>
       ),
       text: 'Unsaved',
+    },
+    error: {
+      className: 'badge-error',
+      icon: (
+        <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm-.75 3.75a.75.75 0 011.5 0v4a.75.75 0 01-1.5 0v-4zm.75 7.25a1 1 0 110-2 1 1 0 010 2z" />
+        </svg>
+      ),
+      text: 'Error',
     },
   };
 
