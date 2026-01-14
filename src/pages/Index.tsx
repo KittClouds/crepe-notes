@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { MoreHorizontal } from 'lucide-react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { MoreHorizontal, Undo2, Redo2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 import { AppSidebar } from '@/components/sidebar/AppSidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { RichTextEditor } from '@/components/editor/RichTextEditor';
+import { RichTextEditor, type RichTextEditorRef } from '@/components/editor/RichTextEditor';
 import { NoteTabs } from '@/components/tabs/NoteTabs';
 import { DarkModeToggle } from '@/components/theme/DarkModeToggle';
 import { HubPanel } from '@/components/hub';
@@ -40,6 +40,9 @@ const Index: React.FC = () => {
   const [entityStats, setEntityStats] = useState<EntityStats[]>([]);
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
+
+  // Editor ref for undo/redo
+  const editorRef = useRef<RichTextEditorRef>(null);
 
   // Current note derived from store
   const currentNote = useMemo(() => {
@@ -181,15 +184,27 @@ const Index: React.FC = () => {
               {/* Note Tabs */}
               <NoteTabs className="flex-1 min-w-0" />
 
-              {/* Editable title - inline in header */}
-              {currentNote && (
-                <Input
-                  value={currentNote.title}
-                  onChange={(e) => handleTitleChange(e.target.value)}
-                  placeholder="Untitled"
-                  className="text-sm font-medium border-0 bg-transparent px-2 h-8 py-0 focus-visible:ring-1 focus-visible:ring-ring max-w-[200px] shrink-0"
-                />
-              )}
+              {/* Undo/Redo buttons */}
+              <div className="flex items-center gap-0.5 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => editorRef.current?.undo()}
+                  title="Undo (Ctrl+Z)"
+                >
+                  <Undo2 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => editorRef.current?.redo()}
+                  title="Redo (Ctrl+Y)"
+                >
+                  <Redo2 className="w-4 h-4" />
+                </Button>
+              </div>
 
               {/* 3-dots menu */}
               <DropdownMenu>
@@ -223,6 +238,7 @@ const Index: React.FC = () => {
             {currentNote ? (
               <div className="flex-1 min-h-0 overflow-auto">
                 <RichTextEditor
+                  ref={editorRef}
                   key={currentNote.id}
                   noteId={currentNote.id}
                   initialContent={(() => {

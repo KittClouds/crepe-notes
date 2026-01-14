@@ -1,0 +1,211 @@
+/* Block Handle Container */
+.block-handle-container {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+    pointer-events: auto;
+    z-index: 10;
+}
+
+/* Show when data-show attribute is true (controlled by BlockProvider) */
+.block-handle-container[data-show="true"] {
+    opacity: 1;
+}
+
+/* Handle buttons base style */
+.block-handle-drag,
+.block-handle-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.block-handle-drag:hover,
+.block-handle-add:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e5e7eb;
+}
+
+.block-handle-drag {
+    cursor: grab;
+}
+
+.block-handle-drag:active {
+    cursor: grabbing;
+}
+
+/* ============================================
+   Block Menu Panel (Zinc Theme)
+   ============================================ */
+
+.block-menu-panel {
+    min-width: 220px;
+    max-width: 280px;
+    background: #18181b;
+    /* zinc-900 */
+    border: 1px solid #3f3f46;
+    /* zinc-700 */
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    overflow: hidden;
+    animation: menuSlideIn 0.15s ease-out;
+}
+
+@keyframes menuSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tabs */
+.block-menu-tabs {
+    display: flex;
+    flex-direction: column;
+}
+
+.block-menu-tab-list {
+    display: flex;
+    padding: 8px 8px 0 8px;
+    gap: 4px;
+    border-bottom: 1px solid #27272a;
+    /* zinc-800 */
+}
+
+.block-menu-tab {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.15s;
+}
+
+.block-menu-tab:hover {
+    color: #e5e7eb;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.block-menu-tab[data-state="active"] {
+    color: #ffffff;
+    background: #27272a;
+    /* zinc-800 */
+}
+
+/* Tab Content */
+.block-menu-content {
+    padding: 8px;
+}
+
+.block-menu-scroll {
+    max-height: 280px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3f3f46 transparent;
+    /* zinc-700 */
+}
+
+.block-menu-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.block-menu-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.block-menu-scroll::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+    /* zinc-700 */
+    border-radius: 3px;
+}
+
+.block-menu-scroll::-webkit-scrollbar-thumb:hover {
+    background: #52525b;
+    /* zinc-600 */
+}
+
+/* Menu Items */
+.block-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    color: #e5e7eb;
+    font-size: 13px;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.block-menu-item:hover {
+    background: #27272a;
+    /* zinc-800 */
+}
+
+.block-menu-item:active {
+    background: #3f3f46;
+    /* zinc-700 */
+}
+
+.block-menu-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: #9ca3af;
+}
+
+.block-menu-item-label {
+    flex: 1;
+}
+
+/* Divider */
+.block-menu-divider {
+    height: 1px;
+    background: #27272a;
+    /* zinc-800 */
+    margin: 6px 0;
+}
+
+/* Sublabel */
+.block-menu-sublabel {
+    padding: 8px 12px 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+}
+
+/* Editor padding for handle space */
+.milkdown-editor-wrapper .ProseMirror {
+    padding-left: 48px;
+    position: relative;
+}

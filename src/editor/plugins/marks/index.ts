@@ -1,10 +1,4 @@
-// src/editor/plugins/marks/index.ts
-// Barrel export for custom marks
-
-export {
-    textColorAttr,
-    textColorSchema,
-    setTextColorCommand,
-    getActiveTextColor,
-    isTextColorActive,
-} from './textColor';
+export * from './textColor';
+export * from './fontFamily';
+export * from './fontSize';
+export * from './underline';

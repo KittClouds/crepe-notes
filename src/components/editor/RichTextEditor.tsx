@@ -1,8 +1,12 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Crepe } from '@milkdown/crepe';
-import { defaultValueCtx } from '@milkdown/kit/core';
+import { defaultValueCtx, commandsCtx } from '@milkdown/kit/core';
+import { undoCommand, redoCommand } from '@milkdown/kit/plugin/history';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
+
+// Font loader
+import { loadEditorFonts } from '../../utils/fontLoader';
 
 // Entity highlighter plugin
 import { entityHighlighter } from '../../editor/plugins/entityHighlighter';
@@ -12,8 +16,24 @@ import { selectionTooltip, createSelectionToolbarView } from '../../editor/plugi
 
 // Custom marks (text color, highlight, etc.)
 // Custom marks & nodes
-import { textColorAttr, textColorSchema, setTextColorCommand } from '../../editor/plugins/marks';
-import { textAlignPlugin, setTextAlignCommand } from '../../editor/plugins/nodes';
+// Custom marks & nodes
+import {
+  textColorAttr,
+  textColorSchema,
+  setTextColorCommand,
+  fontFamilyMark,
+  setFontFamilyCommand,
+  fontSizeMark,
+  setFontSizeCommand,
+  underlineAttr,
+  underlineSchema,
+  setUnderlineCommand
+} from '../../editor/plugins/marks';
+import { textAlignPlugin, setTextAlignCommand, indentPlugin, indentCommand, outdentCommand } from '../../editor/plugins/nodes';
+
+// Block handle plugin
+import { block } from '@milkdown/kit/plugin/block';
+import { configureBlockHandle } from '../../editor/plugins/blockHandle/index';
 
 // Types
 import type { SaveStatus } from '../../api';
@@ -33,13 +53,19 @@ export interface RichTextEditorProps {
   readOnly?: boolean;
 }
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({
+// Exposed methods via ref
+export interface RichTextEditorRef {
+  undo: () => void;
+  redo: () => void;
+}
+
+export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(({
   noteId,
   initialContent,
   onContentChange,
   saveStatus = 'saved',
   readOnly = false,
-}) => {
+}, ref) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const crepeRef = useRef<Crepe | null>(null);
   const isInitializedRef = useRef(false);
@@ -52,6 +78,28 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onChangeRef.current({ json, markdown });
   }, []);
 
+  // Expose undo/redo methods via ref
+  useImperativeHandle(ref, () => ({
+    undo: () => {
+      if (crepeRef.current) {
+        try {
+          crepeRef.current.editor.ctx.get(commandsCtx).call(undoCommand.key);
+        } catch (e) {
+          console.error('[Editor] Undo failed:', e);
+        }
+      }
+    },
+    redo: () => {
+      if (crepeRef.current) {
+        try {
+          crepeRef.current.editor.ctx.get(commandsCtx).call(redoCommand.key);
+        } catch (e) {
+          console.error('[Editor] Redo failed:', e);
+        }
+      }
+    },
+  }), []);
+
   useEffect(() => {
     if (!editorRef.current || isInitializedRef.current) return;
 
@@ -59,7 +107,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       try {
         // Determine default value based on content type
         const defaultValue = initialContent.type === 'json'
-          ? { type: 'json' as const, value: initialContent.value }
+          ? { type: 'json' as const, value: initialContent.value as any }
           : initialContent.value; // Markdown string
 
         const crepe = new Crepe({
@@ -69,7 +117,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             [Crepe.Feature.Toolbar]: false, // Disabled - using custom selection toolbar
             [Crepe.Feature.LinkTooltip]: true,
             [Crepe.Feature.ImageBlock]: true,
-            [Crepe.Feature.BlockEdit]: true,
+            [Crepe.Feature.BlockEdit]: false, // Using custom block handle
             [Crepe.Feature.Placeholder]: true,
             [Crepe.Feature.CodeMirror]: true,
             [Crepe.Feature.ListItem]: true,
@@ -110,10 +158,30 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           .use(textColorSchema)
           .use(setTextColorCommand)
           .config(textAlignPlugin)
-          .use(setTextAlignCommand);
+          .use(setTextAlignCommand)
+          .config(indentPlugin)
+          .use(indentCommand)
+          .use(outdentCommand)
+          .use(fontFamilyMark)
+          .use(setFontFamilyCommand)
+          .use(fontSizeMark)
+          .use(setFontSizeCommand)
+          .use(underlineAttr)
+          .use(underlineSchema)
+          .use(setUnderlineCommand);
+
+        // Load fonts
+        loadEditorFonts();
 
         // Add custom entity highlighter plugin
         crepe.editor.use(entityHighlighter);
+
+        // Add custom block handle plugin
+        crepe.editor
+          .config((ctx) => {
+            configureBlockHandle(ctx);
+          })
+          .use(block);
 
         await crepe.create();
 
@@ -162,7 +230,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       </div>
     </div>
   );
-};
+});
 
 interface StatusBadgeProps {
   status: SaveStatus;

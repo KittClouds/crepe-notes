@@ -19,8 +19,10 @@ import { toggleLinkCommand } from '@milkdown/kit/component/link-tooltip';
 
 // Custom marks
 // Custom marks & nodes
-import { setTextColorCommand } from '../marks';
-import { setTextAlignCommand } from '../nodes';
+// Custom marks & nodes
+import { setTextColorCommand, setFontFamilyCommand, setFontSizeCommand, setUnderlineCommand, underlineSchema } from '../marks';
+import { setTextAlignCommand, indentCommand, outdentCommand } from '../nodes';
+import { FONT_FAMILIES, FONT_SIZES } from '../../../constants/fonts';
 
 import {
     Bold,
@@ -36,9 +38,20 @@ import {
     AlignRight,
     AlignJustify,
     ChevronDown,
+    Type,
+    ALargeSmall,
+    Sparkles,
+    Minimize2,
+    Expand,
+    Check,
+    ArrowRight,
+    Wand2,
+    Indent,
+    Outdent,
 } from 'lucide-react';
 
 import type { ToolbarItem } from './types';
+import { runAIAction, type AIEditAction } from './aiActions';
 
 // Helper to check if a mark is active on selection
 function isMarkActive(ctx: any, schema: any): boolean {
@@ -77,6 +90,46 @@ const HIGHLIGHT_COLORS = [
 ];
 
 export const TOOLBAR_ITEMS: ToolbarItem[] = [
+    // === AI Group (FIRST) ===
+    {
+        id: 'ai',
+        type: 'dropdown',
+        label: 'AI',
+        icon: <Sparkles size={16} className="text-purple-400" />,
+        items: [
+            {
+                id: 'improve',
+                label: 'Improve',
+                icon: <Sparkles size={14} />,
+                onRun: (ctx) => runAIAction(ctx, 'improve'),
+            },
+            {
+                id: 'shorten',
+                label: 'Shorten',
+                icon: <Minimize2 size={14} />,
+                onRun: (ctx) => runAIAction(ctx, 'shorten'),
+            },
+            {
+                id: 'fix',
+                label: 'Fix Grammar',
+                icon: <Check size={14} />,
+                onRun: (ctx) => runAIAction(ctx, 'fix'),
+            },
+            {
+                id: 'lengthen',
+                label: 'Extend',
+                icon: <Expand size={14} />,
+                onRun: (ctx) => runAIAction(ctx, 'lengthen'),
+            },
+            {
+                id: 'continue',
+                label: 'Continue',
+                icon: <ArrowRight size={14} />,
+                onRun: (ctx) => runAIAction(ctx, 'continue'),
+            },
+        ],
+    },
+    { id: 'sep-ai', type: 'separator' },
     // === Formatting Group ===
     {
         id: 'bold',
@@ -102,14 +155,23 @@ export const TOOLBAR_ITEMS: ToolbarItem[] = [
     },
     {
         id: 'underline',
-        type: 'button',
+        type: 'dropdown',
         label: 'Underline',
         icon: <Underline size={16} />,
-        shortcut: 'Ctrl+U',
-        isActive: () => false, // TODO: Custom underline mark
-        onRun: () => {
-            console.warn('[Toolbar] Underline not yet implemented - not standard Markdown');
-        },
+        items: [
+            {
+                id: 'default',
+                label: 'Default',
+                color: 'currentColor',
+                onRun: (ctx) => ctx.get(commandsCtx).call(setUnderlineCommand.key, null),
+            },
+            ...TEXT_COLORS.filter(c => c.id !== 'default').map(c => ({
+                id: c.id,
+                label: c.label,
+                color: c.color,
+                onRun: (ctx) => ctx.get(commandsCtx).call(setUnderlineCommand.key, c.color),
+            })),
+        ]
     },
     {
         id: 'strikethrough',
@@ -213,6 +275,53 @@ export const TOOLBAR_ITEMS: ToolbarItem[] = [
                 onRun: (ctx) => ctx.get(commandsCtx).call(setTextAlignCommand.key, 'justify'),
             },
         ],
+    },
+    // Indent/Outdent buttons
+    {
+        id: 'indent',
+        type: 'button',
+        label: 'Indent',
+        icon: <Indent size={16} />,
+        onRun: (ctx) => ctx.get(commandsCtx).call(indentCommand.key),
+        isActive: () => false,
+    },
+    {
+        id: 'outdent',
+        type: 'button',
+        label: 'Outdent',
+        icon: <Outdent size={16} />,
+        onRun: (ctx) => ctx.get(commandsCtx).call(outdentCommand.key),
+        isActive: () => false,
+    },
+    { id: 'sep3', type: 'separator' },
+    // === Font Group ===
+    {
+        id: 'font-family',
+        type: 'dropdown',
+        label: 'Font Family',
+        icon: <Type size={16} />,
+        items: FONT_FAMILIES.map((f) => ({
+            id: f.value,
+            label: f.label,
+            onRun: (ctx) => {
+                const family = f.value === 'default' ? null : f.family;
+                ctx.get(commandsCtx).call(setFontFamilyCommand.key, family);
+            },
+        })),
+    },
+    {
+        id: 'font-size',
+        type: 'dropdown',
+        label: 'Font Size',
+        icon: <ALargeSmall size={16} />,
+        items: FONT_SIZES.map((s) => ({
+            id: s.value,
+            label: s.label,
+            onRun: (ctx) => {
+                const size = s.value === 'default' ? null : s.size;
+                ctx.get(commandsCtx).call(setFontSizeCommand.key, size);
+            },
+        })),
     },
 ];
 

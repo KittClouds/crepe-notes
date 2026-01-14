@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,9 +17,13 @@ export function NoteTabs({ className }: NoteTabsProps) {
     const {
         state: { openNoteIds, selectedNoteId, notes },
         selectNote,
-        closeNote
+        closeNote,
+        updateNote
     } = useNotesStore();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editValue, setEditValue] = useState('');
+    const inputRef = useRef<HTMLInputElement>(null);
 
     // Map IDs to Note objects
     const openNotes = openNoteIds
@@ -36,6 +40,37 @@ export function NoteTabs({ className }: NoteTabsProps) {
         }
     }, [selectedNoteId, openNoteIds]);
 
+    // Focus input when editing starts
+    useEffect(() => {
+        if (editingId && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    }, [editingId]);
+
+    const handleDoubleClick = useCallback((note: Note) => {
+        setEditingId(note.id);
+        setEditValue(note.title);
+    }, []);
+
+    const handleSave = useCallback(() => {
+        if (editingId && editValue.trim()) {
+            updateNote(editingId, { title: editValue.trim() });
+        }
+        setEditingId(null);
+        setEditValue('');
+    }, [editingId, editValue, updateNote]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSave();
+        } else if (e.key === 'Escape') {
+            setEditingId(null);
+            setEditValue('');
+        }
+    }, [handleSave]);
+
     if (openNotes.length === 0) return null;
 
     return (
@@ -51,6 +86,7 @@ export function NoteTabs({ className }: NoteTabsProps) {
         >
             {openNotes.map((note) => {
                 const isActive = note.id === selectedNoteId;
+                const isEditing = note.id === editingId;
                 const Icon = note.isEntity && note.entityKind ? ENTITY_ICONS[note.entityKind] : null;
                 const color = note.isEntity && note.entityKind ? ENTITY_COLORS[note.entityKind] : undefined;
 
@@ -64,13 +100,28 @@ export function NoteTabs({ className }: NoteTabsProps) {
                                 ? "bg-background border-border text-foreground relative z-10 -mb-[1px] border-b-0"
                                 : "bg-muted/30 text-muted-foreground hover:bg-muted/50 border-transparent hover:text-foreground"
                         )}
-                        onClick={() => selectNote(note.id)}
-                        title={note.title}
+                        onClick={() => !isEditing && selectNote(note.id)}
+                        onDoubleClick={() => handleDoubleClick(note)}
+                        title={isEditing ? undefined : note.title}
                     >
                         {Icon && (
                             <Icon className="h-3.5 w-3.5 shrink-0" style={{ color }} />
                         )}
-                        <span className="truncate flex-1">{getDisplayName(note.title)}</span>
+
+                        {isEditing ? (
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onBlur={handleSave}
+                                onKeyDown={handleKeyDown}
+                                className="flex-1 bg-transparent border-0 outline-none text-xs font-medium min-w-0 px-0"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        ) : (
+                            <span className="truncate flex-1">{getDisplayName(note.title)}</span>
+                        )}
 
                         <Button
                             variant="ghost"
