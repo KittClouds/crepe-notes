@@ -1,26 +1,42 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { Crepe } from '@milkdown/crepe';
+import { defaultValueCtx } from '@milkdown/kit/core';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
 
 // Entity highlighter plugin
 import { entityHighlighter } from '../../editor/plugins/entityHighlighter';
 
+// Custom selection toolbar plugin
+import { selectionTooltip, createSelectionToolbarView } from '../../editor/plugins/toolbar';
+
+// Custom marks (text color, highlight, etc.)
+// Custom marks & nodes
+import { textColorAttr, textColorSchema, setTextColorCommand } from '../../editor/plugins/marks';
+import { textAlignPlugin, setTextAlignCommand } from '../../editor/plugins/nodes';
+
 // Types
 import type { SaveStatus } from '../../api';
 
+// Content can be JSON doc or markdown string
+export type EditorContent =
+  | { type: 'json'; value: object }
+  | { type: 'markdown'; value: string };
+
 export interface RichTextEditorProps {
   noteId: string;
-  initialMarkdown: string;
-  onMarkdownChange: (markdown: string) => void;
+  /** Initial content - JSON preferred, markdown as fallback */
+  initialContent: EditorContent;
+  /** Called when content changes - provides both JSON and markdown */
+  onContentChange: (content: { json: object; markdown: string }) => void;
   saveStatus?: SaveStatus;
   readOnly?: boolean;
 }
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   noteId,
-  initialMarkdown,
-  onMarkdownChange,
+  initialContent,
+  onContentChange,
   saveStatus = 'saved',
   readOnly = false,
 }) => {
@@ -29,11 +45,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const isInitializedRef = useRef(false);
 
   // Stable callback ref to avoid recreating editor
-  const onChangeRef = useRef(onMarkdownChange);
-  onChangeRef.current = onMarkdownChange;
+  const onChangeRef = useRef(onContentChange);
+  onChangeRef.current = onContentChange;
 
-  const handleMarkdownUpdate = useCallback((markdown: string) => {
-    onChangeRef.current(markdown);
+  const handleContentUpdate = useCallback((json: object, markdown: string) => {
+    onChangeRef.current({ json, markdown });
   }, []);
 
   useEffect(() => {
@@ -41,11 +57,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     const initializeEditor = async () => {
       try {
+        // Determine default value based on content type
+        const defaultValue = initialContent.type === 'json'
+          ? { type: 'json' as const, value: initialContent.value }
+          : initialContent.value; // Markdown string
+
         const crepe = new Crepe({
           root: editorRef.current!,
-          defaultValue: initialMarkdown,
+          defaultValue,
           features: {
-            [Crepe.Feature.Toolbar]: true,
+            [Crepe.Feature.Toolbar]: false, // Disabled - using custom selection toolbar
             [Crepe.Feature.LinkTooltip]: true,
             [Crepe.Feature.ImageBlock]: true,
             [Crepe.Feature.BlockEdit]: true,
@@ -62,14 +83,34 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           },
         });
 
-        // Set up listener for markdown updates
+        // Set up listener for document updates - emit both JSON and markdown
         crepe.on((listener) => {
-          listener.markdownUpdated((ctx, markdown, prevMarkdown) => {
-            if (markdown !== prevMarkdown) {
-              handleMarkdownUpdate(markdown);
+          listener.updated((ctx, doc, prevDoc) => {
+            // Only emit if content actually changed
+            if (!doc.eq(prevDoc)) {
+              const json = doc.toJSON();
+              const markdown = crepe.getMarkdown();
+              handleContentUpdate(json, markdown);
             }
           });
         });
+
+        // Add custom selection toolbar plugin
+        crepe.editor
+          .config((ctx) => {
+            ctx.set(selectionTooltip.key, {
+              view: createSelectionToolbarView(ctx),
+            });
+          })
+          .use(selectionTooltip);
+
+        // Add custom marks (text color, etc.)
+        crepe.editor
+          .use(textColorAttr)
+          .use(textColorSchema)
+          .use(setTextColorCommand)
+          .config(textAlignPlugin)
+          .use(setTextAlignCommand);
 
         // Add custom entity highlighter plugin
         crepe.editor.use(entityHighlighter);

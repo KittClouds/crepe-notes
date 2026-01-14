@@ -23,7 +23,13 @@ export function useNotes() {
         queryKey: noteKeys.all,
         queryFn: () => {
             const notes = getAllNotes();
-            return notes.map(n => ({ ...n, content: n.markdownContent || '' })) as Note[];
+            // Don't overwrite content - it may contain JSON doc
+            // Only set content if it's empty and markdownContent exists
+            return notes.map(n => ({
+                ...n,
+                // If content already exists (JSON doc), keep it. Otherwise use markdown.
+                content: n.content || n.markdownContent || '',
+            })) as Note[];
         },
         staleTime: Infinity, // localStorage doesn't change externally
     });
@@ -49,7 +55,11 @@ export function useCreateNote() {
                 title: params.title || 'Untitled Note',
                 folderId: params.folderId || null,
             });
-            return { ...note, content: note.markdownContent || '' } as Note;
+            // Keep content as-is, only set if empty
+            return {
+                ...note,
+                content: note.content || note.markdownContent || ''
+            } as Note;
         },
         onSuccess: (newNote) => {
             queryClient.setQueryData<Note[]>(noteKeys.all, (old) =>

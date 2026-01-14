@@ -127,9 +127,13 @@ const Index: React.FC = () => {
     updateNote(currentNote.id, { title });
   };
 
-  const handleMarkdownChange = (markdown: string) => {
+  const handleContentChange = (content: { json: object; markdown: string }) => {
     if (!currentNote) return;
-    updateNote(currentNote.id, { markdownContent: markdown });
+    // Store both JSON (as stringified) and markdown for compatibility
+    updateNote(currentNote.id, {
+      content: JSON.stringify(content.json),
+      markdownContent: content.markdown
+    });
   };
 
   const handleDeleteNote = () => {
@@ -221,8 +225,20 @@ const Index: React.FC = () => {
                 <RichTextEditor
                   key={currentNote.id}
                   noteId={currentNote.id}
-                  initialMarkdown={currentNote.markdownContent || ''}
-                  onMarkdownChange={handleMarkdownChange}
+                  initialContent={(() => {
+                    // Try to parse content as JSON doc first
+                    if (currentNote.content) {
+                      try {
+                        const parsed = JSON.parse(currentNote.content);
+                        if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
+                          return { type: 'json' as const, value: parsed };
+                        }
+                      } catch { }
+                    }
+                    // Fallback to markdown
+                    return { type: 'markdown' as const, value: currentNote.markdownContent || currentNote.content || '' };
+                  })()}
+                  onContentChange={handleContentChange}
                 />
               </div>
             ) : (

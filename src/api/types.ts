@@ -41,6 +41,7 @@ export interface NoteUpdateParams {
     id: string;
     title?: string;
     content?: string;
+    markdownContent?: string;
     folderId?: string;
     entityKind?: string;
     entitySubtype?: string;
