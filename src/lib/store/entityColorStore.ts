@@ -13,32 +13,24 @@ import { ENTITY_KINDS } from '@/lib/types/entityTypes';
 export const DEFAULT_ENTITY_COLORS: Record<EntityKind, string> = {
     CHARACTER: '280 70% 60%',      // Purple
     LOCATION: '200 75% 55%',       // Blue
-    ORGANIZATION: '340 75% 55%',   // Pink/Rose
+    NPC: '30 80% 55%',             // Orange
     ITEM: '45 90% 50%',            // Gold
-    CONCEPT: '170 65% 45%',        // Teal
-    EVENT: '25 90% 55%',           // Orange
     FACTION: '0 70% 55%',          // Red
-    CREATURE: '120 50% 45%',       // Green
-    UNKNOWN: '220 10% 50%',        // Gray
-    // Narrative structure types
-    ACT: '230 80% 55%',            // Royal Blue
+    SCENE: '330 70% 60%',          // Pink
+    EVENT: '25 90% 55%',           // Orange
+    CONCEPT: '170 65% 45%',        // Teal
     ARC: '270 70% 60%',            // Violet
-    BEAT: '320 70% 55%',           // Magenta
+    ACT: '230 80% 55%',            // Royal Blue
     CHAPTER: '175 65% 45%',        // Teal
+    BEAT: '320 70% 55%',           // Magenta
+    TIMELINE: '50 85% 50%',        // Gold
     NARRATIVE: '250 60% 55%',      // Indigo
     NETWORK: '190 70% 50%',        // Cyan
-    SCENE: '330 70% 60%',          // Pink
-    TIMELINE: '50 85% 50%',        // Gold
-    NPC: '30 80% 55%',             // Orange
-    MAGIC_SYSTEM: '280 80% 55%',   // Purple
-    WORLD: '160 60% 45%',          // Teal-Green
-    RULE: '220 60% 50%',           // Blue-Gray
 };
 
-const STORAGE_KEY = 'entity-theme-colors-v2';
-
 // ============================================
-// STORE CLASS
+// STORE CLASS - PURE RUNTIME REGISTRY
+// No localStorage persistence - CSS variables are the source of truth
 // ============================================
 
 class EntityColorStore {
@@ -55,22 +47,21 @@ class EntityColorStore {
 
     /**
      * Initialize store - must be called after DOM is ready
-     * Loads from localStorage and syncs to CSS variables
+     * Always uses DEFAULT_ENTITY_COLORS and syncs to CSS variables
+     * NO localStorage loading - pure runtime defaults
      */
     initialize(): void {
         if (this.initialized) return;
 
-        // Load from localStorage
-        this.loadFromStorage();
-
-        // Update snapshot
+        // Always start with defaults - no stale state
+        this.colors = { ...DEFAULT_ENTITY_COLORS };
         this.snapshot = { ...this.colors };
 
         // Sync all colors to CSS variables
         this.syncAllToCssVars();
 
         this.initialized = true;
-        console.log('[EntityColorStore] Initialized with', Object.keys(this.colors).length, 'colors');
+        console.log('[EntityColorStore] Initialized with', Object.keys(this.colors).length, 'colors (pure runtime, no localStorage)');
     }
 
     // ============================================
@@ -108,7 +99,7 @@ class EntityColorStore {
      * Returns: '280 70% 60%'
      */
     getRawHsl(kind: EntityKind): string {
-        return this.colors[kind] || this.colors.UNKNOWN || '220 10% 50%';
+        return this.colors[kind] || '220 10% 50%'; // Gray fallback
     }
 
     /**
@@ -126,16 +117,16 @@ class EntityColorStore {
     }
 
     // ============================================
-    // SETTERS - Update CSS variables live
+    // SETTERS - Update CSS variables live (session only)
     // ============================================
 
     /**
      * Set color for a kind - updates CSS variable immediately
+     * Changes are session-only, NOT persisted to localStorage
      */
     setColor(kind: EntityKind, hslValue: string): void {
         this.colors[kind] = hslValue;
         this.setCssVar(kind, hslValue);
-        this.saveToStorage();
         this.notify();
     }
 
@@ -149,7 +140,6 @@ class EntityColorStore {
                 this.setCssVar(kind as EntityKind, hsl);
             }
         }
-        this.saveToStorage();
         this.notify();
     }
 
@@ -159,7 +149,6 @@ class EntityColorStore {
     reset(): void {
         this.colors = { ...DEFAULT_ENTITY_COLORS };
         this.syncAllToCssVars();
-        this.saveToStorage();
         this.notify();
     }
 
@@ -175,31 +164,6 @@ class EntityColorStore {
     private syncAllToCssVars(): void {
         for (const [kind, hsl] of Object.entries(this.colors)) {
             this.setCssVar(kind, hsl);
-        }
-    }
-
-    // ============================================
-    // PERSISTENCE
-    // ============================================
-
-    private loadFromStorage(): void {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                // Merge with defaults to handle new entity kinds
-                this.colors = { ...DEFAULT_ENTITY_COLORS, ...parsed };
-            }
-        } catch (e) {
-            console.warn('[EntityColorStore] Failed to load from localStorage:', e);
-        }
-    }
-
-    private saveToStorage(): void {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(this.colors));
-        } catch (e) {
-            console.warn('[EntityColorStore] Failed to save to localStorage:', e);
         }
     }
 

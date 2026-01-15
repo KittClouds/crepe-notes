@@ -278,6 +278,48 @@ interface NoteItemProps {
   onRenameComplete?: () => void;
 }
 
+// Custom Notebook Icon from User
+function CustomNoteIcon(props: React.ComponentProps<'svg'>) {
+  return (
+    <svg viewBox="0 0 640 640" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Notebook Body */}
+      <rect x="153" y="160" width="268" height="360" rx="10" fill="currentColor" />
+
+      {/* Spiral Binding */}
+      <g fill="currentColor" opacity="0.6">
+        <rect x="183" y="135" width="12" height="60" rx="6" />
+        <rect x="223" y="135" width="12" height="60" rx="6" />
+        <rect x="263" y="135" width="12" height="60" rx="6" />
+        <rect x="303" y="135" width="12" height="60" rx="6" />
+        <rect x="343" y="135" width="12" height="60" rx="6" />
+        <rect x="383" y="135" width="12" height="60" rx="6" />
+      </g>
+
+      {/* Notebook Lines */}
+      <g fill="#f6f6f6" opacity="0.9">
+        <rect x="190" y="230" width="194" height="10" rx="5" />
+        <rect x="190" y="270" width="194" height="10" rx="5" />
+        <rect x="190" y="310" width="194" height="10" rx="5" />
+        <rect x="190" y="350" width="194" height="10" rx="5" />
+        <rect x="260" y="400" width="124" height="10" rx="5" />
+        <rect x="260" y="440" width="124" height="10" rx="5" />
+        <rect x="260" y="480" width="124" height="10" rx="5" />
+      </g>
+
+      {/* Page Fold */}
+      <path d="M153 450 L153 510 A 10 10 0 0 0 163 520 L223 520 L223 460 A 10 10 0 0 0 213 450 Z" fill="currentColor" stroke="#f6f6f6" strokeWidth="4" />
+      <path d="M153 450 L223 520 L223 450 Z" fill="currentColor" opacity="0.3" />
+      <path d="M153 520 L153 440 L233 440 L233 520" fill="none" stroke="#f6f6f6" strokeWidth="5" />
+
+      {/* Pencil */}
+      <rect x="442" y="190" width="52" height="280" rx="4" fill="currentColor" />
+      <rect x="442" y="190" width="52" height="60" rx="4" fill="currentColor" />
+      <rect x="442" y="250" width="52" height="10" fill="#f6f6f6" />
+      <path d="M442 470 L468 520 L494 470 Z" fill="currentColor" />
+    </svg>
+  );
+}
+
 function NoteItem({ note, depth = 0, folderColor, autoRename, onRenameComplete }: NoteItemProps) {
   const { selectNote, updateNote, deleteNote, state } = useNotesStore();
   const [isHovered, setIsHovered] = React.useState(false);
@@ -293,7 +335,7 @@ function NoteItem({ note, depth = 0, folderColor, autoRename, onRenameComplete }
 
   // Parse entity info for display
   const displayName = getDisplayName(note.title);
-  const EntityIcon = note.isEntity && note.entityKind ? ENTITY_ICONS[note.entityKind] : FileText;
+  const EntityIcon = note.isEntity && note.entityKind ? ENTITY_ICONS[note.entityKind] : CustomNoteIcon;
   const entityColor = note.isEntity && note.entityKind ? getEntityColor(note.entityKind) : undefined;
 
   // Check for kind mismatch with folder
@@ -533,8 +575,8 @@ export function AppSidebar({ toolbarVisible, onToolbarToggle, ...props }: AppSid
 
         {/* --- LEFT RAIL (PERSISTENT ICONS) --- */}
         <div className="flex flex-col items-center w-[3rem] border-r border-sidebar-border bg-sidebar h-full py-2 z-20">
-          <div className="mb-2">
-            <GraphLogo className="w-8 h-8" />
+          <div className="mb-2 flex items-center justify-center h-[37px]">
+            <GraphLogo className="w-6 h-6" />
           </div>
 
           <div className="flex flex-col gap-1 w-full px-1 items-center flex-1 overflow-y-auto no-scrollbar">
@@ -601,7 +643,7 @@ export function AppSidebar({ toolbarVisible, onToolbarToggle, ...props }: AppSid
         {/* --- RIGHT PANEL (COLLAPSIBLE CONTENT) --- */}
         <div className="flex flex-col flex-1 h-full min-w-0 bg-sidebar group-data-[collapsible=icon]:hidden w-80 transition-all duration-300 ease-in-out">
           {/* Panel Header */}
-          <div className="h-14 flex items-center justify-between px-4 border-b border-sidebar-border shrink-0">
+          <div className="h-[45px] flex items-center justify-between px-4 border-b border-sidebar-border shrink-0">
             <span className="font-semibold text-sm">
               {activeTab === 'folders' && 'Folders'}
               {activeTab === 'entities' && 'Entities'}

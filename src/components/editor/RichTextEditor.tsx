@@ -227,18 +227,18 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
   }, [readOnly]);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Status bar */}
-      <div className="flex items-center justify-end px-4 py-2 border-b border-border bg-card">
-        <StatusBadge status={saveStatus} />
-      </div>
-
+    <div className="flex flex-col h-full relative group">
       {/* Editor */}
       <div className="flex-1 overflow-auto scrollbar-thin">
         <div
           ref={editorRef}
           className="milkdown-editor-wrapper min-h-full"
         />
+      </div>
+
+      {/* Floating Status Indicator */}
+      <div className="absolute bottom-4 right-6 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-200">
+        <StatusBadge status={saveStatus} />
       </div>
     </div>
   );

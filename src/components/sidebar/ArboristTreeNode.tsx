@@ -4,17 +4,15 @@ import { ArboristNode } from '@/lib/arborist/types';
 import {
     Folder as FolderIcon,
     FolderOpen,
-    FileText,
     MoreVertical,
     Star,
     AlertTriangle,
-    Plus,
-    Minus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ENTITY_ICONS, ENTITY_KINDS, type EntityKind } from '@/lib/types/entityTypes';
 import { getDisplayName } from '@/lib/utils/titleParser';
+import { CustomNoteIcon } from '@/components/icons/CustomNoteIcon';
 
 interface ArboristTreeNodeProps extends NodeRendererProps<ArboristNode> {
     onContextMenu?: (node: ArboristNode, e: React.MouseEvent) => void;
@@ -50,17 +48,15 @@ export function ArboristTreeNode({
     const isFolder = data.type === 'folder';
     const isNote = data.type === 'note';
 
-    // Icon selection - PRESERVED 1:1
-    const Icon = isNote && data.isEntity && data.entityKind
-        ? ENTITY_ICONS[data.entityKind]
-        : isNote
-            ? FileText
-            : node.isOpen
-                ? FolderOpen
-                : FolderIcon;
+    // Icon selection - Entity notes get ENTITY_ICONS, plain notes get CustomNoteIcon, folders get Folder icons
+    const isEntityNote = isNote && data.isEntity && data.entityKind;
+    const EntityIcon = isEntityNote
+        ? ENTITY_ICONS[data.entityKind as EntityKind]
+        : null;
+    const FolderIconComponent = node.isOpen ? FolderOpen : FolderIcon;
 
-    // Entity color - PRESERVED 1:1
-    const iconColor = data.effectiveColor;
+    // Entity color - only applied to entity notes and folders
+    const iconColor = isEntityNote ? data.effectiveColor : (isFolder ? data.effectiveColor : undefined);
 
     // Kind mismatch detection - PRESERVED 1:1
     const hasKindMismatch = isNote &&
@@ -206,12 +202,24 @@ export function ArboristTreeNode({
             {/* Spacer for notes (align with folders) */}
             {isNote && <div className="h-4 w-4 shrink-0" />}
 
-            {/* Icon - PRESERVED 1:1 (entity-colored) */}
-            <Icon
-                className="h-3.5 w-3.5 shrink-0 z-10"
-                style={{ color: iconColor }}
-                strokeWidth={1.5}
-            />
+            {/* Icon - entity-colored for entities/folders, original colors for plain notes */}
+            {isFolder ? (
+                <FolderIconComponent
+                    className="h-3.5 w-3.5 shrink-0 z-10"
+                    style={{ color: iconColor }}
+                    strokeWidth={1.5}
+                />
+            ) : isEntityNote && EntityIcon ? (
+                <EntityIcon
+                    className="h-3.5 w-3.5 shrink-0 z-10"
+                    style={{ color: iconColor }}
+                />
+            ) : (
+                <CustomNoteIcon
+                    className="h-[22px] w-[22px] shrink-0 z-10"
+                    useCurrentColor={false}
+                />
+            )}
 
             {/* Fantasy Date Badge - PRESERVED 1:1 */}
             {data.fantasyDate && (

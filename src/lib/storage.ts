@@ -125,7 +125,16 @@ export function getAllFolders(): Folder[] {
   return getStorageItem<Folder[]>(STORAGE_KEYS.FOLDERS, []);
 }
 
-export function createFolder(name: string, parentId: string | null = null): Folder {
+export interface CreateFolderOptions {
+  entityKind?: string;
+  entitySubtype?: string;
+  entityLabel?: string;
+  color?: string;
+  isTypedRoot?: boolean;
+  isSubtypeRoot?: boolean;
+}
+
+export function createFolder(name: string, parentId: string | null = null, options?: CreateFolderOptions): Folder {
   const now = new Date();
   const folder: Folder = {
     id: uuidv4(),
@@ -134,6 +143,13 @@ export function createFolder(name: string, parentId: string | null = null): Fold
     ownerId: 'local-user',
     createdAt: now,
     updatedAt: now,
+    // Entity properties
+    entityKind: options?.entityKind,
+    entitySubtype: options?.entitySubtype,
+    entityLabel: options?.entityLabel,
+    color: options?.color,
+    isTypedRoot: options?.isTypedRoot,
+    isSubtypeRoot: options?.isSubtypeRoot,
   };
 
   const folders = getAllFolders();
@@ -141,6 +157,34 @@ export function createFolder(name: string, parentId: string | null = null): Fold
   setStorageItem(STORAGE_KEYS.FOLDERS, folders);
 
   return folder;
+}
+
+export function updateFolder(id: string, updates: Partial<Folder>): Folder | undefined {
+  const folders = getAllFolders();
+  const index = folders.findIndex((folder) => folder.id === id);
+
+  if (index === -1) return undefined;
+
+  const updatedFolder = {
+    ...folders[index],
+    ...updates,
+    updatedAt: new Date(),
+  };
+
+  folders[index] = updatedFolder;
+  setStorageItem(STORAGE_KEYS.FOLDERS, folders);
+
+  return updatedFolder;
+}
+
+export function deleteFolder(id: string): boolean {
+  const folders = getAllFolders();
+  const filteredFolders = folders.filter((folder) => folder.id !== id);
+
+  if (filteredFolders.length === folders.length) return false;
+
+  setStorageItem(STORAGE_KEYS.FOLDERS, filteredFolders);
+  return true;
 }
 
 // Tags CRUD operations

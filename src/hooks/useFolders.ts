@@ -5,6 +5,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     getAllFolders,
     createFolder as createFolderStorage,
+    updateFolder as updateFolderStorage,
+    deleteFolder as deleteFolderStorage,
+    type CreateFolderOptions,
 } from '@/lib/storage';
 import type { Folder, FolderWithChildren } from '@/types/noteTypes';
 import type { EntityKind } from '@/lib/types/entityTypes';
@@ -32,14 +35,15 @@ export function useFolders() {
     });
 }
 
-// Create folder mutation
+// Create folder mutation - NOW PERSISTS entityKind!
 export function useCreateFolder() {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (params: { name: string; parentId?: string | null; options?: FolderCreateOptions }): Promise<Folder> => {
-            const folder = createFolderStorage(params.name, params.parentId || null);
-            return { ...folder, ...params.options } as Folder;
+            // Pass options to storage layer so entityKind etc. are persisted
+            const folder = createFolderStorage(params.name, params.parentId || null, params.options as CreateFolderOptions);
+            return folder;
         },
         onSuccess: (newFolder) => {
             queryClient.setQueryData<Folder[]>(folderKeys.all, (old) =>
@@ -49,28 +53,32 @@ export function useCreateFolder() {
     });
 }
 
-// Update folder mutation (in-memory only for now)
+// Update folder mutation - NOW PERSISTS TO LOCALSTORAGE
 export function useUpdateFolder() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ id, updates }: { id: string; updates: Partial<Folder> }): Promise<{ id: string; updates: Partial<Folder> }> => {
-            return { id, updates };
+        mutationFn: async ({ id, updates }: { id: string; updates: Partial<Folder> }): Promise<Folder | undefined> => {
+            // Actually persist to localStorage
+            return updateFolderStorage(id, updates);
         },
-        onSuccess: ({ id, updates }) => {
+        onSuccess: (updatedFolder) => {
+            if (!updatedFolder) return;
             queryClient.setQueryData<Folder[]>(folderKeys.all, (old) =>
-                old?.map(f => f.id === id ? { ...f, ...updates } : f)
+                old?.map(f => f.id === updatedFolder.id ? updatedFolder : f)
             );
         },
     });
 }
 
-// Delete folder mutation
+// Delete folder mutation - NOW PERSISTS TO LOCALSTORAGE
 export function useDeleteFolder() {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (id: string): Promise<string> => {
+            // Actually delete from localStorage
+            deleteFolderStorage(id);
             return id;
         },
         onSuccess: (id) => {
