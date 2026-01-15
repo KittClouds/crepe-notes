@@ -2,16 +2,18 @@
 // Main Hub Panel - integrates all Blueprint Hub functionality into footer
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { ChevronDown, ChevronRight, Palette, Regex, Settings2, Network, Sparkles, Check, Clock, GitGraph, GripHorizontal } from 'lucide-react';
+import { ChevronDown, ChevronRight, Palette, Regex, Settings2, Network, Sparkles, Check, Clock, GitGraph, GripHorizontal, Volume2, Pause, Square, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { GraphTab } from './tabs/GraphTab';
 import { ThemeTab } from './tabs/ThemeTab';
 import { PatternsTab } from './tabs/PatternsTab';
 import { FieldsTab } from './tabs/FieldsTab';
 import { NetworksTab } from './tabs/NetworksTab';
 import { ExtractionTab } from './tabs/ExtractionTab';
+import { useTTS } from '@/lib/tts';
 import type { EntityStats } from './types';
 import type { Note } from '@/types/noteTypes';
 
@@ -29,6 +31,8 @@ interface HubPanelProps {
     // Backlinks
     backlinksCount?: number;
     onBacklinksClick?: () => void;
+    // TTS
+    currentNoteText?: string;
 }
 
 export function HubPanel({
@@ -42,8 +46,11 @@ export function HubPanel({
     wordCount,
     characterCount,
     backlinksCount = 0,
-    onBacklinksClick
+    onBacklinksClick,
+    currentNoteText
 }: HubPanelProps) {
+    // TTS hook
+    const { state: ttsState, play, pause, resume, stop, initModel } = useTTS();
     const [isOpen, setIsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('graph');
 
@@ -115,6 +122,100 @@ export function HubPanel({
                             </span>
                         </Button>
                     </CollapsibleTrigger>
+
+                    {/* TTS Button */}
+                    <div className="flex items-center">
+                        {ttsState.status === 'loading-model' ? (
+                            <div className="flex items-center gap-1.5 px-2 text-xs text-muted-foreground">
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                                <span className="hidden sm:inline">{Math.round(ttsState.progress)}%</span>
+                            </div>
+                        ) : ttsState.status === 'synthesizing' || ttsState.status === 'playing' ? (
+                            <div className="flex items-center gap-1">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7"
+                                            onClick={() => pause()}
+                                        >
+                                            <Pause className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Pause</TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7"
+                                            onClick={() => stop()}
+                                        >
+                                            <Square className="h-3 w-3" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Stop</TooltipContent>
+                                </Tooltip>
+                                <span className="text-xs text-muted-foreground tabular-nums px-1">
+                                    {ttsState.currentChunkIndex + 1}/{ttsState.totalChunks}
+                                </span>
+                            </div>
+                        ) : ttsState.status === 'paused' ? (
+                            <div className="flex items-center gap-1">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 text-primary"
+                                            onClick={() => resume()}
+                                        >
+                                            <Volume2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Resume</TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7"
+                                            onClick={() => stop()}
+                                        >
+                                            <Square className="h-3 w-3" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Stop</TooltipContent>
+                                </Tooltip>
+                            </div>
+                        ) : (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7"
+                                        onClick={async () => {
+                                            if (!ttsState.modelReady) {
+                                                await initModel();
+                                            } else if (currentNoteText) {
+                                                await play(currentNoteText);
+                                            }
+                                        }}
+                                        disabled={ttsState.modelReady && !currentNoteText}
+                                    >
+                                        <Volume2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {!ttsState.modelReady ? 'Load TTS Model' : 'Read Aloud'}
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
+                    </div>
 
                     {/* Status Indicators */}
                     <div className="flex items-center gap-3 text-xs text-muted-foreground px-2 min-w-fit ml-auto">

@@ -283,6 +283,7 @@ const Index: React.FC = () => {
               characterCount={characterCount}
               backlinksCount={backlinksResult.count}
               onBacklinksClick={() => setBacklinksOpen(true)}
+              currentNoteText={currentNote?.markdownContent || currentNote?.content || ''}
             />
 
             {/* Backlinks Drawer */}

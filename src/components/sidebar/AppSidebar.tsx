@@ -1,7 +1,6 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import * as React from "react";
-// Stub useNavigate until router is set up
-const useNavigate = () => (path: string) => console.log('Navigate to:', path);
+import { useNavigate } from 'react-router-dom';
 import {
   Folder as FolderIcon,
   Plus,
@@ -51,7 +50,7 @@ const NetworkFolderCreationMenu = () => null;
 // Stub search hook
 const useResoRankSearchWithDebounce = (notes: any, query: string, opts: any) => ({ results: [], isReady: true, isIndexing: false });
 const GraphLogo = ({ className }: { className?: string }) => <div className={className}>📊</div>;
-const SidebarGraph = ({ className }: { className?: string }) => <div className={className}>Graph View</div>;
+import { SidebarGraph } from '@/components/graph/SidebarGraph';
 
 import {
   Sidebar,

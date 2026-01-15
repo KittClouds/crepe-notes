@@ -341,6 +341,13 @@ export class SmartGraphRegistry {
         return true;
     }
 
+    /**
+     * Get all edges in the graph (for visualization)
+     */
+    getAllEdges(): Edge[] {
+        return Array.from(this.edgeCache.values());
+    }
+
     // =========================================================================
     // Search
     // =========================================================================
