@@ -1,7 +1,7 @@
 /**
  * Chunking Module
  * 
- * Centralized text chunking using memchunk (WASM).
+ * Centralized text chunking using Mastra SentenceTransformer.
  */
 
 export {

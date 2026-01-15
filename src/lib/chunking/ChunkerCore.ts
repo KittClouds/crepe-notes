@@ -1,12 +1,14 @@
 /**
  * ChunkerCore - Centralized Text Chunking Service
  * 
- * High-performance chunking using native Intl.Segmenter.
+ * High-performance chunking using Mastra SentenceTransformer.
  * Supports multiple chunking strategies for different use cases:
  * - TTS: Sentence-boundary chunking for natural speech flow
  * - RAG: Semantic chunking with overlap for retrieval quality
  * - Custom: User-defined sizes
  */
+
+import { SentenceTransformer } from '@/lib/mastra/transformers/sentence';
 
 // ============================================================================
 // Types
@@ -29,6 +31,8 @@ export interface ChunkOptions {
     maxSize?: number;
     /** Maximum sentences per chunk (for sentence-based strategies) */
     maxSentences?: number;
+    /** Overlap size for RAG strategy */
+    overlap?: number;
     /** Language for segmentation (default: 'en') */
     locale?: string;
 }
@@ -39,23 +43,27 @@ const STRATEGY_PRESETS: Record<Exclude<ChunkStrategy, 'custom'>, ChunkOptions> =
     tts: {
         maxSize: 1500,
         maxSentences: 8,
+        overlap: 0,
         locale: 'en',
     },
     /** RAG: Semantic boundaries with larger chunks for retrieval context */
     rag: {
         maxSize: 512,
         maxSentences: 6,
+        overlap: 100, // Important for RAG!
         locale: 'en',
     },
     /** Paragraph: Split on double newlines only */
     paragraph: {
         maxSize: 4096,
+        overlap: 0,
         locale: 'en',
     },
     /** Sentence: One sentence per chunk */
     sentence: {
         maxSize: 2048,
         maxSentences: 1,
+        overlap: 0,
         locale: 'en',
     },
 };
@@ -72,7 +80,7 @@ class ChunkerCoreImpl {
      */
     async init(): Promise<void> {
         this.initialized = true;
-        console.log('[ChunkerCore] Initialized (native Intl.Segmenter)');
+        console.log('[ChunkerCore] Initialized (Mastra SentenceTransformer)');
     }
 
     /**
@@ -110,56 +118,47 @@ class ChunkerCoreImpl {
     }
 
     /**
-     * Chunk by sentences using Intl.Segmenter
+     * Chunk by sentences using Mastra SentenceTransformer
      */
     private chunkBySentence(text: string, options: ChunkOptions): Chunk[] {
         const maxSize = options.maxSize ?? 1500;
-        const maxSentences = options.maxSentences ?? 8;
-        const locale = options.locale ?? 'en';
+        const overlap = options.overlap ?? 0;
 
-        const segmenter = new Intl.Segmenter(locale, { granularity: 'sentence' });
-        const segments = Array.from(segmenter.segment(text));
+        // Use Mastra SentenceTransformer
+        const transformer = new SentenceTransformer({
+            maxSize,
+            overlap,
+            targetSize: Math.floor(maxSize * 0.8),
+        });
 
+        const chunkTexts = transformer.splitText({ text });
+
+        // Convert to Chunk[] with position metadata
         const chunks: Chunk[] = [];
-        let buffer = '';
-        let bufferStart = 0;
-        let sentenceCount = 0;
+        let searchStart = 0;
 
-        const flush = () => {
-            const trimmed = buffer.trim();
-            if (trimmed.length > 0) {
-                chunks.push({
-                    text: trimmed,
-                    index: chunks.length,
-                    startOffset: bufferStart,
-                    endOffset: bufferStart + buffer.length,
-                });
+        for (let i = 0; i < chunkTexts.length; i++) {
+            const chunkText = chunkTexts[i];
+            // Find actual position in original text
+            // Note: With overlap, chunks may share text, so we search from the last found position
+            const startOffset = text.indexOf(chunkText.substring(0, 50), searchStart);
+            const endOffset = startOffset !== -1
+                ? startOffset + chunkText.length
+                : searchStart + chunkText.length;
+
+            chunks.push({
+                text: chunkText,
+                index: i,
+                startOffset: startOffset !== -1 ? startOffset : searchStart,
+                endOffset,
+            });
+
+            // Move search start forward, but account for overlap by not moving too far
+            if (startOffset !== -1) {
+                searchStart = startOffset + Math.max(1, chunkText.length - overlap);
             }
-            buffer = '';
-            sentenceCount = 0;
-        };
-
-        for (const seg of segments) {
-            const sentence = seg.segment;
-            const nextBuffer = buffer + sentence;
-
-            // Check if adding this sentence exceeds limits
-            if (
-                (nextBuffer.length > maxSize && buffer.length > 0) ||
-                sentenceCount >= maxSentences
-            ) {
-                flush();
-                bufferStart = seg.index;
-            }
-
-            if (buffer === '') {
-                bufferStart = seg.index;
-            }
-            buffer += sentence;
-            sentenceCount++;
         }
 
-        flush();
         return chunks;
     }
 
