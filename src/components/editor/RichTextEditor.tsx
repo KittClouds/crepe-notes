@@ -35,6 +35,13 @@ import { textAlignPlugin, setTextAlignCommand, indentPlugin, indentCommand, outd
 import { block } from '@milkdown/kit/plugin/block';
 import { configureBlockHandle } from '../../editor/plugins/blockHandle/index';
 
+// Details/Collapsible sections plugin
+import {
+  detailsNodes,
+  detailsInteractivePlugin,
+  indentGuidesPlugin
+} from '../../editor/plugins/details';
+
 // Types
 import type { SaveStatus } from '../../api';
 
@@ -182,6 +189,11 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
             configureBlockHandle(ctx);
           })
           .use(block);
+
+        // Add collapsible details nodes and plugins
+        detailsNodes.forEach((node) => crepe.editor.use(node));
+        crepe.editor.use(detailsInteractivePlugin);
+        crepe.editor.use(indentGuidesPlugin);
 
         await crepe.create();
 

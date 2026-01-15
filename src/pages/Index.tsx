@@ -21,11 +21,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useNotesStore } from '@/hooks/useNotesStore';
+import { useBacklinks } from '@/hooks/useBacklinks';
 import { setCurrentNoteId } from '@/lib/storage';
 import { getNavigationApi } from '@/api';
 import { scanForPatternsSync, scanForPatterns } from '@/lib/Scanner/pattern-scanner';
 import { smartGraphRegistry } from '@/lib/registry';
 import type { EntityKind } from '@/lib/types/entityTypes';
+import { BacklinksDrawer } from '@/components/backlinks/BacklinksDrawer';
 
 const Index: React.FC = () => {
   const {
@@ -43,6 +45,9 @@ const Index: React.FC = () => {
 
   // Editor ref for undo/redo
   const editorRef = useRef<RichTextEditorRef>(null);
+
+  // Backlinks drawer state
+  const [backlinksOpen, setBacklinksOpen] = useState(false);
 
   // Current note derived from store
   const currentNote = useMemo(() => {
@@ -96,7 +101,8 @@ const Index: React.FC = () => {
     }
   }, [currentNote]);
 
-  // (Backlinks removed - using Entities panel only)
+  // Backlinks for current note
+  const backlinksResult = useBacklinks(currentNote, state.notes);
 
   // Wire up NavigationApi handler ONCE
   useEffect(() => {
@@ -275,6 +281,17 @@ const Index: React.FC = () => {
               notesCount={state.notes.length}
               wordCount={wordCount}
               characterCount={characterCount}
+              backlinksCount={backlinksResult.count}
+              onBacklinksClick={() => setBacklinksOpen(true)}
+            />
+
+            {/* Backlinks Drawer */}
+            <BacklinksDrawer
+              open={backlinksOpen}
+              onOpenChange={setBacklinksOpen}
+              backlinks={backlinksResult.backlinks}
+              grouped={backlinksResult.grouped}
+              onNavigate={handleNavigate}
             />
           </SidebarInset>
 

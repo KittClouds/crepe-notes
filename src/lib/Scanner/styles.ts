@@ -60,9 +60,10 @@ function getEntityStyle(kind: EntityKind, mode: HighlightMode): string {
 
   if (mode === 'vivid') {
     return `
-      background-color: hsl(var(${colorVar}));
-      color: white;
-      padding: 2px 8px;
+      background-color: hsl(var(${colorVar}) / 0.2);
+      color: hsl(var(${colorVar}));
+      border: 1px solid hsl(var(${colorVar}) / 0.3);
+      padding: 1px 6px;
       border-radius: 4px;
       font-weight: 500;
       font-size: 0.9em;
@@ -112,14 +113,18 @@ function getEntityRefStyle(kind: EntityKind | undefined, resolved: boolean, mode
     return getEntityStyle(kind, mode);
   }
 
-  // Default entity ref style (purple pill)
-  const bg = resolved ? ENTITY_REF_COLOR : '#6b7280';
+  // Default entity ref style (purple pill or gray)
+  const color = resolved ? ENTITY_REF_COLOR : '#6b7280';
+  // Manually calculated rgba strings for #8b5cf6 (purple) and #6b7280 (gray)
+  const bg = resolved ? 'rgba(139, 92, 246, 0.2)' : 'rgba(107, 114, 128, 0.2)';
+  const border = resolved ? 'rgba(139, 92, 246, 0.3)' : 'rgba(107, 114, 128, 0.3)';
 
   if (mode === 'vivid') {
     return `
       background-color: ${bg};
-      color: #ffffff;
-      padding: 2px 8px;
+      color: ${color};
+      border: 1px solid ${border};
+      padding: 1px 6px;
       border-radius: 4px;
       font-weight: 500;
       font-size: 0.9em;

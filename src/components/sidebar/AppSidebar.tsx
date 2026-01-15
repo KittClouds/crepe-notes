@@ -41,10 +41,10 @@ import {
 // DEPRECATED: TypeScript semantic search UI (libraries kept intact)
 // import { SemanticSearchPanel } from "@/components/search/SemanticSearchPanel";
 // Panels - stubbed until fully wired
-const RustSearchPanel = () => <div className="p-4 text-muted-foreground">Rust Search Panel (coming soon)</div>;
-const NerPanel = () => <div className="p-4 text-muted-foreground">NER Panel (coming soon)</div>;
+import { RustSearchPanel } from '@/components/search/RustSearchPanel';
+import { NerPanel } from '@/components/search/NerPanel';
 const RankedSearchResults = ({ results, onSelect, className }: any) => null;
-const EntitiesPanel = () => <div className="p-4 text-muted-foreground">Entities Panel (coming soon)</div>;
+import { EntityRegistryPanel } from './EntityRegistryPanel';
 const SettingsPanel = ({ open, onOpenChange }: any) => null;
 import { ArboristTreeView } from '@/components/sidebar/ArboristTreeView';
 const NetworkFolderCreationMenu = () => null;
@@ -600,7 +600,7 @@ export function AppSidebar({ toolbarVisible, onToolbarToggle, ...props }: AppSid
 
 
         {/* --- RIGHT PANEL (COLLAPSIBLE CONTENT) --- */}
-        <div className="flex flex-col flex-1 h-full min-w-0 bg-sidebar group-data-[collapsible=icon]:hidden w-64 transition-all duration-300 ease-in-out">
+        <div className="flex flex-col flex-1 h-full min-w-0 bg-sidebar group-data-[collapsible=icon]:hidden w-80 transition-all duration-300 ease-in-out">
           {/* Panel Header */}
           <div className="h-14 flex items-center justify-between px-4 border-b border-sidebar-border shrink-0">
             <span className="font-semibold text-sm">
@@ -676,7 +676,13 @@ export function AppSidebar({ toolbarVisible, onToolbarToggle, ...props }: AppSid
                 </div>
               </div>
             ) : activeTab === 'entities' ? (
-              <EntitiesPanel />
+              <EntityRegistryPanel onNavigate={(label) => {
+                const note = state.notes.find(n =>
+                  n.title.toLowerCase() === label.toLowerCase() ||
+                  (n.isEntity && n.entityLabel?.toLowerCase() === label.toLowerCase())
+                );
+                if (note) selectNote(note.id);
+              }} />
             ) : activeTab === 'rust' ? (
               <RustSearchPanel />
             ) : activeTab === 'ner' ? (

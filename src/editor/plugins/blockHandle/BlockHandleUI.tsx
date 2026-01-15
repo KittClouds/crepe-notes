@@ -4,7 +4,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tabs from '@radix-ui/react-tabs';
 import {
     GripVertical, Plus, Trash2, Copy, Clipboard,
-    AlignLeft, AlignCenter, AlignRight, ChevronRight,
+    AlignLeft, AlignCenter, AlignRight, ChevronRight, ChevronDown,
     Heading1, Heading2, Heading3, Heading4, Heading5, Heading6,
     Quote, Minus, List, ListOrdered, CheckSquare,
     Image, Code, Table, Calculator, Pilcrow
@@ -24,6 +24,7 @@ import {
     codeBlockSchema,
     paragraphSchema,
 } from '@milkdown/kit/preset/commonmark';
+import { insertDetailsCommand } from '../details';
 
 interface BlockHandleUIProps {
     ctx: Ctx;
@@ -151,6 +152,10 @@ export function BlockHandleUI({ ctx, onAdd }: BlockHandleUIProps) {
                                 <div className="block-menu-scroll">
                                     <MenuItem icon={<Image size={16} />} label="Image" onClick={() => console.log('Image')} />
                                     <MenuItem icon={<Code size={16} />} label="Code Block" onClick={insertCodeBlock} />
+                                    <MenuItem icon={<ChevronDown size={16} />} label="Collapsible Section" onClick={() => runCommand((ctx) => {
+                                        const commands = ctx.get(commandsCtx);
+                                        commands.call(insertDetailsCommand.key, 'Click to expand');
+                                    })} />
                                     <MenuItem icon={<Table size={16} />} label="Table" onClick={() => console.log('Table')} />
                                     <MenuItem icon={<Calculator size={16} />} label="Math" onClick={() => console.log('Math')} />
                                 </div>

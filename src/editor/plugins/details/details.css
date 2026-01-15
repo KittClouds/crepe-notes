@@ -1,0 +1,218 @@
+/* src/editor/plugins/details/details.css */
+/* Collapsible Details + Indent Guide Styles */
+
+/* ============================================
+   COLLAPSIBLE DETAILS
+   ============================================ */
+
+.milkdown-details {
+    margin: 0.75rem 0;
+    border-left: 2px solid rgba(100, 100, 100, 0.2);
+    padding-left: 1rem;
+    position: relative;
+}
+
+/* Nested details get additional indentation */
+.milkdown-details .milkdown-details {
+    margin-left: 0.5rem;
+}
+
+.milkdown-details-summary {
+    cursor: pointer;
+    user-select: none;
+    font-weight: 500;
+    padding: 0.25rem 0;
+    position: relative;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Hide default browser triangle */
+.milkdown-details-summary::-webkit-details-marker {
+    display: none;
+}
+
+.milkdown-details-summary::marker {
+    display: none;
+}
+
+/* Custom disclosure triangle */
+.milkdown-details-summary::before {
+    content: '▶';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    font-size: 0.55rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+    color: rgba(150, 150, 150, 0.7);
+    flex-shrink: 0;
+}
+
+/* Purple circle indicator (collapsed state) */
+/* Purple circle indicator (collapsed state) */
+.milkdown-details:not([open])>.milkdown-details-summary::after {
+    content: '';
+    position: absolute;
+    left: 1.1rem;
+    /* Centered in the 0.5rem gap (arrow is 1rem wide) */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #8b5cf6;
+    pointer-events: none;
+}
+
+/* Ensure text has padding if needed? 
+   The flex gap is 0.5rem (8px). Arrow is 1rem (16px).
+   Dot is at 1rem (16px). It overlaps the gap.
+   The text starts at Arrow Width + Gap = 1.5rem.
+   If Dot is at 1rem, it's right after arrow.
+   Should look fine.
+*/
+
+
+/* Open state: rotate arrow, no circle */
+.milkdown-details[open]>.milkdown-details-summary::before {
+    transform: rotate(90deg);
+}
+
+.milkdown-details[open]>.milkdown-details-summary::after {
+    display: none;
+}
+
+/* Hover state */
+.milkdown-details-summary:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+    margin-left: -0.25rem;
+    padding-left: 0.25rem;
+}
+
+/* Content area */
+.milkdown-details-content {
+    padding: 0.25rem 0 0.25rem 0;
+    position: relative;
+    margin-left: 0.25rem;
+}
+
+/* Slide animation for opening */
+.milkdown-details[open]>.milkdown-details-content {
+    animation: detailsSlideDown 0.2s ease;
+}
+
+@keyframes detailsSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hide content when closed */
+.milkdown-details:not([open])>.milkdown-details-content {
+    display: none;
+}
+
+/* Vertical connector line inside content */
+.milkdown-details-content::before {
+    content: '';
+    position: absolute;
+    left: -0.75rem;
+    top: 0;
+    bottom: 0.25rem;
+    width: 1px;
+    background-color: rgba(100, 100, 100, 0.2);
+    pointer-events: none;
+}
+
+
+/* ============================================
+   NESTED DETAILS INDENTATION
+   ============================================ */
+
+/* Level 2 */
+.milkdown-details .milkdown-details .milkdown-details-content {
+    margin-left: 0.5rem;
+}
+
+/* Level 3+ */
+.milkdown-details .milkdown-details .milkdown-details .milkdown-details-content {
+    margin-left: 0.75rem;
+}
+
+
+/* ============================================
+   INDENT GUIDE LINES
+   ============================================ */
+
+.indent-guide {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: rgba(100, 100, 100, 0.15);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Highlight guide on hover */
+.ProseMirror [style*="margin-left"]:hover .indent-guide {
+    background-color: rgba(100, 100, 100, 0.3);
+}
+
+
+/* ============================================
+   NESTED LIST VISUAL GUIDES (Bullet lists)
+   ============================================ */
+
+.ProseMirror ul ul,
+.ProseMirror ol ol,
+.ProseMirror ul ol,
+.ProseMirror ol ul {
+    position: relative;
+}
+
+.ProseMirror ul ul::before,
+.ProseMirror ol ol::before,
+.ProseMirror ul ol::before,
+.ProseMirror ol ul::before {
+    content: '';
+    position: absolute;
+    left: -1.25rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: rgba(100, 100, 100, 0.12);
+    pointer-events: none;
+}
+
+/* Third level nesting */
+.ProseMirror ul ul ul::before,
+.ProseMirror ol ol ol::before {
+    left: -1.25rem;
+}
+
+
+/* ============================================
+   DETAILS FOCUS/EDITING STATE
+   ============================================ */
+
+.milkdown-details:focus-within {
+    border-left-color: rgba(139, 92, 246, 0.4);
+}
+
+.milkdown-details-summary:focus {
+    outline: none;
+    background-color: rgba(139, 92, 246, 0.1);
+    border-radius: 4px;
+}

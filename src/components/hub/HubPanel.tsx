@@ -1,8 +1,8 @@
 // src/components/hub/HubPanel.tsx
 // Main Hub Panel - integrates all Blueprint Hub functionality into footer
 
-import { useState } from 'react';
-import { ChevronDown, ChevronRight, Palette, Regex, Settings2, Network, Sparkles, Check, Clock, GitGraph } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { ChevronDown, ChevronRight, Palette, Regex, Settings2, Network, Sparkles, Check, Clock, GitGraph, GripHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -26,6 +26,9 @@ interface HubPanelProps {
     notesCount?: number;
     wordCount?: number;
     characterCount?: number;
+    // Backlinks
+    backlinksCount?: number;
+    onBacklinksClick?: () => void;
 }
 
 export function HubPanel({
@@ -37,10 +40,56 @@ export function HubPanel({
     lastSaved,
     notesCount = 0,
     wordCount,
-    characterCount
+    characterCount,
+    backlinksCount = 0,
+    onBacklinksClick
 }: HubPanelProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('graph');
+
+    // Resizable height state
+    const [panelHeight, setPanelHeight] = useState(() => {
+        const saved = localStorage.getItem('hub-panel-height');
+        return saved ? parseInt(saved, 10) : 400;
+    });
+    const isResizing = useRef(false);
+    const startY = useRef(0);
+    const startHeight = useRef(0);
+
+    const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        isResizing.current = true;
+        startY.current = e.clientY;
+        startHeight.current = panelHeight;
+        document.body.style.cursor = 'row-resize';
+        document.body.style.userSelect = 'none';
+    }, [panelHeight]);
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizing.current) return;
+            // Moving up = smaller clientY = larger delta = larger height
+            const delta = startY.current - e.clientY;
+            const newHeight = Math.min(Math.max(startHeight.current + delta, 150), window.innerHeight * 0.8);
+            setPanelHeight(newHeight);
+        };
+
+        const handleMouseUp = () => {
+            if (isResizing.current) {
+                isResizing.current = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                localStorage.setItem('hub-panel-height', panelHeight.toString());
+            }
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [panelHeight]);
 
     const entityCount = entityStats.length;
 
@@ -52,7 +101,7 @@ export function HubPanel({
                     <CollapsibleTrigger asChild>
                         <Button
                             variant="ghost"
-                            className="h-7 px-2 flex-1 justify-start gap-3 hover:bg-accent/50 text-xs text-muted-foreground hover:text-foreground"
+                            className="h-7 px-2 w-fit justify-start gap-3 hover:bg-accent/50 text-xs text-muted-foreground hover:text-foreground shrink-0"
                         >
                             {isOpen ? (
                                 <ChevronDown className="h-3.5 w-3.5" />
@@ -68,7 +117,14 @@ export function HubPanel({
                     </CollapsibleTrigger>
 
                     {/* Status Indicators */}
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground px-2 min-w-fit">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground px-2 min-w-fit ml-auto">
+                        {/* Backlinks - clickable */}
+                        <button
+                            onClick={onBacklinksClick}
+                            className="hidden sm:inline opacity-80 hover:opacity-100 hover:text-primary transition-colors cursor-pointer"
+                        >
+                            {backlinksCount} backlinks
+                        </button>
                         {(wordCount !== undefined || characterCount !== undefined) && (
                             <>
                                 <span className="hidden sm:inline opacity-80">{wordCount ?? 0} words</span>
@@ -91,8 +147,15 @@ export function HubPanel({
                     </div>
                 </div>
 
-                <CollapsibleContent className="border-t border-border bg-background">
-                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <CollapsibleContent className="border-t border-border bg-background relative">
+                    {/* Resize Handle */}
+                    <div
+                        className="absolute top-0 left-0 right-0 h-1.5 cursor-row-resize hover:bg-teal-500/50 active:bg-teal-500 z-30 transition-colors flex items-center justify-center group"
+                        onMouseDown={handleResizeMouseDown}
+                    >
+                        <GripHorizontal className="h-3 w-6 text-muted-foreground/30 group-hover:text-teal-400 transition-colors" />
+                    </div>
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" style={{ height: panelHeight }}>
                         <div className="sticky top-0 z-10 bg-background border-b border-border">
                             <TabsList className="w-full h-auto flex-wrap justify-start gap-1 p-2 bg-transparent">
                                 <TabsTrigger value="graph" className="flex items-center gap-1.5 text-xs h-7 px-3">
@@ -123,7 +186,7 @@ export function HubPanel({
                         </div>
 
                         {/* Graph Tab - full height, no padding for master-detail layout */}
-                        <TabsContent value="graph" className="mt-0 h-[50vh]">
+                        <TabsContent value="graph" className="mt-0 h-full overflow-hidden">
                             <GraphTab
                                 entityStats={entityStats}
                                 notes={notes}

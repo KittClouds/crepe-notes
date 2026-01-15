@@ -33,7 +33,7 @@ import type { EditorState } from '@milkdown/kit/prose/state';
 
 import { getHighlighterApi, getNavigationApi } from '../../api';
 import type { DecorationSpan } from '../../lib/Scanner';
-import { ENTITY_COLORS } from '../../lib/Scanner';
+import { getEntityColorVar } from '../../lib/store/entityColorStore';
 
 /**
  * Check if cursor is inside a span
@@ -47,13 +47,13 @@ function isCursorInside(span: DecorationSpan, selection: { from: number; to: num
  */
 function getEditingStyle(span: DecorationSpan): string {
     if (span.type === 'entity' && span.kind) {
-        const colors = ENTITY_COLORS[span.kind] || ENTITY_COLORS.UNKNOWN;
-        return `color: ${colors.bg}; font-weight: 500;`;
+        const colorVar = getEntityColorVar(span.kind);
+        return `color: hsl(var(${colorVar})); font-weight: 500;`;
     }
     if (span.type === 'entity_ref') {
         if (span.kind) {
-            const colors = ENTITY_COLORS[span.kind] || ENTITY_COLORS.UNKNOWN;
-            return `color: ${colors.bg}; text-decoration: underline;`;
+            const colorVar = getEntityColorVar(span.kind);
+            return `color: hsl(var(${colorVar})); text-decoration: underline;`;
         }
         return 'color: #8b5cf6; text-decoration: underline;';
     }
