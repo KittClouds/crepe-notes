@@ -30,19 +30,19 @@ interface FolderCreateOptions {
 export function useFolders() {
     return useQuery({
         queryKey: folderKeys.all,
-        queryFn: getAllFolders,
+        queryFn: getAllFolders, // storage.ts export is now async, which works with useQuery
         staleTime: Infinity,
     });
 }
 
-// Create folder mutation - NOW PERSISTS entityKind!
+// Create folder mutation
 export function useCreateFolder() {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (params: { name: string; parentId?: string | null; options?: FolderCreateOptions }): Promise<Folder> => {
             // Pass options to storage layer so entityKind etc. are persisted
-            const folder = createFolderStorage(params.name, params.parentId || null, params.options as CreateFolderOptions);
+            const folder = await createFolderStorage(params.name, params.parentId || null, params.options as CreateFolderOptions);
             return folder;
         },
         onSuccess: (newFolder) => {
@@ -53,14 +53,13 @@ export function useCreateFolder() {
     });
 }
 
-// Update folder mutation - NOW PERSISTS TO LOCALSTORAGE
+// Update folder mutation
 export function useUpdateFolder() {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async ({ id, updates }: { id: string; updates: Partial<Folder> }): Promise<Folder | undefined> => {
-            // Actually persist to localStorage
-            return updateFolderStorage(id, updates);
+            return await updateFolderStorage(id, updates);
         },
         onSuccess: (updatedFolder) => {
             if (!updatedFolder) return;
@@ -71,14 +70,14 @@ export function useUpdateFolder() {
     });
 }
 
-// Delete folder mutation - NOW PERSISTS TO LOCALSTORAGE
+// Delete folder mutation
 export function useDeleteFolder() {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (id: string): Promise<string> => {
-            // Actually delete from localStorage
-            deleteFolderStorage(id);
+            const success = await deleteFolderStorage(id);
+            // if (!success) throw Error... ? logic in useFolders was simple before
             return id;
         },
         onSuccess: (id) => {
@@ -100,7 +99,7 @@ export function buildFolderTree(folders: Folder[], notes: any[]): FolderWithChil
     const roots: FolderWithChildren[] = [];
     for (const folder of folders) {
         const node = folderMap.get(folder.id)!;
-        const parentId = folder.parentId || folder.parent_id;
+        const parentId = folder.parentId || (folder as any).parent_id;
 
         if (parentId && folderMap.has(parentId)) {
             folderMap.get(parentId)!.children.push(node);
@@ -110,7 +109,7 @@ export function buildFolderTree(folders: Folder[], notes: any[]): FolderWithChil
     }
 
     for (const note of notes) {
-        const folderId = note.folderId || note.parent_id;
+        const folderId = note.folderId || (note as any).parent_id;
         if (folderId && folderMap.has(folderId)) {
             folderMap.get(folderId)!.notes.push(note);
         }

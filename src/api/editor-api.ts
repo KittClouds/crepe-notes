@@ -1,8 +1,16 @@
 // src/api/editor-api.ts
-// EditorApi interface + Tauri/Mock implementations
+// EditorApi interface + Web/Tauri implementations
 // Clean boundary between frontend and backend
 
 import type { Note, NoteCreateParams, NoteUpdateParams } from './types';
+import {
+    getAllNotes,
+    getNoteById,
+    createNote,
+    updateNote,
+    deleteNote,
+    searchNotes
+} from '@/lib/storage';
 
 // =============================================================================
 // EDITOR API INTERFACE
@@ -15,10 +23,11 @@ export interface EditorApi {
     updateNote(params: NoteUpdateParams): Promise<Note>;
     deleteNote(worldId: string, noteId: string): Promise<boolean>;
     listNotes(worldId: string): Promise<Note[]>;
+    searchNotes(worldId: string, query: string): Promise<Note[]>;
 }
 
 // =============================================================================
-// TAURI IMPLEMENTATION (Production)
+// TAURI IMPLEMENTATION (Native)
 // =============================================================================
 
 export class TauriEditorApi implements EditorApi {
@@ -79,110 +88,70 @@ export class TauriEditorApi implements EditorApi {
         const result = await invoke<string>('content.list_notes', { worldId });
         return JSON.parse(result);
     }
-}
 
-// =============================================================================
-// MOCK IMPLEMENTATION (Development without Tauri)
-// =============================================================================
-
-const STORAGE_KEY = 'crepe-notes-mock-db';
-
-function getMockDb(): { notes: Record<string, Note> } {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-        return JSON.parse(stored);
+    async searchNotes(worldId: string, query: string): Promise<Note[]> {
+        // Fallback if not implemented in Tauri yet, or add invoke
+        const notes = await this.listNotes(worldId);
+        return notes.filter(n => n.title.toLowerCase().includes(query.toLowerCase()));
     }
-    return { notes: {} };
 }
 
-function saveMockDb(db: { notes: Record<string, Note> }): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-}
+// =============================================================================
+// WEB IMPLEMENTATION (NebulaDB)
+// =============================================================================
 
-export class MockEditorApi implements EditorApi {
+export class WebEditorApi implements EditorApi {
     async getNote(worldId: string, noteId: string): Promise<Note | null> {
-        await this.simulateLatency();
-        const db = getMockDb();
-        const note = db.notes[noteId];
-        if (note && note.worldId === worldId) {
-            return note;
-        }
-        return null;
+        const note = await getNoteById(noteId);
+        // Map backend type if needed, strict check on worldId ignored for local webapp
+        return note ? (note as unknown as Note) : null;
     }
 
     async createNote(params: NoteCreateParams): Promise<Note> {
-        await this.simulateLatency();
-        const db = getMockDb();
-        const now = Date.now();
-        const note: Note = {
-            id: crypto.randomUUID(),
-            worldId: params.worldId,
+        const note = await createNote({
             title: params.title,
-            content: params.content || '',
+            // mapping content to markdownContent (storage uses markdownContent)
+            markdownContent: params.content,
             folderId: params.folderId,
-            entityKind: params.entityKind,
+            entityKind: params.entityKind as any,
             entitySubtype: params.entitySubtype,
-            isEntity: params.isEntity || false,
-            isPinned: false,
-            favorite: false,
-            createdAt: now,
-            updatedAt: now,
-        };
-        db.notes[note.id] = note;
-        saveMockDb(db);
-        console.log('[MockEditorApi] Created note:', note.id, note.title);
-        return note;
+            isEntity: params.isEntity,
+        });
+        return note as unknown as Note;
     }
 
     async updateNote(params: NoteUpdateParams): Promise<Note> {
-        await this.simulateLatency();
-        const db = getMockDb();
-        const existing = db.notes[params.id];
-        if (!existing) {
-            throw new Error(`Note not found: ${params.id}`);
-        }
-
-        const updated: Note = {
-            ...existing,
-            title: params.title ?? existing.title,
-            content: params.content ?? existing.content,
-            folderId: params.folderId ?? existing.folderId,
-            entityKind: params.entityKind ?? existing.entityKind,
-            entitySubtype: params.entitySubtype ?? existing.entitySubtype,
-            isEntity: params.isEntity ?? existing.isEntity,
-            isPinned: params.isPinned ?? existing.isPinned,
-            favorite: params.favorite ?? existing.favorite,
-            updatedAt: Date.now(),
+        const updates: any = {
+            title: params.title,
+            markdownContent: params.content, // map
+            folderId: params.folderId,
+            entityKind: params.entityKind,
+            entitySubtype: params.entitySubtype,
+            isEntity: params.isEntity,
+            isPinned: params.isPinned ? 1 : 0, // boolean to number if needed or keeps boolean
+            favorite: params.favorite ? 1 : 0,
         };
 
-        db.notes[params.id] = updated;
-        saveMockDb(db);
-        console.log('[MockEditorApi] Updated note:', params.id);
-        return updated;
+        // Clean undefined
+        Object.keys(updates).forEach(key => updates[key] === undefined && delete updates[key]);
+
+        const updated = await updateNote(params.id, updates);
+        if (!updated) throw new Error(`Note not found: ${params.id}`);
+        return updated as unknown as Note;
     }
 
     async deleteNote(worldId: string, noteId: string): Promise<boolean> {
-        await this.simulateLatency();
-        const db = getMockDb();
-        if (db.notes[noteId] && db.notes[noteId].worldId === worldId) {
-            delete db.notes[noteId];
-            saveMockDb(db);
-            console.log('[MockEditorApi] Deleted note:', noteId);
-            return true;
-        }
-        return false;
+        return await deleteNote(noteId);
     }
 
     async listNotes(worldId: string): Promise<Note[]> {
-        await this.simulateLatency();
-        const db = getMockDb();
-        return Object.values(db.notes).filter(n => n.worldId === worldId);
+        const notes = await getAllNotes();
+        return notes as unknown as Note[];
     }
 
-    private simulateLatency(): Promise<void> {
-        // Simulate network latency (50-150ms)
-        const delay = 50 + Math.random() * 100;
-        return new Promise(resolve => setTimeout(resolve, delay));
+    async searchNotes(worldId: string, query: string): Promise<Note[]> {
+        const results = await searchNotes(query);
+        return results as unknown as Note[];
     }
 }
 
@@ -194,7 +163,7 @@ let _instance: EditorApi | null = null;
 
 /**
  * Get the EditorApi instance.
- * Uses TauriEditorApi in Tauri environment, MockEditorApi in browser.
+ * Uses TauriEditorApi in Tauri environment, WebEditorApi in browser.
  */
 export function getEditorApi(): EditorApi {
     if (_instance) return _instance;
@@ -206,8 +175,8 @@ export function getEditorApi(): EditorApi {
         console.log('[EditorApi] Using TauriEditorApi');
         _instance = new TauriEditorApi();
     } else {
-        console.log('[EditorApi] Using MockEditorApi (localStorage)');
-        _instance = new MockEditorApi();
+        console.log('[EditorApi] Using WebEditorApi (NebulaDB)');
+        _instance = new WebEditorApi();
     }
 
     return _instance;

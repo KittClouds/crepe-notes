@@ -4,11 +4,9 @@ import "./index.css";
 import { smartGraphRegistry } from "./lib/registry";
 import { entityColorStore } from "./lib/store/entityColorStore";
 
-// Initialize entity color registry FIRST (sets CSS variables before any rendering)
-entityColorStore.initialize();
-
-// Initialize entity registry
-smartGraphRegistry.init().catch(console.error);
+// KAMMI: Centralized App Orchestration
+import { appOrchestrator } from '@/lib/core/AppOrchestrator';
+appOrchestrator.boot();
 
 createRoot(document.getElementById("root")!).render(<App />);
 

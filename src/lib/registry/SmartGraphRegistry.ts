@@ -1,34 +1,24 @@
 // src/lib/registry/SmartGraphRegistry.ts
-// Entity Registry - Local cache facade for entity management
-// V2: Simplified version without Tauri IPC - uses localStorage until Rust backend is migrated
+// Entity Registry - Facade for GraphRegistry (CozoDB)
+// V3: Migrated to CozoDB via GraphRegistry and Adapters
 
 import type { EntityKind } from '@/lib/types/entityTypes';
 import { implicitScanner } from '../Scanner/ImplicitScanner';
+import { entityRegistry } from '@/lib/cozo/graph/adapters/EntityRegistryAdapter';
+import { relationshipRegistry } from '@/lib/cozo/graph/adapters/RelationshipRegistryAdapter';
+import type { RegisteredEntity } from '@/lib/cozo/graph/adapters/EntityRegistryAdapter';
 
 // =============================================================================
-// Types
+// Legacy Types (kept for compatibility)
 // =============================================================================
+
+export type { RegisteredEntity };
 
 export interface EntityDefinition {
     id: string;
     label: string;
     kind: string;
     aliases: string[];
-}
-
-export interface RegisteredEntity {
-    id: string;
-    label: string;
-    aliases: string[];
-    kind: EntityKind;
-    subtype?: string;
-    firstNote: string;
-    mentionsByNote: Map<string, number>;
-    totalMentions: number;
-    lastSeenDate: Date;
-    createdAt: Date;
-    createdBy: 'user' | 'extraction' | 'auto';
-    attributes?: Record<string, any>;
 }
 
 export interface EntityRegistrationResult {
@@ -47,21 +37,11 @@ export interface Edge {
 }
 
 // =============================================================================
-// SmartGraphRegistry
+// SmartGraphRegistry Facade
 // =============================================================================
 
-const STORAGE_KEY = 'graphaite_entity_registry';
-const EDGES_KEY = 'graphaite_edge_registry';
-
-export class SmartGraphRegistry {
+export class SmartGraphRegistryFacade {
     private initialized = false;
-    private initPromise: Promise<void> | null = null;
-
-    // Local cache
-    private entityCache: Map<string, RegisteredEntity> = new Map();
-    private labelIndex: Map<string, string> = new Map(); // normalized label → id
-    private aliasIndex: Map<string, string> = new Map(); // normalized alias → id
-    private edgeCache: Map<string, Edge> = new Map();
 
     // =========================================================================
     // Initialization
@@ -69,164 +49,64 @@ export class SmartGraphRegistry {
 
     async init(): Promise<void> {
         if (this.initialized) return;
-        if (this.initPromise) return this.initPromise;
 
-        this.initPromise = (async () => {
-            try {
-                this.loadFromStorage();
-                this.initialized = true;
-                // Hydrate implicit scanner
-                implicitScanner.hydrate(this.getAllEntities());
-                console.log(`[SmartGraphRegistry] Initialized with ${this.entityCache.size} entities, ${this.edgeCache.size} edges`);
-            } catch (err) {
-                this.initPromise = null;
-                throw err;
-            }
-        })();
+        try {
+            await entityRegistry.init();
+            await relationshipRegistry.init();
+            this.initialized = true;
 
-        return this.initPromise;
+            // KAMMI: ImplicitScanner hydration is now handled by AppOrchestrator
+            // to ensure batching and correct phase execution.
+            // const entities = entityRegistry.getAllEntities();
+            // const scannerEntities = entities.map(this.toScannerEntity);
+            // implicitScanner.hydrate(scannerEntities);
+
+            console.log(`[SmartGraphRegistry] Initialized via GraphRegistry (CozoDB). Loaded ${entityRegistry.getAllEntities().length} entities.`);
+        } catch (err) {
+            console.error('[SmartGraphRegistry] Failed to initialize:', err);
+            throw err;
+        }
     }
 
     isInitialized(): boolean {
         return this.initialized;
     }
 
-    // =========================================================================
-    // Persistence (localStorage for now, Tauri IPC later)
-    // =========================================================================
-
-    private loadFromStorage(): void {
-        try {
-            // Load entities
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) {
-                const entities = JSON.parse(raw) as EntityDefinition[];
-                for (const e of entities) {
-                    const entity = this.definitionToEntity(e);
-                    this.entityCache.set(e.id, entity);
-                    this.labelIndex.set(e.label.toLowerCase(), e.id);
-                    for (const alias of e.aliases) {
-                        this.aliasIndex.set(alias.toLowerCase(), e.id);
-                    }
-                }
-            }
-
-            // Load edges
-            const edgesRaw = localStorage.getItem(EDGES_KEY);
-            if (edgesRaw) {
-                const edges = JSON.parse(edgesRaw) as Edge[];
-                for (const edge of edges) {
-                    this.edgeCache.set(edge.id, edge);
-                }
-            }
-        } catch (err) {
-            console.error('[SmartGraphRegistry] Failed to load from storage:', err);
-        }
-    }
-
-    private saveToStorage(): void {
-        try {
-            const entities: EntityDefinition[] = Array.from(this.entityCache.values()).map(e => ({
-                id: e.id,
-                label: e.label,
-                kind: e.kind,
-                aliases: e.aliases,
-            }));
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(entities));
-
-            const edges = Array.from(this.edgeCache.values());
-            localStorage.setItem(EDGES_KEY, JSON.stringify(edges));
-        } catch (err) {
-            console.error('[SmartGraphRegistry] Failed to save to storage:', err);
-        }
-    }
-
-    private definitionToEntity(e: EntityDefinition): RegisteredEntity {
+    private toScannerEntity(e: RegisteredEntity) {
         return {
             id: e.id,
             label: e.label,
+            kind: e.kind,
             aliases: e.aliases,
-            kind: e.kind as EntityKind,
-            subtype: undefined,
-            firstNote: '',
-            mentionsByNote: new Map(),
-            totalMentions: 0,
-            lastSeenDate: new Date(),
-            createdAt: new Date(),
-            createdBy: 'auto',
-            attributes: {},
+            originNoteId: e.firstNote,
+            registeredAt: e.createdAt.getTime(),
         };
     }
 
     // =========================================================================
-    // Cache Management
-    // =========================================================================
-
-    private addToCache(entity: RegisteredEntity): void {
-        this.entityCache.set(entity.id, entity);
-        this.labelIndex.set(entity.label.toLowerCase(), entity.id);
-        for (const alias of entity.aliases) {
-            this.aliasIndex.set(alias.toLowerCase(), entity.id);
-        }
-        this.saveToStorage();
-        implicitScanner.hydrate(this.getAllEntities());
-    }
-
-    private removeFromCache(id: string): void {
-        const entity = this.entityCache.get(id);
-        if (entity) {
-            this.labelIndex.delete(entity.label.toLowerCase());
-            for (const alias of entity.aliases) {
-                this.aliasIndex.delete(alias.toLowerCase());
-            }
-            this.entityCache.delete(id);
-            this.saveToStorage();
-            implicitScanner.hydrate(this.getAllEntities());
-        }
-    }
-
-    // =========================================================================
-    // SYNC READS (from cache - fast!)
+    // ENTITY OPERATIONS
     // =========================================================================
 
     isRegisteredEntity(label: string): boolean {
-        if (!this.initialized) return false;
-        const normalized = label.toLowerCase();
-        return this.labelIndex.has(normalized) || this.aliasIndex.has(normalized);
+        return entityRegistry.isRegisteredEntity(label);
     }
 
     getEntityById(id: string): RegisteredEntity | null {
-        return this.entityCache.get(id) || null;
+        return entityRegistry.getEntityById(id);
     }
 
     findEntityByLabel(label: string): RegisteredEntity | null {
-        if (!this.initialized) return null;
-        const normalized = label.toLowerCase();
-
-        const idByLabel = this.labelIndex.get(normalized);
-        if (idByLabel) return this.entityCache.get(idByLabel) || null;
-
-        const idByAlias = this.aliasIndex.get(normalized);
-        if (idByAlias) return this.entityCache.get(idByAlias) || null;
-
-        return null;
+        return entityRegistry.findEntityByLabel(label);
     }
 
     getAllEntities(): RegisteredEntity[] {
-        return Array.from(this.entityCache.values());
+        return entityRegistry.getAllEntities();
     }
 
     getEntitiesByKind(kind: EntityKind): RegisteredEntity[] {
-        return Array.from(this.entityCache.values()).filter(e => e.kind === kind);
+        return entityRegistry.getEntitiesByKind(kind);
     }
 
-    // =========================================================================
-    // ENTITY WRITES
-    // =========================================================================
-
-    /**
-     * Register an entity - auto-detects on first parse
-     */
     async registerEntity(
         label: string,
         kind: EntityKind,
@@ -238,65 +118,25 @@ export class SmartGraphRegistry {
             source?: 'user' | 'extraction' | 'auto';
         }
     ): Promise<EntityRegistrationResult> {
-        await this.ensureInit();
+        const result = await entityRegistry.registerEntity(label, kind, noteId, options);
 
-        // Check if already exists
-        const existing = this.findEntityByLabel(label);
-        if (existing) {
-            existing.totalMentions++;
-            existing.lastSeenDate = new Date();
-            const noteCount = existing.mentionsByNote.get(noteId) || 0;
-            existing.mentionsByNote.set(noteId, noteCount + 1);
-            this.saveToStorage();
-            return { entity: existing, isNew: false, wasMerged: false };
-        }
+        // Update implicit scanner incrementally needed? 
+        // implicitScanner usually rebuilds trie. Ideally we call hydrate again or addIncremental.
+        // For now, re-hydration is safer though heavier. Or rely on scanning logic.
+        implicitScanner.hydrate(Array.from(entityRegistry.getAllEntities()).map(this.toScannerEntity));
 
-        // Create new entity
-        const entity: RegisteredEntity = {
-            id: crypto.randomUUID(),
-            label,
-            aliases: options?.aliases || [],
-            kind,
-            subtype: options?.subtype,
-            firstNote: noteId,
-            mentionsByNote: new Map([[noteId, 1]]),
-            totalMentions: 1,
-            lastSeenDate: new Date(),
-            createdAt: new Date(),
-            createdBy: options?.source || 'auto',
-            attributes: options?.attributes,
-        };
-
-        this.addToCache(entity);
-        console.log(`[SmartGraphRegistry] Registered new entity: ${label} (${kind})`);
-
-        return { entity, isNew: true, wasMerged: false };
+        return result;
     }
 
     async deleteEntity(id: string): Promise<boolean> {
-        await this.ensureInit();
-        this.removeFromCache(id);
-        // Also delete related edges
-        for (const [edgeId, edge] of this.edgeCache) {
-            if (edge.sourceId === id || edge.targetId === id) {
-                this.edgeCache.delete(edgeId);
-            }
-        }
-        this.saveToStorage();
-        return true;
+        return entityRegistry.deleteEntity(id);
     }
 
     async clearAll(): Promise<number> {
-        await this.ensureInit();
-        const count = this.entityCache.size;
-        this.entityCache.clear();
-        this.labelIndex.clear();
-        this.aliasIndex.clear();
-        this.edgeCache.clear();
-        this.saveToStorage();
+        await entityRegistry.clear();
+        await relationshipRegistry.clear();
         implicitScanner.hydrate([]);
-        console.log(`[SmartGraphRegistry] Cleared ${count} entities`);
-        return count;
+        return 0; // Count unknown unless we checked before clearing
     }
 
     // =========================================================================
@@ -312,128 +152,89 @@ export class SmartGraphRegistry {
             sourceNote?: string;
         }
     ): Promise<Edge> {
-        await this.ensureInit();
+        const rel = relationshipRegistry.add({
+            sourceEntityId: sourceId,
+            targetEntityId: targetId,
+            type: type,
+            provenance: [{
+                source: 'user', // Default source for manual creation
+                originId: options?.sourceNote || 'unknown',
+                confidence: options?.confidence || 1.0,
+                timestamp: new Date()
+            }]
+        });
 
-        const edge: Edge = {
-            id: crypto.randomUUID(),
-            sourceId,
-            targetId,
-            type,
-            confidence: options?.confidence ?? 1.0,
-            sourceNote: options?.sourceNote,
+        return {
+            id: rel.id,
+            sourceId: rel.sourceEntityId,
+            targetId: rel.targetEntityId,
+            type: rel.type,
+            confidence: rel.confidence,
+            sourceNote: options?.sourceNote // Not stored directly on edge but in provenance
         };
-
-        this.edgeCache.set(edge.id, edge);
-        this.saveToStorage();
-        return edge;
     }
 
     async getEdges(
         entityId: string,
         direction: 'in' | 'out' | 'both' = 'both'
     ): Promise<Edge[]> {
-        await this.ensureInit();
-        return Array.from(this.edgeCache.values()).filter(edge => {
-            if (direction === 'out') return edge.sourceId === entityId;
-            if (direction === 'in') return edge.targetId === entityId;
-            return edge.sourceId === entityId || edge.targetId === entityId;
-        });
+        let relations;
+        if (direction === 'in') {
+            relations = relationshipRegistry.getByTarget(entityId);
+        } else if (direction === 'out') {
+            relations = relationshipRegistry.getBySource(entityId);
+        } else {
+            relations = relationshipRegistry.getByEntity(entityId);
+        }
+
+        return relations.map(r => ({
+            id: r.id,
+            sourceId: r.sourceEntityId,
+            targetId: r.targetEntityId,
+            type: r.type,
+            confidence: r.confidence,
+            sourceNote: r.provenance[0]?.originId // Approximation
+        }));
     }
 
     async deleteEdge(edgeId: string): Promise<boolean> {
-        await this.ensureInit();
-        this.edgeCache.delete(edgeId);
-        this.saveToStorage();
-        return true;
+        return relationshipRegistry.delete(edgeId);
     }
 
-    /**
-     * Get all edges in the graph (for visualization)
-     */
     getAllEdges(): Edge[] {
-        return Array.from(this.edgeCache.values());
+        return relationshipRegistry.getAll().map(r => ({
+            id: r.id,
+            sourceId: r.sourceEntityId,
+            targetId: r.targetEntityId,
+            type: r.type,
+            confidence: r.confidence,
+            sourceNote: r.provenance[0]?.originId
+        }));
     }
 
     // =========================================================================
-    // Search
+    // Search & Misc
     // =========================================================================
 
-    async searchEntities(query: string): Promise<Array<{
-        entity: RegisteredEntity;
-        matchType: 'exact' | 'alias' | 'fuzzy';
-        score: number;
-    }>> {
-        const normalized = query.toLowerCase();
-        const results: Array<{ entity: RegisteredEntity; matchType: 'exact' | 'alias' | 'fuzzy'; score: number }> = [];
-
-        for (const entity of this.entityCache.values()) {
-            let matchType: 'exact' | 'alias' | 'fuzzy' = 'fuzzy';
-            let score = 0;
-
-            if (entity.label.toLowerCase() === normalized) {
-                matchType = 'exact';
-                score = 1.0;
-            } else if (entity.aliases.some(a => a.toLowerCase() === normalized)) {
-                matchType = 'alias';
-                score = 0.9;
-            } else if (entity.label.toLowerCase().includes(normalized)) {
-                matchType = 'fuzzy';
-                score = 0.7;
-            } else {
-                continue;
-            }
-
-            results.push({ entity, matchType, score });
-        }
-
-        return results.sort((a, b) => b.score - a.score);
+    async searchEntities(query: string) {
+        return entityRegistry.searchEntities(query);
     }
 
     async addAlias(entityId: string, alias: string): Promise<boolean> {
-        const entity = this.entityCache.get(entityId);
-        if (entity) {
-            entity.aliases.push(alias);
-            this.aliasIndex.set(alias.toLowerCase(), entityId);
-            this.saveToStorage();
-            return true;
-        }
-        return false;
+        return entityRegistry.addAlias(entityId, alias);
     }
 
-    async getStats(): Promise<{
-        totalEntities: number;
-        byKind: Record<string, number>;
-        totalMentions: number;
-        totalAliases: number;
-        totalEdges: number;
-    }> {
-        const byKind: Record<string, number> = {};
-        let totalMentions = 0;
-        let totalAliases = 0;
-
-        for (const entity of this.entityCache.values()) {
-            byKind[entity.kind] = (byKind[entity.kind] || 0) + 1;
-            totalMentions += entity.totalMentions;
-            totalAliases += entity.aliases.length;
-        }
-
+    async getStats() {
+        // approximate compatibility
+        const stats = await entityRegistry.getStats();
+        const edges = await relationshipRegistry.getAll();
         return {
-            totalEntities: this.entityCache.size,
-            byKind,
-            totalMentions,
-            totalAliases,
-            totalEdges: this.edgeCache.size,
+            totalEntities: stats.totalEntities,
+            byKind: stats.byKind,
+            totalMentions: stats.totalMentions,
+            totalAliases: stats.totalAliases,
+            totalEdges: edges.length
         };
-    }
-
-    // =========================================================================
-    // Helpers
-    // =========================================================================
-
-    private async ensureInit(): Promise<void> {
-        if (!this.initialized) {
-            await this.init();
-        }
     }
 }
 
@@ -441,5 +242,5 @@ export class SmartGraphRegistry {
 // Singleton Export
 // ============================================================================
 
-export const smartGraphRegistry = new SmartGraphRegistry();
+export const smartGraphRegistry = new SmartGraphRegistryFacade();
 export { smartGraphRegistry as entityRegistry };

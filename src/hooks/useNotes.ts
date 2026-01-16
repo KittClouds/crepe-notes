@@ -21,8 +21,8 @@ export const noteKeys = {
 export function useNotes() {
     return useQuery({
         queryKey: noteKeys.all,
-        queryFn: () => {
-            const notes = getAllNotes();
+        queryFn: async () => {
+            const notes = await getAllNotes();
             // Don't overwrite content - it may contain JSON doc
             // Only set content if it's empty and markdownContent exists
             return notes.map(n => ({
@@ -31,7 +31,7 @@ export function useNotes() {
                 content: n.content || n.markdownContent || '',
             })) as Note[];
         },
-        staleTime: Infinity, // localStorage doesn't change externally
+        staleTime: Infinity, // IndexedDB doesn't change externally (same tab)
     });
 }
 
@@ -39,7 +39,7 @@ export function useNotes() {
 export function useNote(id: string | null) {
     return useQuery({
         queryKey: noteKeys.detail(id || ''),
-        queryFn: () => id ? getNoteById(id) : null,
+        queryFn: async () => id ? await getNoteById(id) : null,
         enabled: !!id,
         staleTime: Infinity,
     });
@@ -51,7 +51,7 @@ export function useCreateNote() {
 
     return useMutation({
         mutationFn: async (params: { folderId?: string; title?: string }): Promise<Note> => {
-            const note = createNoteStorage({
+            const note = await createNoteStorage({
                 title: params.title || 'Untitled Note',
                 folderId: params.folderId || null,
             });
@@ -75,12 +75,13 @@ export function useUpdateNote() {
 
     return useMutation({
         mutationFn: async ({ id, updates }: { id: string; updates: Partial<Note> }): Promise<Note | undefined> => {
-            return updateNoteStorage(id, updates as any);
+            return await updateNoteStorage(id, updates as any);
         },
         onMutate: async ({ id, updates }) => {
             await queryClient.cancelQueries({ queryKey: noteKeys.all });
             const previousNotes = queryClient.getQueryData<Note[]>(noteKeys.all);
 
+            // Optimistic update
             queryClient.setQueryData<Note[]>(noteKeys.all, (old) =>
                 old?.map(n => n.id === id ? { ...n, ...updates } : n)
             );
@@ -101,7 +102,7 @@ export function useDeleteNote() {
 
     return useMutation({
         mutationFn: async (id: string): Promise<string> => {
-            const success = deleteNoteStorage(id);
+            const success = await deleteNoteStorage(id);
             if (!success) throw new Error('Failed to delete note');
             return id;
         },

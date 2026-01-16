@@ -254,6 +254,6 @@ export function getStorageService() {
 }
 
 export async function initializeStorage(): Promise<void> {
-    await smartGraphRegistry.ensureInit();
+    await smartGraphRegistry.init();
     console.log('[Storage Shim] Initialized via smartGraphRegistry');
 }

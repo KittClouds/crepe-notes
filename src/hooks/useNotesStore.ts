@@ -47,32 +47,32 @@ export function useNotesStore() {
     }, [notes]);
 
     // Wrapped CRUD functions
-    const createNote = (folderId?: string, title?: string) => {
-        const result = createNoteMutation.mutate({ folderId, title });
+    const createNote = async (folderId?: string, title?: string) => {
+        const result = await createNoteMutation.mutateAsync({ folderId, title });
         // Get the created note ID and select it
         // Note: We use onSuccess in the mutation to handle this
         return result;
     };
 
-    const updateNote = (id: string, updates: Partial<Note>) => {
-        return updateNoteMutation.mutate({ id, updates });
+    const updateNote = async (id: string, updates: Partial<Note>) => {
+        return await updateNoteMutation.mutateAsync({ id, updates });
     };
 
-    const deleteNote = (id: string) => {
+    const deleteNote = async (id: string) => {
         closeNote(id); // Close tab first
-        return deleteNoteMutation.mutate(id);
+        return await deleteNoteMutation.mutateAsync(id);
     };
 
-    const createFolder = (name: string, parentId?: string | null, options?: any) => {
-        return createFolderMutation.mutate({ name, parentId, options });
+    const createFolder = async (name: string, parentId?: string | null, options?: any) => {
+        return await createFolderMutation.mutateAsync({ name, parentId, options });
     };
 
-    const updateFolder = (id: string, updates: any) => {
-        return updateFolderMutation.mutate({ id, updates });
+    const updateFolder = async (id: string, updates: any) => {
+        return await updateFolderMutation.mutateAsync({ id, updates });
     };
 
-    const deleteFolder = (id: string) => {
-        return deleteFolderMutation.mutate(id);
+    const deleteFolder = async (id: string) => {
+        return await deleteFolderMutation.mutateAsync(id);
     };
 
     // Combined state object for backwards compatibility

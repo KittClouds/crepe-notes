@@ -1,10 +1,8 @@
 import { Note, Folder, Tag } from '@/types/notes';
 import { v4 as uuidv4 } from 'uuid';
+import { db, Collections } from './db';
 
 const STORAGE_KEYS = {
-  NOTES: 'inkwell_notes',
-  FOLDERS: 'inkwell_folders',
-  TAGS: 'inkwell_tags',
   CURRENT_NOTE_ID: 'inkwell_current_note_id',
 } as const;
 
@@ -24,42 +22,21 @@ Start writing your thoughts here. This editor supports **Markdown** formatting.
 Happy writing! ✨
 `;
 
-// Helper to get data from localStorage
-function getStorageItem<T>(key: string, defaultValue: T): T {
-  try {
-    const item = localStorage.getItem(key);
-    if (!item) return defaultValue;
-    return JSON.parse(item, (key, value) => {
-      if (key === 'createdAt' || key === 'updatedAt') {
-        return new Date(value);
-      }
-      return value;
-    });
-  } catch {
-    return defaultValue;
-  }
-}
-
-// Helper to set data in localStorage
-function setStorageItem<T>(key: string, value: T): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.error(`Failed to save to localStorage: ${key}`, error);
-  }
-}
-
 // Notes CRUD operations
-export function getAllNotes(): Note[] {
-  return getStorageItem<Note[]>(STORAGE_KEYS.NOTES, []);
+export async function getAllNotes(): Promise<Note[]> {
+  const notes = await db.collection(Collections.NOTES).find({});
+  // db returns Document[], cast to Note[]
+  // Since we store dates as strings/numbers in JSON/IDB usually, we might need hydration if Note expects Date objects
+  // NebulaDB (via IndexedDB) can store Date objects natively! 
+  return notes as unknown as Note[];
 }
 
-export function getNoteById(id: string): Note | undefined {
-  const notes = getAllNotes();
-  return notes.find((note) => note.id === id);
+export async function getNoteById(id: string): Promise<Note | undefined> {
+  const note = await db.collection(Collections.NOTES).findOne({ id });
+  return note as unknown as Note | undefined;
 }
 
-export function createNote(partial?: Partial<Note>): Note {
+export async function createNote(partial?: Partial<Note>): Promise<Note> {
   const now = new Date();
   const note: Note = {
     id: uuidv4(),
@@ -72,42 +49,36 @@ export function createNote(partial?: Partial<Note>): Note {
     ownerId: partial?.ownerId ?? 'local-user',
   };
 
-  const notes = getAllNotes();
-  notes.unshift(note);
-  setStorageItem(STORAGE_KEYS.NOTES, notes);
-
+  await db.collection(Collections.NOTES).insert(note as any);
   return note;
 }
 
-export function updateNote(id: string, updates: Partial<Note>): Note | undefined {
-  const notes = getAllNotes();
-  const index = notes.findIndex((note) => note.id === id);
+export async function updateNote(id: string, updates: Partial<Note>): Promise<Note | undefined> {
+  // We need to fetch current to merge? Or usage update operator?
+  // Our NebulaDB adapter supports $set which is partial update.
+  // But we need to return the updated object.
+  // Ideally: update -> findOne
 
-  if (index === -1) return undefined;
+  const now = new Date();
+  const actualUpdates = { ...updates, updatedAt: now };
 
-  const updatedNote = {
-    ...notes[index],
-    ...updates,
-    updatedAt: new Date(),
-  };
+  const count = await db.collection(Collections.NOTES).update(
+    { id },
+    { $set: actualUpdates }
+  );
 
-  notes[index] = updatedNote;
-  setStorageItem(STORAGE_KEYS.NOTES, notes);
+  if (count === 0) return undefined;
 
-  return updatedNote;
+  return getNoteById(id);
 }
 
-export function deleteNote(id: string): boolean {
-  const notes = getAllNotes();
-  const filteredNotes = notes.filter((note) => note.id !== id);
-
-  if (filteredNotes.length === notes.length) return false;
-
-  setStorageItem(STORAGE_KEYS.NOTES, filteredNotes);
-  return true;
+export async function deleteNote(id: string): Promise<boolean> {
+  const count = await db.collection(Collections.NOTES).delete({ id });
+  return count > 0;
 }
 
-// Current note management
+// Current note management (UI State - keep in localStorage for now or move to DB settings?)
+// Keeping in localStorage is faster for sync initialization of UI routers.
 export function getCurrentNoteId(): string | null {
   return localStorage.getItem(STORAGE_KEYS.CURRENT_NOTE_ID);
 }
@@ -121,8 +92,9 @@ export function setCurrentNoteId(id: string | null): void {
 }
 
 // Folders CRUD operations
-export function getAllFolders(): Folder[] {
-  return getStorageItem<Folder[]>(STORAGE_KEYS.FOLDERS, []);
+export async function getAllFolders(): Promise<Folder[]> {
+  const folders = await db.collection(Collections.FOLDERS).find({});
+  return folders as unknown as Folder[];
 }
 
 export interface CreateFolderOptions {
@@ -134,7 +106,7 @@ export interface CreateFolderOptions {
   isSubtypeRoot?: boolean;
 }
 
-export function createFolder(name: string, parentId: string | null = null, options?: CreateFolderOptions): Folder {
+export async function createFolder(name: string, parentId: string | null = null, options?: CreateFolderOptions): Promise<Folder> {
   const now = new Date();
   const folder: Folder = {
     id: uuidv4(),
@@ -152,47 +124,38 @@ export function createFolder(name: string, parentId: string | null = null, optio
     isSubtypeRoot: options?.isSubtypeRoot,
   };
 
-  const folders = getAllFolders();
-  folders.push(folder);
-  setStorageItem(STORAGE_KEYS.FOLDERS, folders);
-
+  await db.collection(Collections.FOLDERS).insert(folder as any);
   return folder;
 }
 
-export function updateFolder(id: string, updates: Partial<Folder>): Folder | undefined {
-  const folders = getAllFolders();
-  const index = folders.findIndex((folder) => folder.id === id);
+export async function updateFolder(id: string, updates: Partial<Folder>): Promise<Folder | undefined> {
+  const now = new Date();
+  const actualUpdates = { ...updates, updatedAt: now };
 
-  if (index === -1) return undefined;
+  const count = await db.collection(Collections.FOLDERS).update(
+    { id },
+    { $set: actualUpdates }
+  );
 
-  const updatedFolder = {
-    ...folders[index],
-    ...updates,
-    updatedAt: new Date(),
-  };
+  if (count === 0) return undefined;
 
-  folders[index] = updatedFolder;
-  setStorageItem(STORAGE_KEYS.FOLDERS, folders);
-
-  return updatedFolder;
+  // Return full object
+  const folder = await db.collection(Collections.FOLDERS).findOne({ id });
+  return folder as unknown as Folder;
 }
 
-export function deleteFolder(id: string): boolean {
-  const folders = getAllFolders();
-  const filteredFolders = folders.filter((folder) => folder.id !== id);
-
-  if (filteredFolders.length === folders.length) return false;
-
-  setStorageItem(STORAGE_KEYS.FOLDERS, filteredFolders);
-  return true;
+export async function deleteFolder(id: string): Promise<boolean> {
+  const count = await db.collection(Collections.FOLDERS).delete({ id });
+  return count > 0;
 }
 
 // Tags CRUD operations
-export function getAllTags(): Tag[] {
-  return getStorageItem<Tag[]>(STORAGE_KEYS.TAGS, []);
+export async function getAllTags(): Promise<Tag[]> {
+  const tags = await db.collection(Collections.TAGS).find({});
+  return tags as unknown as Tag[];
 }
 
-export function createTag(name: string, color: string = '#3b82f6'): Tag {
+export async function createTag(name: string, color: string = '#3b82f6'): Promise<Tag> {
   const tag: Tag = {
     id: uuidv4(),
     name,
@@ -200,16 +163,18 @@ export function createTag(name: string, color: string = '#3b82f6'): Tag {
     ownerId: 'local-user',
   };
 
-  const tags = getAllTags();
-  tags.push(tag);
-  setStorageItem(STORAGE_KEYS.TAGS, tags);
-
+  await db.collection(Collections.TAGS).insert(tag as any);
   return tag;
 }
 
 // Search functionality
-export function searchNotes(query: string): Note[] {
-  const notes = getAllNotes();
+export async function searchNotes(query: string): Promise<Note[]> {
+  // Full text search in NebulaDB is not implemented efficiently yet, so we fetch all and filter.
+  // Or usage $contains if we implemented it?
+  // The 'MemoryAdapter' implements match logic. 'IndexedDBAdapter' does find() -> filter in memory.
+  // So this logic can remain similar but async.
+
+  const notes = await getAllNotes();
   const lowerQuery = query.toLowerCase();
 
   return notes.filter((note) =>
@@ -220,8 +185,13 @@ export function searchNotes(query: string): Note[] {
 }
 
 // Find note by title (for wikilink resolution)
-export function findNoteByTitle(title: string): Note | null {
-  const notes = getAllNotes();
+export async function findNoteByTitle(title: string): Promise<Note | null> {
+  // Optimize: query DB directly?
+  // DB query: { title: { $eq: title } } (case sensitive in basic impl)
+  // We need case insensitive.
+  // For now, fetch all is safest until we add normalized indexes.
+
+  const notes = await getAllNotes();
   const lowerTitle = title.toLowerCase();
 
   // Exact match first
@@ -234,8 +204,9 @@ export function findNoteByTitle(title: string): Note | null {
 }
 
 // Initialize with a default note if none exist
-export function initializeStorage(): Note {
-  const notes = getAllNotes();
+export async function initializeStorage(): Promise<Note> {
+  // This might be called on app mount.
+  const notes = await getAllNotes();
 
   if (notes.length === 0) {
     return createNote({
@@ -245,3 +216,4 @@ export function initializeStorage(): Note {
 
   return notes[0];
 }
+

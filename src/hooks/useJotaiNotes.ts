@@ -53,25 +53,8 @@ export function useJotaiNotes() {
         title?: string,
         _sourceNoteId?: string
     ): Promise<Note> => {
-        const noteId = await createNote({
-            title: title || 'Untitled Note',
-            folderId: folderId || null,
-            markdownContent: '',
-        });
-
-        // Return a basic note object
-        return {
-            id: noteId,
-            title: title || 'Untitled Note',
-            content: '',
-            markdownContent: '',
-            folderId: folderId || null,
-            favorite: false,
-            isEntity: false,
-            tags: [],
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        } as unknown as Note;
+        const note = await createNote(folderId || undefined, title || undefined);
+        return note;
     };
 
     /**
@@ -86,26 +69,16 @@ export function useJotaiNotes() {
             color?: string;
         }
     ): Promise<Folder> => {
-        const folderId = await createFolder(name, parentId, options);
-
-        return {
-            id: folderId,
-            name,
-            parentId: parentId || null,
-            entityKind: options?.entityKind,
-            isTypedRoot: options?.isTypedRoot,
-            color: options?.color,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        } as unknown as Folder;
+        const folder = await createFolder(name, parentId, options);
+        return folder as unknown as Folder;
     };
 
     return {
         state: {
             notes: state.notes,
             folders: state.folders,
-            isSaving: state.isSaving,
-            lastSaved: state.lastSaved,
+            isSaving: false,
+            lastSaved: Date.now(),
             searchQuery: state.searchQuery || '',
             selectedNoteId: state.selectedNoteId,
             openNoteIds: state.openNoteIds || [],
