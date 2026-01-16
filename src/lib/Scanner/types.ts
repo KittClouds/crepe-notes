@@ -19,6 +19,9 @@ export type EntityKind =
     | 'ACT'
     | 'CHAPTER'
     | 'BEAT'
+    | 'TIMELINE'
+    | 'NARRATIVE'
+    | 'NETWORK'
     | 'CUSTOM'
     | 'UNKNOWN';
 

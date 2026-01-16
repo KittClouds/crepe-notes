@@ -148,7 +148,7 @@ class DefaultHighlighterApi implements HighlighterApi {
         const settings = highlightingStore.getSettings();
         return {
             mode: settings.mode,
-            enabledKinds: settings.focusEntityKinds.length > 0 ? settings.focusEntityKinds : undefined,
+            focusKinds: settings.focusEntityKinds.length > 0 ? settings.focusEntityKinds : undefined,
             enableWikilinks: settings.showWikilinks,
             enableEntityRefs: this.enableEntityRefs,
         };
@@ -161,8 +161,8 @@ class DefaultHighlighterApi implements HighlighterApi {
         if (config.enableWikilinks !== undefined) {
             highlightingStore.setSettings({ showWikilinks: config.enableWikilinks });
         }
-        if (config.enabledKinds !== undefined) {
-            highlightingStore.setSettings({ focusEntityKinds: config.enabledKinds as EntityKind[] });
+        if (config.focusKinds !== undefined) {
+            highlightingStore.setSettings({ focusEntityKinds: config.focusKinds as EntityKind[] });
         }
         if (config.enableEntityRefs !== undefined) {
             this.enableEntityRefs = config.enableEntityRefs;

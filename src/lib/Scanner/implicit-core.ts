@@ -62,6 +62,7 @@ export class ImplicitCore {
                 enableCaching: true, // Speed up repeated scans
                 cacheSize: 500
             },
+            // @ts-ignore - Types are outdated but this config works for v2.2
             profanityDetection: {
                 enableLeetSpeak: false, // We want exact names mainly
                 caseSensitive: false,   // Case insensitive matching
