@@ -174,10 +174,41 @@ function buildFuzzyIndex(reg: RegisteredEntity[]): FuzzyIndex {
     return { entities, anchorToIds, uniquePhraseToId, uniqueTokenToId };
 }
 
+// Collapse overlapping fuzzy spans into ambiguous ones
+function collapseAmbiguousSameRange(spans: DecorationSpan[], text: string): DecorationSpan[] {
+    const byKey = new Map<string, DecorationSpan[]>();
+    for (const s of spans) {
+        const k = `${s.from}:${s.to}`;
+        const arr = byKey.get(k) ?? [];
+        arr.push(s);
+        byKey.set(k, arr);
+    }
+
+    const out: DecorationSpan[] = [];
+    for (const arr of byKey.values()) {
+        if (arr.length === 1) { out.push(arr[0]); continue; }
+
+        const candidateIds = arr.map(a => a.entityId).filter(Boolean) as string[];
+        const candidateLabels = arr.map(a => a.label);
+
+        out.push({
+            type: 'entity_implicit',
+            from: arr[0].from,
+            to: arr[0].to,
+            label: text.slice(arr[0].from, arr[0].to),
+            kind: arr[0].kind,
+            resolved: false,
+            candidateIds,
+            candidateLabels
+        });
+    }
+    return out;
+}
+
 function scanFuzzy(
     text: string,
     idx: FuzzyIndex,
-    _entityMap: Map<string, { id: string; label: string; kind: EntityKind }>
+    entityMap: Map<string, EntityInfo[]> // Updated to match ImplicitCore's map type, though we might only need simple lookup
 ): DecorationSpan[] {
     const toks = tokenizeWithOffsets(text);
     if (toks.length === 0) return [];
@@ -196,7 +227,8 @@ function scanFuzzy(
                 to: toks[i].end,
                 label: e.label,
                 kind: e.kind,
-                resolved: true
+                resolved: true,
+                entityId: e.id
             });
         }
     }
@@ -214,7 +246,8 @@ function scanFuzzy(
                 to: toks[i + 1].end,
                 label: e.label,
                 kind: e.kind,
-                resolved: true
+                resolved: true,
+                entityId: e.id
             });
         }
     }
@@ -278,13 +311,14 @@ function scanFuzzy(
                     to: best.to,
                     label: e.label,
                     kind: e.kind,
-                    resolved: true
+                    resolved: true,
+                    entityId: e.id
                 });
             }
         }
     }
 
-    return spans;
+    return collapseAmbiguousSameRange(spans, text);
 }
 
 // Helper for smart alias generation
@@ -304,7 +338,6 @@ function generateAliases(label: string, kind: EntityKind): string[] {
         if (first.length >= 3) aliases.push(first);
         if (last.length >= 3 && last !== first) aliases.push(last);
     } else if (kind === 'FACTION' || kind === 'ORGANIZATION') {
-        // Keep acronym; last-token alias is allowed but will be dropped if ambiguous at hydrate-time.
         const acronym = parts
             .filter(p => p && !STOP.test(p))
             .map(p => p[0])
@@ -312,12 +345,102 @@ function generateAliases(label: string, kind: EntityKind): string[] {
             .toUpperCase();
 
         if (acronym.length >= 2) aliases.push(acronym);
-
         if (last.length >= 3) aliases.push(last);
     }
 
-    // De-dupe per-entity
     return [...new Set(aliases)];
+}
+
+export type DisambigOptions = {
+    windowTokens?: number;     // context window on each side
+    delta?: number;            // required margin between best and 2nd best
+    minScore?: number;         // minimum best score to resolve
+    wAnchor?: number;          // weight for anchor hits
+    wOverlap?: number;         // weight for token overlap
+    wPrior?: number;           // weight for priors
+};
+
+function spanTokenWindow(toks: Tok[], from: number, to: number, w: number): Tok[] {
+    let lo = toks.findIndex(t => t.end > from);
+    if (lo < 0) lo = toks.length;
+    let hi = lo;
+    while (hi < toks.length && toks[hi].start < to) hi++;
+
+    const a = Math.max(0, lo - w);
+    const b = Math.min(toks.length, hi + w);
+    return toks.slice(a, b);
+}
+
+function scoreCandidate(
+    cand: FuzzyEntity,
+    win: Tok[],
+    priors?: Map<string, number>,
+    opt?: DisambigOptions
+): number {
+    const o = opt ?? {};
+    const wAnchor = o.wAnchor ?? 6;
+    const wOverlap = o.wOverlap ?? 2;
+    const wPrior = o.wPrior ?? 4;
+
+    const winSet = new Set(win.map(t => t.t));
+
+    let anchorHits = 0;
+    for (const a of cand.anchors) if (winSet.has(a)) anchorHits++;
+
+    let overlap = 0;
+    for (const t of cand.tokens) if (winSet.has(t)) overlap++;
+
+    const prior = priors?.get(cand.id) ?? 0;
+
+    return anchorHits * wAnchor + overlap * wOverlap + prior * wPrior;
+}
+
+export function disambiguateSpans(
+    text: string,
+    spans: DecorationSpan[],
+    idx: FuzzyIndex,
+    priors?: Map<string, number>,
+    opt?: DisambigOptions
+): DecorationSpan[] {
+    const windowTokens = opt?.windowTokens ?? 8;
+    const delta = opt?.delta ?? 3;
+    const minScore = opt?.minScore ?? 8;
+
+    const toks = tokenizeWithOffsets(text);
+    if (toks.length === 0) return spans;
+
+    return spans.map(span => {
+        if (span.type !== 'entity_implicit') return span;
+        if (span.resolved !== false) return span;
+        if (!span.candidateIds || span.candidateIds.length < 2) return span;
+
+        const win = spanTokenWindow(toks, span.from, span.to, windowTokens);
+
+        const scored: { id: string; score: number; e: FuzzyEntity }[] = [];
+        for (const id of span.candidateIds) {
+            const e = idx.entities.get(id);
+            if (!e) continue;
+            scored.push({ id, score: scoreCandidate(e, win, priors, opt), e });
+        }
+        if (scored.length < 2) return span;
+
+        scored.sort((a, b) => b.score - a.score);
+        const best = scored[0];
+        const second = scored[1];
+
+        if (best.score < minScore) return span;
+        if (best.score - second.score < delta) return span;
+
+        return {
+            ...span,
+            resolved: true,
+            entityId: best.id,
+            label: best.e.label,
+            kind: best.e.kind,
+            candidateIds: undefined,
+            candidateLabels: undefined,
+        };
+    });
 }
 
 type EntityInfo = { id: string; label: string; kind: EntityKind };
@@ -325,97 +448,60 @@ type PatternEntry = { surface: string; info: EntityInfo };
 
 export class ImplicitCore {
     private filter: AllProfanity;
-
-    // Exact match lookup: normalized(surface) -> entity info (only if unambiguous)
-    private entityMap: Map<string, EntityInfo>;
-
-    // Optional: keep track of patterns we intentionally dropped as ambiguous
-    private ambiguousPatterns: Set<string>;
-
+    private aliasToCandidates: Map<string, EntityInfo[]> = new Map();
+    private aliasSurface: Map<string, string> = new Map();
     private fuzzyIndex: FuzzyIndex | null = null;
 
     constructor() {
         this.filter = new AllProfanity({
             algorithm: { matching: 'aho-corasick' },
             performance: { enableCaching: true, cacheSize: 500 },
-            // @ts-ignore - Types are outdated but this config works for v2.2
-            profanityDetection: {
-                enableLeetSpeak: false,
-                caseSensitive: false,
-                strictMode: true
-            }
+            // @ts-ignore
+            profanityDetection: { enableLeetSpeak: false, caseSensitive: false, strictMode: true }
         });
-
-        this.entityMap = new Map();
-        this.ambiguousPatterns = new Set();
     }
 
     hydrate(entities: RegisteredEntity[]): void {
         this.filter.clearList();
-        this.entityMap.clear();
-        this.ambiguousPatterns.clear();
+        this.aliasToCandidates.clear();
+        this.aliasSurface.clear();
 
-        // Build fuzzy index up front (also used for uniqueness fast paths)
         this.fuzzyIndex = buildFuzzyIndex(entities);
 
-        // Two-phase: propose many patterns, then keep only unambiguous normalized keys.
-        const normKeyToEntry = new Map<string, PatternEntry | null>();
-
         const offer = (surface: string, info: EntityInfo) => {
-            const normKey = normalizeRaw(surface);
-            if (!normKey) return;
+            const key = normalizeRaw(surface);
+            if (!key) return;
 
-            const existing = normKeyToEntry.get(normKey);
-            if (!existing) {
-                normKeyToEntry.set(normKey, { surface, info });
-                return;
-            }
-            if (existing === null) return;
+            if (!this.aliasSurface.has(key)) this.aliasSurface.set(key, surface);
 
-            if (existing.info.id !== info.id) {
-                normKeyToEntry.set(normKey, null);
-                this.ambiguousPatterns.add(normKey);
-            }
-            // else: same entity; keep first surface
+            const arr = this.aliasToCandidates.get(key) ?? [];
+            if (!arr.some(x => x.id === info.id)) arr.push(info);
+            this.aliasToCandidates.set(key, arr);
         };
 
         for (const entity of entities) {
             const info: EntityInfo = { id: entity.id, label: entity.label, kind: entity.kind };
 
-            // 1) Primary label (also offer normalized variant for punctuation-insensitive matching)
             offer(entity.label, info);
             const normLabel = normalizeRaw(entity.label);
             if (normLabel && normLabel !== normalizeRaw(entity.label)) {
-                // (this condition is effectively redundant; kept harmless)
                 offer(normLabel, info);
             } else {
-                // still useful to explicitly offer normalized label as a surface form sometimes
                 offer(normLabel, info);
             }
 
-            // 2) Explicit aliases (plus normalized variants)
             for (const alias of entity.aliases || []) {
                 offer(alias, info);
                 offer(normalizeRaw(alias), info);
             }
 
-            // 3) Smart aliases (plus normalized variants)
             for (const alias of generateAliases(entity.label, entity.kind)) {
                 offer(alias, info);
                 offer(normalizeRaw(alias), info);
             }
         }
 
-        // Finalize dictionary + entityMap (only unambiguous)
-        const dictionary: string[] = [];
-        for (const [normKey, entry] of normKeyToEntry.entries()) {
-            if (!entry) continue;
-            if (this.ambiguousPatterns.has(normKey)) continue;
-
-            this.entityMap.set(normKey, entry.info);
-            dictionary.push(entry.surface);
-        }
-
+        const dictionary = [...this.aliasSurface.values()];
         if (dictionary.length > 0) {
             this.filter.loadCustomDictionary('entities', dictionary);
             this.filter.loadLanguage('entities');
@@ -427,34 +513,50 @@ export class ImplicitCore {
 
         let spans: DecorationSpan[] = [];
 
-        // 1) Exact match (AllProfanity strictMode handles word boundaries)
         const result = this.filter.detect(text);
         if (result.hasProfanity) {
             for (const match of result.positions) {
                 if (match.start < 0 || match.end > text.length) continue;
 
-                // Normalize the matched surface before lookup (handles casing/punct differences)
                 const key = normalizeRaw(match.word);
-                const info = this.entityMap.get(key);
-                if (!info) continue;
+                const candidates = this.aliasToCandidates.get(key);
+                if (!candidates || candidates.length === 0) continue;
 
-                spans.push({
-                    type: 'entity_implicit',
-                    from: match.start,
-                    to: match.end,
-                    label: info.label,
-                    kind: info.kind,
-                    resolved: true
-                });
+                if (candidates.length === 1) {
+                    const c = candidates[0];
+                    spans.push({
+                        type: 'entity_implicit',
+                        from: match.start,
+                        to: match.end,
+                        label: c.label,
+                        kind: c.kind,
+                        resolved: true,
+                        entityId: c.id
+                    });
+                } else {
+                    spans.push({
+                        type: 'entity_implicit',
+                        from: match.start,
+                        to: match.end,
+                        label: text.slice(match.start, match.end),
+                        kind: candidates[0].kind,
+                        resolved: false,
+                        candidateIds: candidates.map(c => c.id),
+                        candidateLabels: candidates.map(c => c.label)
+                    });
+                }
             }
         }
 
-        // 2) Fuzzy match (two-stage gated)
         if (this.fuzzyIndex) {
-            spans.push(...scanFuzzy(text, this.fuzzyIndex, this.entityMap));
+            const fuzzy = scanFuzzy(text, this.fuzzyIndex, this.aliasToCandidates as any);
+            spans.push(...fuzzy);
         }
 
-        return this.deduplicate(spans);
+        const merged = this.deduplicate(spans);
+        return this.fuzzyIndex
+            ? disambiguateSpans(text, merged, this.fuzzyIndex, undefined /* priors */)
+            : merged;
     }
 
     scanBatch(items: { id: number; text: string }[]): Map<number, DecorationSpan[]> {
@@ -476,7 +578,6 @@ export class ImplicitCore {
         for (let i = 1; i < spans.length; i++) {
             const next = spans[i];
 
-            // overlap: keep longer
             if (next.from < current.to) {
                 const currentLen = current.to - current.from;
                 const nextLen = next.to - next.from;

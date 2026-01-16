@@ -50,7 +50,7 @@ export async function scanForPatterns(text: string, noteId?: string): Promise<De
 
         // Auto-register entity
         if (noteId) {
-            await smartGraphRegistry.registerEntity(label, kind as EntityKind, noteId, { source: 'auto' });
+            await smartGraphRegistry.registerEntity(label, kind as EntityKind || 'UNKNOWN', noteId, { source: 'auto' });
         }
 
         spans.push({

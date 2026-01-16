@@ -62,6 +62,10 @@ export interface DecorationSpan {
     verb?: string;
     /** For relationships: direction 'forward' | 'backward' | 'bidirectional' */
     direction?: 'forward' | 'backward' | 'bidirectional';
+    /** Candidates for ambiguous matches */
+    candidateIds?: string[];
+    /** Labels for ambiguous candidates */
+    candidateLabels?: string[];
 }
 
 /**
