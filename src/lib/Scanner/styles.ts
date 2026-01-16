@@ -47,6 +47,8 @@ export function getDecorationStyle(span: DecorationSpan, mode: HighlightMode): s
       return getWikilinkStyle(span.resolved !== false, mode);
     case 'entity_ref':
       return getEntityRefStyle(span.kind, span.resolved !== false, mode);
+    case 'entity_implicit':
+      return getEntityStyle(span.kind || 'UNKNOWN', mode);
     default:
       return '';
   }
@@ -149,6 +151,8 @@ export function getDecorationClass(span: DecorationSpan): string {
       return `wikilink ${span.resolved === false ? 'wikilink-broken' : ''}`;
     case 'entity_ref':
       return `entity-ref ${span.kind ? `entity-${span.kind.toLowerCase()}` : ''} ${span.resolved === false ? 'entity-ref-broken' : ''}`;
+    case 'entity_implicit':
+      return `entity-implicit entity-${(span.kind || 'unknown').toLowerCase()}`;
     default:
       return '';
   }

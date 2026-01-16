@@ -25,7 +25,7 @@ export type EntityKind =
 /**
  * Types of detected spans
  */
-export type SpanType = 'entity' | 'wikilink' | 'entity_ref' | 'relationship';
+export type SpanType = 'entity' | 'wikilink' | 'entity_ref' | 'relationship' | 'entity_implicit';
 
 /**
  * A decoration span representing a detected element in text

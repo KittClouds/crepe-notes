@@ -4,3 +4,4 @@
 export * from './types';
 export * from './pattern-scanner';
 export * from './styles';
+export * from './ImplicitScanner';

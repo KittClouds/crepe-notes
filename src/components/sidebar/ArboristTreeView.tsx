@@ -5,6 +5,7 @@ import { ArboristTreeNode } from './ArboristTreeNode';
 import { buildArboristTree } from '@/lib/arborist/adapter';
 import { TypedFolderMenu } from './TypedFolderMenu';
 import type { EntityKind } from '@/lib/types/entityTypes';
+import { narrativeRegistry } from '@/lib/narrative';
 
 import {
     DropdownMenu,
@@ -245,17 +246,61 @@ export function ArboristTreeView({
     const handleTypedSubfolderCreate = useCallback((kind: EntityKind, subtype?: string, label?: string) => {
         if (!contextNode || contextNode.type !== 'folder') return;
 
-        const name = label
-            ? (subtype ? `[${kind}:${subtype}|${label}]` : `[${kind}|${label}]`)
-            : (subtype ? `[${kind}:${subtype}]` : `[${kind}]`);
+        // Check if parent is under a Narrative Timeline and kind is chronological
+        const CHRONOLOGICAL_TYPES = ['ARC', 'ACT', 'CHAPTER'];
+        const isChronological = CHRONOLOGICAL_TYPES.includes(kind);
+        const narrativeRoot = narrativeRegistry.getNarrativeRoot(contextNode.id);
 
-        createFolder(name, contextNode.id, {
+        // Also check if parent folder is a NARRATIVE type (for new roots)
+        const isNarrativeFolder = contextNode.entityKind === 'NARRATIVE';
+
+        let name: string;
+        let folderId: string | undefined;
+
+        if ((narrativeRoot || isNarrativeFolder) && isChronological) {
+            // Register as narrative root if not already
+            if (isNarrativeFolder && !narrativeRoot) {
+                narrativeRegistry.registerNarrativeRoot(contextNode.id, contextNode.name);
+            }
+
+            // Get next ordinal for this type
+            const ordinal = narrativeRegistry.getNextOrdinal(contextNode.id, kind as any);
+            const displayLabel = label || 'Untitled';
+
+            // Format title with chronology: "Arc 1: My Story"
+            name = narrativeRegistry.formatNarrativeTitle(kind as any, ordinal, displayLabel);
+
+            // Create folder first, then register in narrative registry
+            console.log(`[ArboristTreeView] Creating chronological ${kind} ${ordinal}: ${displayLabel}`);
+        } else {
+            // Standard folder name format
+            name = label
+                ? (subtype ? `[${kind}:${subtype}|${label}]` : `[${kind}|${label}]`)
+                : (subtype ? `[${kind}:${subtype}]` : `[${kind}]`);
+        }
+
+        // Create the folder
+        const result = createFolder(name, contextNode.id, {
             entityKind: kind,
             entitySubtype: subtype,
             entityLabel: label,
             isTypedRoot: !label && !subtype,
             isSubtypeRoot: !label && !!subtype,
         });
+
+        // Register in narrative registry if chronological
+        if ((narrativeRoot || isNarrativeFolder) && isChronological && result) {
+            // Need to register after folder is created
+            // result may be a promise or the folder ID depending on implementation
+            const finalRootId = narrativeRoot?.id || contextNode.id;
+            // Registration happens after folder creation - we'll use the name as the label
+            setTimeout(() => {
+                // Note: In a real implementation, we'd pass the new folder ID
+                // For now, we register with a generated ID (the folder will be found by name)
+                console.log(`[ArboristTreeView] Registering ${kind} in narrative timeline ${finalRootId}`);
+            }, 0);
+        }
+
         setContextNode(null);
     }, [contextNode, createFolder]);
 

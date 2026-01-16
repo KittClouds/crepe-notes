@@ -3,7 +3,7 @@
 // Timeline excluded - not migrating chrono package
 
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { PanelRightClose, PanelRight, Sparkles, BarChart3, Bot } from 'lucide-react';
+import { PanelRightClose, PanelRight, Sparkles, BarChart3, Bot, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { FactSheetContainer } from '@/components/fact-sheets/FactSheetContainer';
 import { AnalyticsPanel } from '@/components/analytics';
 import { AgentSidebar } from '@/components/ai/AgentSidebar';
+import { SceneDashboard } from '@/components/sidebar/SceneDashboard';
 
 // Right Sidebar Context (independent from left sidebar)
 interface RightSidebarContextType {
@@ -145,6 +146,12 @@ export function RightSidebar() {
                                         <span>Agent</span>
                                     </div>
                                 </SelectItem>
+                                <SelectItem value="scenes">
+                                    <div className="flex items-center gap-2">
+                                        <BookOpen className="h-4 w-4" />
+                                        <span>Scenes</span>
+                                    </div>
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -154,6 +161,7 @@ export function RightSidebar() {
                         {activeTab === 'entities' && <FactSheetContainer />}
                         {activeTab === 'analytics' && <AnalyticsPanel />}
                         {activeTab === 'agent' && <AgentSidebar />}
+                        {activeTab === 'scenes' && <SceneDashboard />}
                     </div>
                 </div>
             )}

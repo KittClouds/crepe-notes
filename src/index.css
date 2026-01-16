@@ -437,3 +437,37 @@
   height: 1rem;
   margin-right: 0.5rem;
 }
+
+/* ============================================
+   Theme-Aware Toolbar Colors
+   Text colored via toolbar adapts to light/dark mode
+   ============================================ */
+
+/* In light mode, invert the difference so light colors become dark and vice versa */
+:root:not(.dark) .toolbar-colored {
+  /* Use difference blend mode to invert colors relative to background */
+  /* This makes white text become black in light mode */
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Dark mode - no adjustment needed, colors were designed for dark */
+.dark .toolbar-colored {
+  filter: none;
+}
+
+/* ============================================
+   Theme-Aware Entity Highlighter Colors
+   Entity pills/highlights are slightly darker in light mode
+   ============================================ */
+
+/* In light mode, deepen entity colors for better contrast on white */
+:root:not(.dark) .entity-widget,
+:root:not(.dark) .entity-editing {
+  filter: brightness(0.75) saturate(1.1);
+}
+
+/* Dark mode - no adjustment needed */
+.dark .entity-widget,
+.dark .entity-editing {
+  filter: none;
+}

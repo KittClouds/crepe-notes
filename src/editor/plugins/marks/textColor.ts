@@ -32,6 +32,7 @@ export const textColorSchema = $markSchema('textColor', (ctx) => ({
         {
             style: `color: ${mark.attrs.color}`,
             'data-text-color': mark.attrs.color,
+            class: 'toolbar-colored', // For theme-aware CSS adjustments
         },
         0,
     ],

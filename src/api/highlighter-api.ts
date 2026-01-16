@@ -6,6 +6,7 @@ import type { DecorationSpan, HighlighterConfig, HighlightMode } from '../lib/Sc
 import { scanDocument, getDecorationStyle, getDecorationClass } from '../lib/Scanner';
 import { highlightingStore } from '../lib/store/highlightingStore';
 import type { EntityKind } from '../lib/types/entityTypes';
+import { implicitScanner } from '../lib/Scanner/ImplicitScanner';
 
 // =============================================================================
 // HIGHLIGHTER API INTERFACE
@@ -46,9 +47,33 @@ export interface ProseMirrorDoc {
 // DEFAULT IMPLEMENTATION - CONNECTED TO HIGHLIGHTING STORE
 // =============================================================================
 
+function docContent(doc: ProseMirrorDoc): string {
+    let text = '';
+    doc.descendants((node) => {
+        if (node.isText && node.text) {
+            text += node.text;
+        }
+    });
+    return text;
+}
+
 class DefaultHighlighterApi implements HighlighterApi {
     private enableWikilinks = true;
     private enableEntityRefs = true;
+    private implicitDecorations: DecorationSpan[] = [];
+    private lastContext: string = '';
+    private listeners: Set<() => void> = new Set();
+    private isScanning = false;
+    private scanVersion = 0;
+
+    constructor() {
+        // subscribe to store changes
+        highlightingStore.subscribe(() => this.notifyListeners());
+    }
+
+    private notifyListeners() {
+        this.listeners.forEach(cb => cb());
+    }
 
     getDecorations(doc: ProseMirrorDoc): DecorationSpan[] {
         const settings = highlightingStore.getSettings();
@@ -58,9 +83,37 @@ class DefaultHighlighterApi implements HighlighterApi {
         }
 
         const spans = scanDocument(doc);
+        const text = docContent(doc); // We need a helper to get text from doc to check change
+
+        // Trigger implicit scan if text changed (debounced ideally, but simplistic for now)
+        // Or just scan always if not scanning?
+        if (text !== this.lastContext) {
+            this.lastContext = text;
+            this.triggerImplicitScan(doc);
+        }
+
+        // Merge implicit spans
+        // Start with explicit spans
+        const allSpans = [...spans];
+
+        // Add implicit spans that DON'T overlap with explicit ones
+        for (const implicit of this.implicitDecorations) {
+            const overlaps = allSpans.some(explicit =>
+                (implicit.from >= explicit.from && implicit.from < explicit.to) ||
+                (implicit.to > explicit.from && implicit.to <= explicit.to) ||
+                (implicit.from <= explicit.from && implicit.to >= explicit.to)
+            );
+
+            if (!overlaps) {
+                allSpans.push(implicit);
+            }
+        }
+
+        // Resort
+        allSpans.sort((a, b) => a.from - b.from);
 
         // Filter based on config
-        return spans.filter(span => {
+        return allSpans.filter(span => {
             // Filter by type
             if (span.type === 'wikilink' && !settings.showWikilinks) return false;
             if (span.type === 'entity_ref' && !this.enableEntityRefs) return false;
@@ -113,11 +166,59 @@ class DefaultHighlighterApi implements HighlighterApi {
         }
         if (config.enableEntityRefs !== undefined) {
             this.enableEntityRefs = config.enableEntityRefs;
+            this.notifyListeners();
         }
     }
 
     subscribe(callback: () => void): () => void {
-        return highlightingStore.subscribe(callback);
+        this.listeners.add(callback);
+        return () => this.listeners.delete(callback);
+    }
+
+    private triggerImplicitScan(doc: ProseMirrorDoc) {
+        const myVersion = ++this.scanVersion;
+        const batch: { id: number, text: string }[] = [];
+        const nodePositions = new Map<number, number>(); // Map batch ID to document position
+
+        let batchIdCounter = 0;
+        doc.descendants((node, pos) => {
+            if (node.isText && node.text) {
+                const id = batchIdCounter++;
+                batch.push({ id, text: node.text });
+                nodePositions.set(id, pos);
+            }
+        });
+
+        // If nothing to scan
+        if (batch.length === 0) {
+            this.implicitDecorations = [];
+            this.notifyListeners();
+            return;
+        }
+
+        implicitScanner.scanBatch(batch).then(results => {
+            // Only apply if this is still the latest requested scan
+            if (this.scanVersion !== myVersion) return;
+
+            const mergedSpans: DecorationSpan[] = [];
+
+            // Reconstruct spans with correct document offsets
+            for (const [id, spans] of results.entries()) {
+                const nodeStart = nodePositions.get(id);
+                if (nodeStart !== undefined) {
+                    for (const span of spans) {
+                        mergedSpans.push({
+                            ...span,
+                            from: nodeStart + span.from,
+                            to: nodeStart + span.to
+                        });
+                    }
+                }
+            }
+
+            this.implicitDecorations = mergedSpans;
+            this.notifyListeners();
+        });
     }
 }
 

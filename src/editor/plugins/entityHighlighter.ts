@@ -178,6 +178,18 @@ export const entityHighlighter = $prose(() => {
                 for (const span of currentSpans) {
                     const isEditing = isCursorInside(span, selection);
 
+                    // IMPLICIT HIGHLIGHTS: Always render as inline, never replace text
+                    if (span.type === 'entity_implicit') {
+                        decorations.push(
+                            Decoration.inline(span.from, span.to, {
+                                class: highlighterApi.getClass(span),
+                                style: highlighterApi.getStyle(span),
+                                title: getTooltip(span)
+                            })
+                        );
+                        continue;
+                    }
+
                     if (isEditing) {
                         // EDITING MODE: Show raw text with subtle highlight
                         decorations.push(

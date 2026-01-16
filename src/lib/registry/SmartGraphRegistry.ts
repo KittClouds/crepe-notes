@@ -3,6 +3,7 @@
 // V2: Simplified version without Tauri IPC - uses localStorage until Rust backend is migrated
 
 import type { EntityKind } from '@/lib/types/entityTypes';
+import { implicitScanner } from '../Scanner/ImplicitScanner';
 
 // =============================================================================
 // Types
@@ -74,6 +75,8 @@ export class SmartGraphRegistry {
             try {
                 this.loadFromStorage();
                 this.initialized = true;
+                // Hydrate implicit scanner
+                implicitScanner.hydrate(this.getAllEntities());
                 console.log(`[SmartGraphRegistry] Initialized with ${this.entityCache.size} entities, ${this.edgeCache.size} edges`);
             } catch (err) {
                 this.initPromise = null;
@@ -166,6 +169,7 @@ export class SmartGraphRegistry {
             this.aliasIndex.set(alias.toLowerCase(), entity.id);
         }
         this.saveToStorage();
+        implicitScanner.hydrate(this.getAllEntities());
     }
 
     private removeFromCache(id: string): void {
@@ -177,6 +181,7 @@ export class SmartGraphRegistry {
             }
             this.entityCache.delete(id);
             this.saveToStorage();
+            implicitScanner.hydrate(this.getAllEntities());
         }
     }
 
@@ -289,6 +294,7 @@ export class SmartGraphRegistry {
         this.aliasIndex.clear();
         this.edgeCache.clear();
         this.saveToStorage();
+        implicitScanner.hydrate([]);
         console.log(`[SmartGraphRegistry] Cleared ${count} entities`);
         return count;
     }
