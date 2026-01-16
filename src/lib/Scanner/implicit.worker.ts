@@ -1,5 +1,5 @@
 
-import { ImplicitCore } from './implicit-core';
+import { ImplicitCore } from './implicit-core.copy';
 import type { RegisteredEntity, DecorationSpan } from './types';
 
 // Worker State
