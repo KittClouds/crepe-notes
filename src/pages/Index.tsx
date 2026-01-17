@@ -28,6 +28,7 @@ import { scanForPatternsSync, scanForPatterns } from '@/lib/Scanner/pattern-scan
 import { smartGraphRegistry } from '@/lib/registry';
 import type { EntityKind } from '@/lib/types/entityTypes';
 import { BacklinksDrawer } from '@/components/backlinks/BacklinksDrawer';
+import { Logo } from '@/components/icons/Logo';
 
 const Index: React.FC = () => {
   const {
@@ -264,11 +265,12 @@ const Index: React.FC = () => {
                 />
               </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <h2 className="text-xl font-semibold text-muted-foreground">No note selected</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Select a note or create a new one</p>
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-muted-foreground animate-in fade-in-50 duration-500">
+                <div className="w-80 h-80 mb-6 opacity-80">
+                  <Logo className="w-full h-full filter grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-700" />
                 </div>
+                <h2 className="text-2xl font-semibold tracking-tight">No note selected</h2>
+                <p className="text-sm mt-2 max-w-sm">Select a note from the sidebar or create a new one to get started.</p>
               </div>
             )}
 

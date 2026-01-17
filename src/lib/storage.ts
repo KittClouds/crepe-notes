@@ -38,10 +38,12 @@ export async function getNoteById(id: string): Promise<Note | undefined> {
 
 export async function createNote(partial?: Partial<Note>): Promise<Note> {
   const now = new Date();
+  const defaultContent = partial?.markdownContent ?? DEFAULT_NOTE_CONTENT;
   const note: Note = {
     id: uuidv4(),
     title: partial?.title ?? 'Untitled Note',
-    markdownContent: partial?.markdownContent ?? DEFAULT_NOTE_CONTENT,
+    content: defaultContent,
+    markdownContent: defaultContent,
     folderId: partial?.folderId ?? null,
     tags: partial?.tags ?? [],
     createdAt: now,
@@ -97,8 +99,10 @@ export async function getAllFolders(): Promise<Folder[]> {
   return folders as unknown as Folder[];
 }
 
+import type { EntityKind } from '@/lib/types/entityTypes';
+
 export interface CreateFolderOptions {
-  entityKind?: string;
+  entityKind?: EntityKind;
   entitySubtype?: string;
   entityLabel?: string;
   color?: string;
@@ -217,3 +221,117 @@ export async function initializeStorage(): Promise<Note> {
   return notes[0];
 }
 
+// =============================================================================
+// Calendar CRUD Operations
+// =============================================================================
+
+import type {
+  CalendarDefinition,
+  CalendarEvent,
+  Period,
+} from '@/lib/fantasy-calendar/types';
+
+// Calendar Events
+export async function getAllCalendarEvents(): Promise<CalendarEvent[]> {
+  const events = await db.collection(Collections.CALENDAR_EVENTS).find({});
+  return events as unknown as CalendarEvent[];
+}
+
+export async function getCalendarEventById(id: string): Promise<CalendarEvent | undefined> {
+  const event = await db.collection(Collections.CALENDAR_EVENTS).findOne({ id });
+  return event as unknown as CalendarEvent | undefined;
+}
+
+export async function createCalendarEvent(event: Omit<CalendarEvent, 'id'>): Promise<CalendarEvent> {
+  const newEvent: CalendarEvent = {
+    ...event,
+    id: uuidv4(),
+    createdAt: new Date().toISOString(),
+  };
+  await db.collection(Collections.CALENDAR_EVENTS).insert(newEvent as any);
+  return newEvent;
+}
+
+export async function updateCalendarEvent(
+  id: string,
+  updates: Partial<CalendarEvent>
+): Promise<CalendarEvent | undefined> {
+  const actualUpdates = { ...updates, updatedAt: new Date().toISOString() };
+  const count = await db.collection(Collections.CALENDAR_EVENTS).update(
+    { id },
+    { $set: actualUpdates }
+  );
+  if (count === 0) return undefined;
+  return getCalendarEventById(id);
+}
+
+export async function deleteCalendarEvent(id: string): Promise<boolean> {
+  const count = await db.collection(Collections.CALENDAR_EVENTS).delete({ id });
+  return count > 0;
+}
+
+// Calendar Periods
+export async function getAllCalendarPeriods(): Promise<Period[]> {
+  const periods = await db.collection(Collections.CALENDAR_PERIODS).find({});
+  return periods as unknown as Period[];
+}
+
+export async function getCalendarPeriodById(id: string): Promise<Period | undefined> {
+  const period = await db.collection(Collections.CALENDAR_PERIODS).findOne({ id });
+  return period as unknown as Period | undefined;
+}
+
+export async function createCalendarPeriod(period: Omit<Period, 'id'>): Promise<Period> {
+  const newPeriod: Period = {
+    ...period,
+    id: uuidv4(),
+    createdAt: new Date().toISOString(),
+  };
+  await db.collection(Collections.CALENDAR_PERIODS).insert(newPeriod as any);
+  return newPeriod;
+}
+
+export async function updateCalendarPeriod(
+  id: string,
+  updates: Partial<Period>
+): Promise<Period | undefined> {
+  const actualUpdates = { ...updates, updatedAt: new Date().toISOString() };
+  const count = await db.collection(Collections.CALENDAR_PERIODS).update(
+    { id },
+    { $set: actualUpdates }
+  );
+  if (count === 0) return undefined;
+  return getCalendarPeriodById(id);
+}
+
+export async function deleteCalendarPeriod(id: string): Promise<boolean> {
+  const count = await db.collection(Collections.CALENDAR_PERIODS).delete({ id });
+  return count > 0;
+}
+
+// Calendar Definitions
+export async function getCalendarDefinition(): Promise<CalendarDefinition | undefined> {
+  const defs = await db.collection(Collections.CALENDAR_DEFINITIONS).find({});
+  return (defs as unknown as CalendarDefinition[])[0];
+}
+
+export async function saveCalendarDefinition(calendar: CalendarDefinition): Promise<CalendarDefinition> {
+  // Upsert: delete existing and insert new
+  await db.collection(Collections.CALENDAR_DEFINITIONS).delete({ id: calendar.id });
+  await db.collection(Collections.CALENDAR_DEFINITIONS).insert(calendar as any);
+  return calendar;
+}
+
+// Load all calendar data (for initial hydration)
+export async function loadCalendarData(): Promise<{
+  calendar: CalendarDefinition | undefined;
+  events: CalendarEvent[];
+  periods: Period[];
+}> {
+  const [calendar, events, periods] = await Promise.all([
+    getCalendarDefinition(),
+    getAllCalendarEvents(),
+    getAllCalendarPeriods(),
+  ]);
+  return { calendar, events, periods };
+}

@@ -1,8 +1,13 @@
-// src/lib/db.ts
 import { createDb, IndexedDBAdapter } from './nebuladb';
+import { OpfsAdapter } from './nebuladb/persistence/opfs-adapter';
+
+// Feature Flag: Switch between IndexedDB (Legacy) and OPFS (New Hardened Snapshot)
+const USE_OPFS_PERSISTENCE = true;
 
 // Initialize adapter
-export const adapter = new IndexedDBAdapter('crepe-notes-db', 3);
+export const adapter = USE_OPFS_PERSISTENCE
+    ? new OpfsAdapter()
+    : new IndexedDBAdapter('crepe-notes-db', 3);
 
 // Initialize DB
 export const db = createDb({ adapter });
@@ -18,6 +23,10 @@ export const Collections = {
     FACT_SHEETS: 'fact_sheets',
     NARRATIVE_ROOTS: 'narrative_roots',
     NARRATIVE_ELEMENTS: 'narrative_elements',
+    // Calendar collections
+    CALENDAR_DEFINITIONS: 'calendar_definitions',
+    CALENDAR_EVENTS: 'calendar_events',
+    CALENDAR_PERIODS: 'calendar_periods',
 } as const;
 
 // PRE-REGISTER COLLECTIONS to ensure they exist on first connect
@@ -28,7 +37,7 @@ Object.values(Collections).forEach(name => {
 
 // Ensure connection (optional, lazy connect is supported by adapter but this warms it up)
 db.connect().then(() => {
-    console.log('[NebulaDB] Connected to IndexedDB');
+    console.log(`[NebulaDB] Connected to ${USE_OPFS_PERSISTENCE ? 'OPFS (Worker)' : 'IndexedDB'}`);
 }).catch(err => {
     console.error('[NebulaDB] Connection failed', err);
 });

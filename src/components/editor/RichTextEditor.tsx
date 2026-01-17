@@ -117,9 +117,32 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
           ? { type: 'json' as const, value: initialContent.value as any }
           : initialContent.value; // Markdown string
 
+        // Sanitize JSON to ensure types match schema (Fix for RangeError: spread attribute)
+        const sanitizeJSON = (node: any): any => {
+          if (!node) return node;
+          if (Array.isArray(node)) return node.map(sanitizeJSON);
+          if (typeof node === 'object') {
+            const newNode = { ...node };
+            // Fix specific known attribute issues
+            if (newNode.type === 'list_item' && newNode.attrs) {
+              if (typeof newNode.attrs.spread === 'string') {
+                newNode.attrs.spread = newNode.attrs.spread === 'true';
+              }
+            }
+            // Recursively sanitize children
+            if (newNode.content) {
+              newNode.content = newNode.content.map(sanitizeJSON);
+            }
+            return newNode;
+          }
+          return node;
+        };
+
         const crepe = new Crepe({
           root: editorRef.current!,
-          defaultValue,
+          defaultValue: initialContent.type === 'json'
+            ? { type: 'json' as const, value: sanitizeJSON(initialContent.value) }
+            : initialContent.value,
           features: {
             [Crepe.Feature.Toolbar]: false, // Disabled - using custom selection toolbar
             [Crepe.Feature.LinkTooltip]: true,

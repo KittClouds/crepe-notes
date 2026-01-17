@@ -59,7 +59,7 @@ function transformFolderToNode(
             inheritedSubtype,
             effectiveColor,
             depth: depth + 1,
-            size: note.content.length,  // D3-style metric
+            size: (note.content || '').length,  // D3-style metric
             noteData: note,
         };
     });
@@ -129,7 +129,7 @@ export function buildArboristTree(
                 ? getEntityColor(noteKind)
                 : DEFAULT_COLORS[0],
             depth: 0,
-            size: note.content.length,
+            size: (note.content || '').length,
             noteData: note,
         };
     });

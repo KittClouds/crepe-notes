@@ -6,7 +6,7 @@ import type { Adapter, CollectionOptions, Document, Query, UpdateQuery } from '.
 // ==========================================
 
 export class MemoryAdapter implements Adapter {
-    private data: Map<string, Map<string, Document>> = new Map();
+    protected data: Map<string, Map<string, Document>> = new Map();
 
     async connect(): Promise<void> {
         // No-op

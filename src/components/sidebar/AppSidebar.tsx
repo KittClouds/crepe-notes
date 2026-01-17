@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo, useState } from 'react';
+import { Logo } from '@/components/icons/Logo';
 import * as React from "react";
 import { useNavigate } from 'react-router-dom';
 import {
@@ -49,7 +50,13 @@ import { ArboristTreeView } from '@/components/sidebar/ArboristTreeView';
 const NetworkFolderCreationMenu = () => null;
 // Stub search hook
 const useResoRankSearchWithDebounce = (notes: any, query: string, opts: any) => ({ results: [], isReady: true, isIndexing: false });
-const GraphLogo = ({ className }: { className?: string }) => <div className={className}>📊</div>;
+
+
+const GraphLogo = ({ className }: { className?: string }) => (
+  <div className={cn("flex items-center justify-center", className)}>
+    <Logo className="w-full h-full" />
+  </div>
+);
 import { SidebarGraph } from '@/components/graph/SidebarGraph';
 
 import {
@@ -75,6 +82,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { Note } from "@/types/noteTypes";
@@ -576,7 +585,7 @@ export function AppSidebar({ toolbarVisible, onToolbarToggle, ...props }: AppSid
         {/* --- LEFT RAIL (PERSISTENT ICONS) --- */}
         <div className="flex flex-col items-center w-[3rem] border-r border-sidebar-border bg-sidebar h-full py-2 z-20">
           <div className="mb-2 flex items-center justify-center h-[37px]">
-            <GraphLogo className="w-6 h-6" />
+            <GraphLogo className="w-8 h-8" />
           </div>
 
           <div className="flex flex-col gap-1 w-full px-1 items-center flex-1 overflow-y-auto no-scrollbar">

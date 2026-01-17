@@ -1,0 +1,87 @@
+[package]
+name = "kittcore"
+version = "0.1.0"
+edition = "2021"
+authors = ["KittClouds Team"]
+description = "KittCore: Document Scanner + ResoRank Search Engine - Rust/WASM implementation"
+license = "MIT"
+repository = "https://github.com/KittClouds/collaborative-canvas"
+keywords = ["scanner", "search", "bm25", "wasm", "aho-corasick", "nlp"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["wasm"]
+# WASM target (browser) - full WASM/JS dependencies
+wasm = [
+    "dep:wasm-bindgen",
+    "dep:js-sys",
+    "dep:wasm-bindgen-futures",
+    "dep:serde-wasm-bindgen",
+    "dep:console_error_panic_hook",
+    "dep:web-sys",
+    "dep:instant",
+    "dep:getrandom02",
+    "dep:getrandom",
+]
+# Native target (Tauri) - no WASM deps, standard Rust
+native = []
+# Optional features
+wee_alloc = ["dep:wee_alloc"]
+sqlite_wasm = ["dep:sqlite-wasm-rs", "dep:sqlite-wasm-vfs"]
+# Embeddings (expensive - ONNX + tokenizers)
+embeddings = ["dep:tract-onnx", "dep:tract-core", "dep:tokenizers"]
+
+[dependencies]
+# Core dependencies (always included)
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+aho-corasick = "1.1"
+daachorse = "1.0.0"
+regex = "1.12.2"
+chrono = "0.4.42"
+rowan = "0.16.1"
+unicode-segmentation = "1.10"
+rustworkx-core = "0.17"
+lasso = { version = "0.7", features = ["multi-threaded"] }
+ndarray = "0.16"
+
+# WASM-specific dependencies (optional via wasm feature)
+wasm-bindgen = { version = "0.2", optional = true }
+js-sys = { version = "0.3", optional = true }
+wasm-bindgen-futures = { version = "0.4", optional = true }
+console_error_panic_hook = { version = "0.1", optional = true }
+wee_alloc = { version = "0.4", optional = true }
+serde-wasm-bindgen = { version = "0.6.5", optional = true }
+instant = { version = "0.1", features = ["wasm-bindgen"], optional = true }
+web-sys = { version = "0.3", features = ["console"], optional = true }
+getrandom02 = { package = "getrandom", version = "0.2", features = ["js"], optional = true }
+getrandom = { version = "0.3", features = ["wasm_js"], optional = true }
+
+# Embeddings (optional via embeddings feature)
+tract-onnx = { version = "0.21", default-features = false, optional = true }
+tract-core = { version = "0.21", default-features = false, optional = true }
+tokenizers = { version = "0.19", default-features = false, features = ["unstable_wasm"], optional = true }
+
+
+# RAG Pipeline (Phase 1)
+# NOTE: micro-hnsw-wasm requires no_std panic=abort, conflicts with our std usage
+# Using brute-force cosine similarity for now (fast enough for 10k chunks)
+
+# SQLite WASM (experimental - Rust-side DB access with OPFS)
+# Requires LLVM/Clang installed for C→WASM compilation
+sqlite-wasm-rs = { version = "0.5", optional = true }
+sqlite-wasm-vfs = { version = "0.1", optional = true }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+debug = true
