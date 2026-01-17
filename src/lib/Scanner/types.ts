@@ -40,7 +40,7 @@ export interface DecorationSpan {
     from: number;
     /** End offset in document */
     to: number;
-    /** Display label */
+    /** Display label (canonical entity name) */
     label: string;
     /** Entity kind for styling (entity spans only) */
     kind?: EntityKind;
@@ -48,6 +48,8 @@ export interface DecorationSpan {
     target?: string;
     /** Display alias (for [[target|alias]] syntax) */
     displayText?: string;
+    /** Actual matched text in document (for implicit matches, may differ from label) */
+    matchedText?: string;
     /** Optional entity ID (if resolved) */
     entityId?: string;
     /** Optional note ID (if resolved) */

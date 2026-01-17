@@ -1,22 +1,26 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import type { NEREntity, NERModelStatus } from '@/lib/extraction';
-import {
-    nerGetSuggestions,
-    nerAcceptSuggestion,
-    nerRejectSuggestion,
-    nerGetModelStatus,
-    nerGetSettings,
-    isTauriNer,
-    type NerSuggestion,
-    type NerSettings,
-    type NerModelStatus as RustModelStatus,
-    type AcceptResult,
-} from '@/lib/tauri/ner-bridge';
 import { smartGraphRegistry } from '@/lib/registry';
 
 // =============================================================================
-// Types
+// Types (Simplified for web-only version)
 // =============================================================================
+
+export interface NerSuggestion {
+    id: string;
+    label: string;
+    kind: string;
+    confidence: number;
+    source_note_id: string;
+    span_start: number;
+    span_end: number;
+}
+
+export interface NerSettings {
+    enabled: boolean;
+    auto_promote_threshold: number;
+    suggest_threshold: number;
+}
 
 interface NERContextValue {
     // Legacy state (frontend NER entities)
@@ -25,10 +29,10 @@ interface NERContextValue {
     isAnalyzing: boolean;
     error: string | null;
 
-    // Rust NER suggestions
+    // Suggestions (stub for web)
     suggestions: NerSuggestion[];
     isFetchingSuggestions: boolean;
-    rustModelStatus: RustModelStatus | null;
+    rustModelStatus: null;
     settings: NerSettings;
 
     // FST NER State
@@ -45,7 +49,7 @@ interface NERContextValue {
     setIsAnalyzing: (analyzing: boolean) => void;
     setError: (error: string | null) => void;
 
-    // Rust NER actions
+    // Actions (stubs for web)
     setCurrentNoteId: (noteId: string | null) => void;
     refreshSuggestions: (noteId?: string) => Promise<void>;
     acceptSuggestion: (suggestionId: string) => Promise<boolean>;
@@ -70,11 +74,9 @@ export function NERProvider({ children }: NERProviderProps) {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Rust NER state
-    const [suggestions, setSuggestions] = useState<NerSuggestion[]>([]);
-    const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
-    const [rustModelStatus, setRustModelStatus] = useState<RustModelStatus | null>(null);
-    const [settings, setSettings] = useState<NerSettings>({
+    // Web version - no Tauri NER
+    const [suggestions] = useState<NerSuggestion[]>([]);
+    const [settings] = useState<NerSettings>({
         enabled: false,
         auto_promote_threshold: 0.90,
         suggest_threshold: 0.60,
@@ -87,131 +89,24 @@ export function NERProvider({ children }: NERProviderProps) {
         setEntities([]);
     }, []);
 
-    // Refresh suggestions from Rust backend
-    const refreshSuggestions = useCallback(async (noteId?: string) => {
-        const targetNoteId = noteId || currentNoteId;
-        if (!targetNoteId || !isTauriNer()) {
-            return;
-        }
-
-        setIsFetchingSuggestions(true);
-        try {
-            const newSuggestions = await nerGetSuggestions(targetNoteId);
-            setSuggestions(newSuggestions);
-        } catch (err) {
-            console.error('[NERContext] Failed to refresh suggestions:', err);
-        } finally {
-            setIsFetchingSuggestions(false);
-        }
-    }, [currentNoteId]);
-
-    // Accept a suggestion - returns AcceptResult with full entity info
-    const acceptSuggestion = useCallback(async (suggestionId: string): Promise<boolean> => {
-        if (!isTauriNer()) {
-            console.warn('[NERContext] Not in Tauri environment');
-            return false;
-        }
-
-        try {
-            const result: AcceptResult = await nerAcceptSuggestion(suggestionId);
-
-            // Remove from local state immediately for responsive UI
-            setSuggestions(prev => prev.filter(s => s.id !== suggestionId));
-
-            console.log(
-                '[NERContext] Accepted suggestion:', suggestionId,
-                '→ Entity:', result.promoted_entity_id,
-                '| Kind:', result.kind,
-                '| Label:', result.label,
-                '| New:', result.is_new
-            );
-
-            // Sync to SmartGraphRegistry cache for immediate highlighting
-            if (result.is_new) {
-                smartGraphRegistry.registerEntity(
-                    result.label,
-                    result.kind as any, // Cast if needed, assuming kind matches
-                    result.source_note_id,
-                    { source: 'extraction' }
-                );
-            }
-
-            // Note: We don't have CozoContext's refreshEntities anymore.
-            // EntityRegistryPanel might not update automatically unless it polls or reloads.
-
-            return true;
-        } catch (err) {
-            console.error('[NERContext] Accept error:', err);
-            setError(err instanceof Error ? err.message : 'Unknown error');
-            return false;
-        }
+    // Stub implementations for web
+    const refreshSuggestions = useCallback(async (_noteId?: string) => {
+        // No-op in web version
     }, []);
 
-    // Reject a suggestion
-    const rejectSuggestion = useCallback(async (suggestionId: string): Promise<boolean> => {
-        if (!isTauriNer()) {
-            console.warn('[NERContext] Not in Tauri environment');
-            return false;
-        }
-
-        try {
-            const response = await nerRejectSuggestion(suggestionId);
-
-            if (response.success) {
-                // Remove from local state immediately for responsive UI
-                setSuggestions(prev => prev.filter(s => s.id !== suggestionId));
-                console.log('[NERContext] Rejected suggestion:', suggestionId);
-                return true;
-            } else {
-                console.error('[NERContext] Reject failed:', response.message);
-                setError(response.message);
-                return false;
-            }
-        } catch (err) {
-            console.error('[NERContext] Reject error:', err);
-            setError(err instanceof Error ? err.message : 'Unknown error');
-            return false;
-        }
+    const acceptSuggestion = useCallback(async (_suggestionId: string): Promise<boolean> => {
+        // No-op in web version
+        return false;
     }, []);
 
-    // Refresh model status
+    const rejectSuggestion = useCallback(async (_suggestionId: string): Promise<boolean> => {
+        // No-op in web version
+        return false;
+    }, []);
+
     const refreshModelStatus = useCallback(async () => {
-        if (!isTauriNer()) {
-            return;
-        }
-
-        try {
-            const status = await nerGetModelStatus();
-            setRustModelStatus(status);
-        } catch (err) {
-            console.error('[NERContext] Failed to get model status:', err);
-        }
+        // No-op in web version
     }, []);
-
-    // Initial load: fetch model status and settings
-    useEffect(() => {
-        if (!isTauriNer()) {
-            return;
-        }
-
-        // Fetch model status on mount
-        refreshModelStatus();
-
-        // Fetch settings on mount
-        nerGetSettings().then(setSettings).catch(err => {
-            console.error('[NERContext] Failed to get settings:', err);
-        });
-    }, [refreshModelStatus]);
-
-    // Refresh suggestions when note changes
-    useEffect(() => {
-        if (currentNoteId && isTauriNer()) {
-            refreshSuggestions(currentNoteId);
-        } else {
-            // Clear suggestions when no note selected
-            setSuggestions([]);
-        }
-    }, [currentNoteId, refreshSuggestions]);
 
     const value: NERContextValue = {
         // Legacy
@@ -220,10 +115,10 @@ export function NERProvider({ children }: NERProviderProps) {
         isAnalyzing,
         error,
 
-        // Rust NER
+        // Stubs for web
         suggestions,
-        isFetchingSuggestions,
-        rustModelStatus,
+        isFetchingSuggestions: false,
+        rustModelStatus: null,
         settings,
         currentNoteId,
         fstNerEnabled,
@@ -236,7 +131,7 @@ export function NERProvider({ children }: NERProviderProps) {
         setIsAnalyzing,
         setError,
 
-        // Rust NER actions
+        // Stub actions
         setCurrentNoteId,
         refreshSuggestions,
         acceptSuggestion,
@@ -269,7 +164,7 @@ export function useNEREntities(): NEREntity[] {
     return context?.entities ?? [];
 }
 
-// Hook for Rust NER suggestions
+// Hook for NER suggestions
 export function useNERSuggestions(): NerSuggestion[] {
     const context = useContext(NERContext);
     return context?.suggestions ?? [];
@@ -291,6 +186,6 @@ export function useNERModelStatus() {
     return {
         rustStatus: context?.rustModelStatus ?? null,
         legacyStatus: context?.modelStatus ?? 'idle',
-        isModelAvailable: context?.rustModelStatus?.available ?? false,
+        isModelAvailable: false,
     };
 }

@@ -1,6 +1,6 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ImplicitCore } from './implicit-core';
+import { ImplicitCore } from './implicit-scan';
 import type { RegisteredEntity } from '../registry/SmartGraphRegistry';
 
 // Mock data

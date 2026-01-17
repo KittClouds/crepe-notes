@@ -1,6 +1,5 @@
 import type { EntityKind } from '@/lib/types/entityTypes';
-// LEGACY: This file is not actively used but kept for future LLM extraction
-import type { RegisteredEntity } from '@/lib/tauri';
+import type { RegisteredEntity } from '@/lib/registry';
 
 /**
  * Schema for entity extraction

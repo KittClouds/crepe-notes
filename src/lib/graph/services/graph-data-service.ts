@@ -5,7 +5,7 @@
  * 
  * DUAL-MODE ARCHITECTURE:
  * - Browser Mode: Uses SmartGraphRegistry (localStorage-backed)
- * - Tauri Mode: [FUTURE] Will use TauRPC -> Rust backend
+ * - Tauri Mode: [FUTURE] Will use native backend -> Rust backend
  * 
  * Currently wired for Browser Mode only.
  */

@@ -43,7 +43,10 @@ export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
     // Load entities on mount
     useEffect(() => {
         const loadEntities = async () => {
-            await smartGraphRegistry.ensureInit();
+            // Wait for registry to be ready (init is idempotent if already initialized)
+            if (!smartGraphRegistry.isInitialized()) {
+                await smartGraphRegistry.init();
+            }
             setEntities(smartGraphRegistry.getAllEntities());
             setIsLoading(false);
         };

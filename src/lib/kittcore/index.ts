@@ -91,7 +91,7 @@ export interface WorkerStatus {
     version: string;
 }
 
-class KittCoreService {
+export class KittCoreService {
     private worker: Worker | null = null;
     private initPromise: Promise<void> | null = null;
     private messageId = 0;
@@ -111,9 +111,9 @@ class KittCoreService {
 
         this.initPromise = new Promise((resolve, reject) => {
             try {
-                // Create worker
+                // Create worker - path relative from this file to worker in src/workers/
                 this.worker = new Worker(
-                    new URL('./kittcore.worker.ts', import.meta.url),
+                    new URL('../../workers/kittcore.worker.ts', import.meta.url),
                     { type: 'module' }
                 );
 

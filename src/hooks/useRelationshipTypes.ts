@@ -30,25 +30,24 @@ export function useRelationshipTypes(versionId: string | null) {
             return;
         }
 
-        // TODO: Connect to TauRPC
-        console.warn('[useRelationshipTypes] Stub - would load types for version:', versionId);
+        // Stub - relationship types not implemented yet
         setRelationshipTypes([]);
     }, [versionId]);
 
     const create = useCallback(async (data: Omit<RelationshipTypeDefinition, 'relationship_type_id' | 'version_id' | 'created_at'>) => {
         console.warn('[useRelationshipTypes] Stub - would create type:', data);
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
         return null;
     }, []);
 
     const update = useCallback(async (typeId: string, data: Partial<RelationshipTypeDefinition>) => {
         console.warn('[useRelationshipTypes] Stub - would update type:', typeId, data);
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
     }, []);
 
     const remove = useCallback(async (typeId: string) => {
         console.warn('[useRelationshipTypes] Stub - would delete type:', typeId);
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
     }, []);
 
     return {

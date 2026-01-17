@@ -226,6 +226,7 @@ function scanFuzzy(
                 from: toks[i].start,
                 to: toks[i].end,
                 label: e.label,
+                matchedText: text.slice(toks[i].start, toks[i].end),
                 kind: e.kind,
                 resolved: true,
                 entityId: e.id
@@ -245,6 +246,7 @@ function scanFuzzy(
                 from: toks[i].start,
                 to: toks[i + 1].end,
                 label: e.label,
+                matchedText: text.slice(toks[i].start, toks[i + 1].end),
                 kind: e.kind,
                 resolved: true,
                 entityId: e.id
@@ -310,6 +312,7 @@ function scanFuzzy(
                     from: best.from,
                     to: best.to,
                     label: e.label,
+                    matchedText: text.slice(best.from, best.to),
                     kind: e.kind,
                     resolved: true,
                     entityId: e.id
@@ -529,6 +532,7 @@ export class ImplicitCore {
                         from: match.start,
                         to: match.end,
                         label: c.label,
+                        matchedText: text.slice(match.start, match.end),
                         kind: c.kind,
                         resolved: true,
                         entityId: c.id
@@ -539,6 +543,7 @@ export class ImplicitCore {
                         from: match.start,
                         to: match.end,
                         label: text.slice(match.start, match.end),
+                        matchedText: text.slice(match.start, match.end),
                         kind: candidates[0].kind,
                         resolved: false,
                         candidateIds: candidates.map(c => c.id),

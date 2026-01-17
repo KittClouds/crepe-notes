@@ -1,63 +1,27 @@
 /**
- * NER Panel - Sidebar panel for NER model management and analysis
+ * NER Panel - Simplified for web-only version
  * 
- * Two-stage workflow:
- * 1. Download model (if not available)
- * 2. Analyze current note text
+ * Native NER (GLiNER) requires the Tauri desktop app.
+ * This panel shows the FST scanner toggle and entity list.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    Download,
-    Play,
-    Loader2,
+    Brain,
+    AlertTriangle,
     CheckCircle2,
     XCircle,
-    Brain,
-    RefreshCw,
-    Trash2,
-    AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useNER } from '@/contexts/NERContext';
+import { useNER, type NerSuggestion } from '@/contexts/NERContext';
 import { useNotesStore } from '@/hooks/useNotesStore';
-import {
-    nerGetModelStatus,
-    nerDownloadModel,
-    nerRequestAnalysis,
-    nerAddSuggestion,
-    isTauriNer,
-    type NerModelStatus,
-    type NerSuggestion,
-} from '@/lib/tauri/ner-bridge';
 import { Switch } from '@/components/ui/switch';
 
-// Default labels for NER analysis
-const DEFAULT_LABELS = [
-    'person', 'character', 'location', 'organization',
-    'item', 'concept', 'event', 'creature',
-];
-
 export function NerPanel() {
-    // Model status
-    const [modelStatus, setModelStatus] = useState<NerModelStatus | null>(null);
-    const [isCheckingModel, setIsCheckingModel] = useState(false);
-    const [isDownloading, setIsDownloading] = useState(false);
-    const [downloadError, setDownloadError] = useState<string | null>(null);
-
-    // Analysis status
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [analysisError, setAnalysisError] = useState<string | null>(null);
-    const [lastAnalyzedNoteId, setLastAnalyzedNoteId] = useState<string | null>(null);
-
-    // Logs
-    const [logs, setLogs] = useState<string[]>([]);
-
     // Context
     const {
         suggestions,
-        refreshSuggestions,
         acceptSuggestion,
         rejectSuggestion,
         fstNerEnabled,
@@ -68,170 +32,10 @@ export function NerPanel() {
     // Notes Store
     const { state } = useNotesStore();
 
-    // Helper to add log
-    const addLog = useCallback((message: string) => {
-        const timestamp = new Date().toLocaleTimeString();
-        setLogs(prev => [...prev.slice(-50), `[${timestamp}] ${message}`]);
-        console.log(`[NerPanel] ${message}`);
-    }, []);
-
-    // Check if we're in Tauri
-    const inTauri = isTauriNer();
-
-    // Check model status on mount
-    useEffect(() => {
-        if (inTauri) {
-            checkModelStatus();
-        }
-    }, [inTauri]);
-
     // Sync selected note to NER context
     useEffect(() => {
         setCurrentNoteId(state.selectedNoteId);
     }, [state.selectedNoteId, setCurrentNoteId]);
-
-    // Check model status
-    const checkModelStatus = async () => {
-        setIsCheckingModel(true);
-        addLog('Checking model status...');
-        try {
-            const status = await nerGetModelStatus();
-            setModelStatus(status);
-            addLog(`Model ${status.available ? 'ready' : 'not downloaded'}`);
-        } catch (err) {
-            addLog(`Error checking model: ${err}`);
-        } finally {
-            setIsCheckingModel(false);
-        }
-    };
-
-    // Download model
-    const handleDownloadModel = async () => {
-        setIsDownloading(true);
-        setDownloadError(null);
-        addLog('Starting model download...');
-
-        try {
-            const response = await nerDownloadModel();
-            if (response.started) {
-                addLog('Download started in background');
-                // Poll for completion
-                const pollInterval = setInterval(async () => {
-                    const status = await nerGetModelStatus();
-                    setModelStatus(status);
-                    if (status.available) {
-                        clearInterval(pollInterval);
-                        setIsDownloading(false);
-                        addLog('Model download complete!');
-                    }
-                }, 2000);
-
-                // Timeout after 5 minutes
-                setTimeout(() => {
-                    clearInterval(pollInterval);
-                    if (isDownloading) {
-                        setIsDownloading(false);
-                        setDownloadError('Download timeout - check your connection');
-                        addLog('Download timeout');
-                    }
-                }, 300000);
-            } else {
-                setDownloadError(response.message);
-                addLog(`Download failed: ${response.message}`);
-                setIsDownloading(false);
-            }
-        } catch (err) {
-            const msg = err instanceof Error ? err.message : 'Unknown error';
-            setDownloadError(msg);
-            addLog(`Download error: ${msg}`);
-            setIsDownloading(false);
-        }
-    };
-
-    // Analyze current note
-    const handleAnalyze = async () => {
-        const selectedNote = state.notes.find(n => n.id === state.selectedNoteId);
-        if (!selectedNote) {
-            addLog('No note selected');
-            setAnalysisError('Please select a note first');
-            return;
-        }
-
-        setIsAnalyzing(true);
-        setAnalysisError(null);
-        addLog(`Analyzing note: ${selectedNote.title}`);
-
-        try {
-            const response = await nerRequestAnalysis(
-                selectedNote.id,
-                selectedNote.content || '',
-                DEFAULT_LABELS
-            );
-
-            if (response.queued) {
-                addLog(`Analysis queued for doc_id: ${response.doc_id}`);
-                setLastAnalyzedNoteId(selectedNote.id);
-
-                // Refresh suggestions after a delay (mock for now)
-                setTimeout(async () => {
-                    addLog('Refreshing suggestions...');
-                    await refreshSuggestions(selectedNote.id);
-                    addLog(`Found ${suggestions.length} suggestions`);
-                }, 1000);
-            } else {
-                addLog('Analysis request failed');
-                setAnalysisError('Failed to queue analysis');
-            }
-        } catch (err) {
-            const msg = err instanceof Error ? err.message : 'Unknown error';
-            setAnalysisError(msg);
-            addLog(`Analysis error: ${msg}`);
-        } finally {
-            setIsAnalyzing(false);
-        }
-    };
-
-    // Add test suggestion (for debugging)
-    const handleAddTestSuggestion = async () => {
-        const selectedNote = state.notes.find(n => n.id === state.selectedNoteId);
-        if (!selectedNote) {
-            addLog('No note selected for test');
-            return;
-        }
-
-        addLog('Adding test suggestion...');
-        const id = await nerAddSuggestion(
-            'test-world',
-            selectedNote.id,
-            'Test Entity',
-            'Test Entity',
-            0,
-            11,
-            0.85
-        );
-
-        if (id) {
-            addLog(`Test suggestion added: ${id}`);
-            await refreshSuggestions(selectedNote.id);
-        } else {
-            addLog('Failed to add test suggestion');
-        }
-    };
-
-    // Clear logs
-    const handleClearLogs = () => {
-        setLogs([]);
-    };
-
-    // if (!inTauri) {
-    //     return (
-    //         <div className="p-4 text-center text-muted-foreground">
-    //             <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-amber-500" />
-    //             <p>NER requires Tauri runtime</p>
-    //             <p className="text-xs mt-1">Run with `npm tauri dev`</p>
-    //         </div>
-    //     );
-    // }
 
     return (
         <div className="flex flex-col h-full">
@@ -239,10 +43,10 @@ export function NerPanel() {
             <div className="p-4 border-b border-border">
                 <div className="flex items-center gap-2 mb-2">
                     <Brain className="h-5 w-5 text-purple-500" />
-                    <span className="font-semibold">NER Analysis</span>
+                    <span className="font-semibold">Entity Detection</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                    Extract entities using GLiNER AI model
+                    Detect and manage entities in your notes
                 </p>
             </div>
 
@@ -252,7 +56,7 @@ export function NerPanel() {
                     <div className="flex-1">
                         <span className="text-sm font-medium">FST Scanner</span>
                         <p className="text-xs text-muted-foreground">
-                            Instant entity detection
+                            Instant entity detection (WASM)
                         </p>
                     </div>
                     <Switch
@@ -263,108 +67,17 @@ export function NerPanel() {
                 </div>
             </div>
 
-            {/* Model Status Section */}
-            <div className="p-4 border-b border-border space-y-3">
-                <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Model Status</span>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={checkModelStatus}
-                        disabled={isCheckingModel}
-                    >
-                        <RefreshCw className={`h-3 w-3 ${isCheckingModel ? 'animate-spin' : ''}`} />
-                    </Button>
+            {/* Native NER Notice */}
+            <div className="p-4 border-b border-border bg-muted/30">
+                <div className="flex items-start gap-2 text-sm">
+                    <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                        <p className="font-medium text-muted-foreground">AI NER Available in Desktop App</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            The GLiNER AI model for advanced entity extraction requires the native desktop application.
+                        </p>
+                    </div>
                 </div>
-
-                {modelStatus ? (
-                    <div className="flex items-center gap-2 text-sm">
-                        {modelStatus.available ? (
-                            <>
-                                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                <span className="text-green-500">Model Ready</span>
-                            </>
-                        ) : (
-                            <>
-                                <XCircle className="h-4 w-4 text-amber-500" />
-                                <span className="text-amber-500">Not Downloaded</span>
-                            </>
-                        )}
-                    </div>
-                ) : (
-                    <div className="text-xs text-muted-foreground">
-                        {isCheckingModel ? 'Checking...' : 'Click refresh to check'}
-                    </div>
-                )}
-
-                {/* Download Button */}
-                {modelStatus && !modelStatus.available && (
-                    <Button
-                        className="w-full gap-2"
-                        onClick={handleDownloadModel}
-                        disabled={isDownloading}
-                    >
-                        {isDownloading ? (
-                            <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Downloading...
-                            </>
-                        ) : (
-                            <>
-                                <Download className="h-4 w-4" />
-                                Download Model (~100MB)
-                            </>
-                        )}
-                    </Button>
-                )}
-
-                {downloadError && (
-                    <p className="text-xs text-destructive">{downloadError}</p>
-                )}
-            </div>
-
-            {/* Analysis Section */}
-            <div className="p-4 border-b border-border space-y-3">
-                <span className="text-sm font-medium">Analyze Note</span>
-
-                <Button
-                    className="w-full gap-2"
-                    onClick={handleAnalyze}
-                    disabled={isAnalyzing || !modelStatus?.available}
-                    variant={modelStatus?.available ? "default" : "secondary"}
-                >
-                    {isAnalyzing ? (
-                        <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Analyzing...
-                        </>
-                    ) : (
-                        <>
-                            <Play className="h-4 w-4" />
-                            {modelStatus?.available ? 'Run NER Analysis' : 'Download Model First'}
-                        </>
-                    )}
-                </Button>
-
-                {/* Test button for debugging */}
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full gap-2 text-xs"
-                    onClick={handleAddTestSuggestion}
-                >
-                    Add Test Suggestion
-                </Button>
-
-                {analysisError && (
-                    <p className="text-xs text-destructive">{analysisError}</p>
-                )}
-
-                {lastAnalyzedNoteId && (
-                    <p className="text-xs text-muted-foreground">
-                        Last analyzed: {state.notes.find(n => n.id === lastAnalyzedNoteId)?.title || lastAnalyzedNoteId}
-                    </p>
-                )}
             </div>
 
             {/* Suggestions Section */}
@@ -394,27 +107,14 @@ export function NerPanel() {
                 )}
             </div>
 
-            {/* Logs Section */}
-            <div className="flex-1 flex flex-col min-h-0">
-                <div className="flex items-center justify-between p-2 border-b border-border">
-                    <span className="text-xs font-medium text-muted-foreground">Logs</span>
-                    <Button variant="ghost" size="sm" onClick={handleClearLogs}>
-                        <Trash2 className="h-3 w-3" />
-                    </Button>
+            {/* Empty state / help */}
+            <div className="flex-1 flex items-center justify-center p-4">
+                <div className="text-center text-muted-foreground">
+                    <Brain className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-xs">
+                        Use bracket syntax like <code className="bg-muted px-1 rounded">[CHARACTER|Name]</code> to create entities
+                    </p>
                 </div>
-                <ScrollArea className="flex-1 p-2">
-                    <div className="space-y-1 font-mono text-[10px] text-muted-foreground">
-                        {logs.length === 0 ? (
-                            <p className="text-center py-2">No logs yet</p>
-                        ) : (
-                            logs.map((log, i) => (
-                                <div key={i} className="whitespace-pre-wrap break-all">
-                                    {log}
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </ScrollArea>
             </div>
         </div>
     );
@@ -447,9 +147,9 @@ function SuggestionCard({ suggestion, onAccept, onReject }: SuggestionCardProps)
     return (
         <div className="flex items-center justify-between p-2 bg-muted/50 rounded text-xs">
             <div className="flex-1 min-w-0">
-                <span className="font-medium truncate block">{suggestion.text}</span>
+                <span className="font-medium truncate block">{suggestion.label}</span>
                 <span className="text-muted-foreground">
-                    {suggestion.entity_type} • {confidencePercent}%
+                    {suggestion.kind} • {confidencePercent}%
                 </span>
             </div>
             <div className="flex gap-1 shrink-0 ml-2">

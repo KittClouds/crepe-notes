@@ -1,12 +1,14 @@
 // src/api/highlighter-api.ts
 // Highlighter API - interface between Scanner and Editor
 // Connected to highlightingStore for live mode updates
+// Wired to ScanCoordinator for entity event emission
 
 import type { DecorationSpan, HighlighterConfig, HighlightMode } from '../lib/Scanner';
 import { scanDocument, getDecorationStyle, getDecorationClass } from '../lib/Scanner';
 import { highlightingStore } from '../lib/store/highlightingStore';
 import type { EntityKind } from '../lib/types/entityTypes';
 import { implicitScanner } from '../lib/Scanner/ImplicitScanner';
+import { getScanCoordinator } from '../lib/Scanner/scanCoordinatorInstance';
 
 // =============================================================================
 // HIGHLIGHTER API INTERFACE
@@ -36,6 +38,12 @@ export interface HighlighterApi {
 
     /** Subscribe to settings changes for editor refresh */
     subscribe(callback: () => void): () => void;
+
+    /** Set current note ID for scan coordinator integration */
+    setNoteId(noteId: string): void;
+
+    /** Handle keystroke for scan coordinator punctuation trigger */
+    onKeystroke(char: string, cursorPos: number, contextText: string): void;
 }
 
 // ProseMirror document interface (minimal)
@@ -65,6 +73,18 @@ class DefaultHighlighterApi implements HighlighterApi {
     private listeners: Set<() => void> = new Set();
     private isScanning = false;
     private scanVersion = 0;
+    private currentNoteId: string = '';
+
+    /** Set the current note ID for scan coordinator */
+    setNoteId(noteId: string): void {
+        this.currentNoteId = noteId;
+    }
+
+    /** Called on editor keystroke - forward to scan coordinator */
+    onKeystroke(char: string, cursorPos: number, contextText: string): void {
+        if (!this.currentNoteId) return;
+        getScanCoordinator().onKeystroke(char, cursorPos, contextText, this.currentNoteId);
+    }
 
     constructor() {
         // subscribe to store changes
@@ -113,7 +133,7 @@ class DefaultHighlighterApi implements HighlighterApi {
         allSpans.sort((a, b) => a.from - b.from);
 
         // Filter based on config
-        return allSpans.filter(span => {
+        const filteredSpans = allSpans.filter(span => {
             // Filter by type
             if (span.type === 'wikilink' && !settings.showWikilinks) return false;
             if (span.type === 'entity_ref' && !this.enableEntityRefs) return false;
@@ -125,6 +145,19 @@ class DefaultHighlighterApi implements HighlighterApi {
 
             return true;
         });
+
+        // Emit entity decorations to ScanCoordinator (non-blocking)
+        // This is in the hot path but ScanCoordinator queues, doesn't block
+        if (this.currentNoteId) {
+            const entitySpans = filteredSpans.filter(s =>
+                s.type === 'entity' || s.type === 'entity_ref'
+            );
+            for (const span of entitySpans) {
+                getScanCoordinator().onEntityDecoration(span, this.currentNoteId);
+            }
+        }
+
+        return filteredSpans;
     }
 
     getStyle(span: DecorationSpan): string {

@@ -11,6 +11,9 @@ import { loadEditorFonts } from '../../utils/fontLoader';
 // Entity highlighter plugin
 import { entityHighlighter } from '../../editor/plugins/entityHighlighter';
 
+// Highlighter API for scan coordinator integration
+import { getHighlighterApi } from '../../api';
+
 // Custom selection toolbar plugin
 import { selectionTooltip, createSelectionToolbarView } from '../../editor/plugins/toolbar';
 
@@ -123,11 +126,10 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
           if (Array.isArray(node)) return node.map(sanitizeJSON);
           if (typeof node === 'object') {
             const newNode = { ...node };
-            // Fix specific known attribute issues
-            if (newNode.type === 'list_item' && newNode.attrs) {
-              if (typeof newNode.attrs.spread === 'string') {
-                newNode.attrs.spread = newNode.attrs.spread === 'true';
-              }
+            // Fix specific known attribute issues - spread should be boolean
+            if (newNode.attrs && typeof newNode.attrs.spread === 'string') {
+              newNode.attrs = { ...newNode.attrs };
+              newNode.attrs.spread = newNode.attrs.spread === 'true';
             }
             // Recursively sanitize children
             if (newNode.content) {
@@ -241,6 +243,43 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
       }
     };
   }, [noteId]);
+
+  // Wire highlighterApi.setNoteId when noteId changes
+  useEffect(() => {
+    if (noteId) {
+      const api = getHighlighterApi();
+      api.setNoteId(noteId);
+    }
+  }, [noteId]);
+
+  // Keystroke handler for scan coordinator
+  useEffect(() => {
+    const container = editorRef.current;
+    if (!container) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only track printable characters
+      if (e.key.length === 1) {
+        const api = getHighlighterApi();
+
+        // Get cursor position and context from editor
+        if (crepeRef.current) {
+          try {
+            const markdown = crepeRef.current.getMarkdown();
+            // Use selection start as approximate cursor position
+            const selection = window.getSelection();
+            const cursorPos = selection?.anchorOffset ?? 0;
+            api.onKeystroke(e.key, cursorPos, markdown);
+          } catch {
+            // Editor may not be ready, ignore
+          }
+        }
+      }
+    };
+
+    container.addEventListener('keydown', handleKeyDown);
+    return () => container.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Handle readonly changes
   useEffect(() => {

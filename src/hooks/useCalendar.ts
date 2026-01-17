@@ -56,7 +56,11 @@ export function useCalendarPeriods() {
 export function useCalendarDefinition() {
     return useQuery({
         queryKey: calendarKeys.definition,
-        queryFn: getCalendarDefinition,
+        queryFn: async () => {
+            const result = await getCalendarDefinition();
+            // TanStack Query doesn't allow undefined, return null for missing definition
+            return result ?? null;
+        },
         staleTime: Infinity,
     });
 }

@@ -4,7 +4,7 @@ import { useUnifiedEntityAttributes } from '@/hooks/useUnifiedEntityAttributes';
 import { FactSheetContainer } from '@/components/fact-sheets/FactSheetContainer';
 import { EntitySelectionProvider, useEntitySelection } from '@/contexts/EntitySelectionContext';
 // Use smartGraphRegistry (SYNC!) instead of async parseNoteConnectionsFromDocument
-import { smartGraphRegistry } from '@/lib/tauri';
+import { smartGraphRegistry } from '@/lib/registry';
 import type { ParsedEntity, EntityAttributes } from '@/types/factSheetTypes';
 import type { EntityKind } from '@/lib/types/entityTypes';
 import { toast } from 'sonner';

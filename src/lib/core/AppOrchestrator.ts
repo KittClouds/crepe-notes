@@ -1,4 +1,5 @@
 import { entityColorStore } from '../store/entityColorStore';
+import { entityAttributeStore } from '../store/entityAttributeStore';
 import { smartGraphRegistry } from '../registry/SmartGraphRegistry';
 import { cozoDb } from '../cozo/db';
 import { implicitScanner } from '../Scanner/ImplicitScanner';
@@ -158,6 +159,10 @@ export class AppOrchestrator {
         console.time('Step 2: Reconciliation');
         console.log('Step 2: Reconciliation & Services...');
 
+        // Invalidate notes/folders so UI refetches from CozoDB (not stale boot cache)
+        await queryClient.invalidateQueries({ queryKey: noteKeys.all });
+        await queryClient.invalidateQueries({ queryKey: folderKeys.all });
+
         // Get fresh stats
         const stats = await smartGraphRegistry.getStats();
         console.log(`[AppOrchestrator] Graph Ready with ${stats.totalEntities} entities`);
@@ -178,6 +183,10 @@ export class AppOrchestrator {
         );
         saveCozoBootCache(freshCache);
         console.log(`[AppOrchestrator] Updated Cozo boot cache (${entities.length} entities)`);
+
+        // Initialize EntityAttributeStore (requires CozoDB to be ready)
+        await entityAttributeStore.init();
+        console.log('[AppOrchestrator] EntityAttributeStore initialized');
 
         console.timeEnd('Step 2: Reconciliation');
     }

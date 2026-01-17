@@ -1,21 +1,28 @@
-// src/lib/fact-sheets/FactSheetService.ts
-// Fact Sheet Service - Manages strictly typed (Primary) and flexible (Meta) fact sheets
-// Persists directly to NebulaDB 'fact_sheets' collection.
+/**
+ * @deprecated FactSheetService is deprecated. Use EntityMetadataService from @/lib/cozo/content instead.
+ * 
+ * This file is kept for reference during migration. It will be removed after verification.
+ * 
+ * Migration:
+ * - factSheetService.getPrimarySheet() -> entityMetadataService.getAsRecord()
+ * - factSheetService.getMetaSheet() -> entityMetadataService.getCards()
+ * - factSheetService.updateSheet() -> entityMetadataService.setValue() / setMultiple()
+ */
 
-import { db, Collections } from '../db';
 import type { EntityKind } from '@/lib/types/entityTypes';
+import { entityMetadataService, ensureMetadataSchemas } from '@/lib/cozo/content/EntityMetadataService';
 
 // ===================================
-// TYPES
+// TYPES (kept for compatibility)
 // ===================================
 
 export type FactSheetType = 'primary' | 'meta';
 
 export interface FactSheetDocument {
-    id: string;             // Composite ID: "{entityId}:{type}"
+    id: string;
     entityId: string;
     type: FactSheetType;
-    kind?: EntityKind;      // Only for primary sheets
+    kind?: EntityKind;
     data: Record<string, any>;
     createdAt: number;
     updatedAt: number;
@@ -26,93 +33,61 @@ export interface FactSheetUpdate {
 }
 
 // ===================================
-// SERVICE
+// SERVICE (Facade over EntityMetadataService)
 // ===================================
 
 export class FactSheetService {
 
     /**
-     * Get or create the Primary Fact Sheet for an entity
-     * Primary sheets enforce the schema for the entity's Kind
+     * @deprecated Use entityMetadataService.getAsRecord() instead
      */
     async getPrimarySheet(entityId: string, kind: EntityKind): Promise<FactSheetDocument> {
-        const id = this.getId(entityId, 'primary');
-        const existing = await db.collection(Collections.FACT_SHEETS).findOne({ id });
+        ensureMetadataSchemas();
+        const data = entityMetadataService.getAsRecord(entityId);
 
-        if (existing) {
-            return existing as unknown as FactSheetDocument;
-        }
-
-        // Create default
-        const newSheet: FactSheetDocument = {
-            id,
+        return {
+            id: `${entityId}:primary`,
             entityId,
             type: 'primary',
             kind,
-            data: {},
+            data,
             createdAt: Date.now(),
             updatedAt: Date.now(),
         };
-
-        await db.collection(Collections.FACT_SHEETS).insert(newSheet);
-        return newSheet;
     }
 
     /**
-     * Get or create the Meta Fact Sheet for an entity
-     * Meta sheets store custom cards and extra fields
+     * @deprecated Use entityMetadataService.getCards() and getAsRecord() instead
      */
     async getMetaSheet(entityId: string): Promise<FactSheetDocument> {
-        const id = this.getId(entityId, 'meta');
-        const existing = await db.collection(Collections.FACT_SHEETS).findOne({ id });
+        ensureMetadataSchemas();
+        const cards = entityMetadataService.getCards(entityId);
+        const data = entityMetadataService.getAsRecord(entityId);
 
-        if (existing) {
-            return existing as unknown as FactSheetDocument;
-        }
-
-        // Create default
-        const newSheet: FactSheetDocument = {
-            id,
+        return {
+            id: `${entityId}:meta`,
             entityId,
             type: 'meta',
-            data: {}, // Will store custom cards like { "card-uuid": { title: "...", fields: [...] } }
+            data: { ...data, metaCards: cards },
             createdAt: Date.now(),
             updatedAt: Date.now(),
         };
-
-        await db.collection(Collections.FACT_SHEETS).insert(newSheet);
-        return newSheet;
     }
 
     /**
-     * Update a fact sheet (merges data)
+     * @deprecated Use entityMetadataService.setValue() or setMultiple() instead
      */
     async updateSheet(entityId: string, type: FactSheetType, updates: Partial<Record<string, any>>): Promise<void> {
-        const id = this.getId(entityId, type);
-        const sheet = await db.collection(Collections.FACT_SHEETS).findOne({ id });
-
-        if (!sheet) {
-            throw new Error(`FactSheet not found for ${entityId}:${type}`);
-        }
-
-        const newData = { ...(sheet.data || {}), ...updates };
-
-        await db.collection(Collections.FACT_SHEETS).update(
-            { id },
-            {
-                $set: {
-                    data: newData,
-                    updatedAt: Date.now()
-                }
-            }
-        );
+        ensureMetadataSchemas();
+        entityMetadataService.setMultiple(entityId, updates);
     }
 
     /**
-     * Delete all sheets for an entity
+     * @deprecated Use entityMetadataService.deleteAllForEntity() instead
      */
     async deleteSheetsForEntity(entityId: string): Promise<void> {
-        await db.collection(Collections.FACT_SHEETS).delete({ entityId });
+        entityMetadataService.deleteAllForEntity(entityId);
+        entityMetadataService.deleteAllCardsForEntity(entityId);
     }
 
     private getId(entityId: string, type: FactSheetType): string {

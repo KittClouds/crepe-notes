@@ -1,18 +1,30 @@
 // src/lib/registry/SmartGraphRegistry.ts
-// Entity Registry - Facade for GraphRegistry (CozoDB)
-// V3: Migrated to CozoDB via GraphRegistry and Adapters
+// Entity Registry - Thin Facade for CozoGraphRegistry
+// V4: Direct CozoDB integration with GraphHotCache
 
 import type { EntityKind } from '@/lib/types/entityTypes';
 import { implicitScanner } from '../Scanner/ImplicitScanner';
-import { entityRegistry } from '@/lib/cozo/graph/adapters/EntityRegistryAdapter';
-import { relationshipRegistry } from '@/lib/cozo/graph/adapters/RelationshipRegistryAdapter';
-import type { RegisteredEntity } from '@/lib/cozo/graph/adapters/EntityRegistryAdapter';
+import { cozoGraphRegistry, type CozoEntity, type CozoRelationship, type RelationshipProvenance } from '@/lib/cozo/graph/GraphRegistry';
+import type { GraphHotCache } from '@/lib/cozo/graph/GraphHotCache';
 
 // =============================================================================
-// Legacy Types (kept for compatibility)
+// Types - Compatible with legacy code
 // =============================================================================
 
-export type { RegisteredEntity };
+export interface RegisteredEntity {
+    id: string;
+    label: string;
+    aliases: string[];
+    kind: EntityKind;
+    subtype?: string;
+    firstNote: string;
+    mentionsByNote: Map<string, number>;
+    totalMentions: number;
+    lastSeenDate: Date;
+    createdAt: Date;
+    createdBy: 'user' | 'extraction' | 'auto';
+    attributes?: Record<string, any>;
+}
 
 export interface EntityDefinition {
     id: string;
@@ -37,7 +49,7 @@ export interface Edge {
 }
 
 // =============================================================================
-// SmartGraphRegistry Facade
+// SmartGraphRegistry Facade (Thin wrapper around CozoGraphRegistry)
 // =============================================================================
 
 export class SmartGraphRegistryFacade {
@@ -51,17 +63,11 @@ export class SmartGraphRegistryFacade {
         if (this.initialized) return;
 
         try {
-            await entityRegistry.init();
-            await relationshipRegistry.init();
+            await cozoGraphRegistry.init();
             this.initialized = true;
 
-            // KAMMI: ImplicitScanner hydration is now handled by AppOrchestrator
-            // to ensure batching and correct phase execution.
-            // const entities = entityRegistry.getAllEntities();
-            // const scannerEntities = entities.map(this.toScannerEntity);
-            // implicitScanner.hydrate(scannerEntities);
-
-            console.log(`[SmartGraphRegistry] Initialized via GraphRegistry (CozoDB). Loaded ${entityRegistry.getAllEntities().length} entities.`);
+            const entityCount = cozoGraphRegistry.getHotCache().size;
+            console.log(`[SmartGraphRegistry] Initialized via CozoGraphRegistry. Loaded ${entityCount} entities.`);
         } catch (err) {
             console.error('[SmartGraphRegistry] Failed to initialize:', err);
             throw err;
@@ -70,6 +76,13 @@ export class SmartGraphRegistryFacade {
 
     isInitialized(): boolean {
         return this.initialized;
+    }
+
+    /**
+     * Get direct access to the hot cache for performance-critical operations
+     */
+    getHotCache(): GraphHotCache {
+        return cozoGraphRegistry.getHotCache();
     }
 
     private toScannerEntity(e: RegisteredEntity) {
@@ -83,28 +96,47 @@ export class SmartGraphRegistryFacade {
         };
     }
 
+    private toRegisteredEntity(e: CozoEntity): RegisteredEntity {
+        return {
+            id: e.id,
+            label: e.label,
+            aliases: e.aliases || [],
+            kind: e.kind,
+            subtype: e.subtype,
+            firstNote: e.firstNote,
+            mentionsByNote: e.mentionsByNote || new Map(),
+            totalMentions: e.totalMentions || 0,
+            lastSeenDate: e.lastSeenDate || new Date(),
+            createdAt: e.createdAt,
+            createdBy: e.createdBy,
+            attributes: e.metadata || {},
+        };
+    }
+
     // =========================================================================
     // ENTITY OPERATIONS
     // =========================================================================
 
     isRegisteredEntity(label: string): boolean {
-        return entityRegistry.isRegisteredEntity(label);
+        return cozoGraphRegistry.isRegisteredEntity(label);
     }
 
     getEntityById(id: string): RegisteredEntity | null {
-        return entityRegistry.getEntityById(id);
+        const entity = cozoGraphRegistry.getEntityById(id);
+        return entity ? this.toRegisteredEntity(entity) : null;
     }
 
     findEntityByLabel(label: string): RegisteredEntity | null {
-        return entityRegistry.findEntityByLabel(label);
+        const entity = cozoGraphRegistry.findEntityByLabel(label);
+        return entity ? this.toRegisteredEntity(entity) : null;
     }
 
     getAllEntities(): RegisteredEntity[] {
-        return entityRegistry.getAllEntities();
+        return cozoGraphRegistry.getAllEntities().map(e => this.toRegisteredEntity(e));
     }
 
     getEntitiesByKind(kind: EntityKind): RegisteredEntity[] {
-        return entityRegistry.getEntitiesByKind(kind);
+        return cozoGraphRegistry.getEntitiesByKind(kind).map(e => this.toRegisteredEntity(e));
     }
 
     async registerEntity(
@@ -118,25 +150,35 @@ export class SmartGraphRegistryFacade {
             source?: 'user' | 'extraction' | 'auto';
         }
     ): Promise<EntityRegistrationResult> {
-        const result = await entityRegistry.registerEntity(label, kind, noteId, options);
+        const existing = cozoGraphRegistry.findEntityByLabel(label);
+        const isNew = !existing;
 
-        // Update implicit scanner incrementally needed? 
-        // implicitScanner usually rebuilds trie. Ideally we call hydrate again or addIncremental.
-        // For now, re-hydration is safer though heavier. Or rely on scanning logic.
-        implicitScanner.hydrate(Array.from(entityRegistry.getAllEntities()).map(this.toScannerEntity));
+        const entity = cozoGraphRegistry.registerEntity(label, kind, noteId, {
+            subtype: options?.subtype,
+            aliases: options?.aliases,
+            metadata: options?.attributes,
+        });
 
-        return result;
+        // Update implicit scanner with all entities
+        const allEntities = this.getAllEntities();
+        implicitScanner.hydrate(allEntities.map(this.toScannerEntity));
+
+        return {
+            entity: this.toRegisteredEntity(entity),
+            isNew,
+            wasMerged: false,
+        };
     }
 
     async deleteEntity(id: string): Promise<boolean> {
-        return entityRegistry.deleteEntity(id);
+        return cozoGraphRegistry.deleteEntity(id);
     }
 
     async clearAll(): Promise<number> {
-        await entityRegistry.clear();
-        await relationshipRegistry.clear();
+        const count = cozoGraphRegistry.getAllEntities().length;
+        await cozoGraphRegistry.clear();
         implicitScanner.hydrate([]);
-        return 0; // Count unknown unless we checked before clearing
+        return count;
     }
 
     // =========================================================================
@@ -152,25 +194,22 @@ export class SmartGraphRegistryFacade {
             sourceNote?: string;
         }
     ): Promise<Edge> {
-        const rel = relationshipRegistry.add({
-            sourceEntityId: sourceId,
-            targetEntityId: targetId,
-            type: type,
-            provenance: [{
-                source: 'user', // Default source for manual creation
-                originId: options?.sourceNote || 'unknown',
-                confidence: options?.confidence || 1.0,
-                timestamp: new Date()
-            }]
-        });
+        const provenance: RelationshipProvenance = {
+            source: 'user',
+            originId: options?.sourceNote || 'unknown',
+            confidence: options?.confidence || 1.0,
+            timestamp: new Date()
+        };
+
+        const rel = cozoGraphRegistry.addRelationship(sourceId, targetId, type, provenance);
 
         return {
             id: rel.id,
-            sourceId: rel.sourceEntityId,
-            targetId: rel.targetEntityId,
+            sourceId: rel.sourceId,
+            targetId: rel.targetId,
             type: rel.type,
             confidence: rel.confidence,
-            sourceNote: options?.sourceNote // Not stored directly on edge but in provenance
+            sourceNote: options?.sourceNote
         };
     }
 
@@ -178,37 +217,38 @@ export class SmartGraphRegistryFacade {
         entityId: string,
         direction: 'in' | 'out' | 'both' = 'both'
     ): Promise<Edge[]> {
-        let relations;
+        let relationships: CozoRelationship[];
+
         if (direction === 'in') {
-            relations = relationshipRegistry.getByTarget(entityId);
+            relationships = cozoGraphRegistry.getRelationshipsByTarget(entityId);
         } else if (direction === 'out') {
-            relations = relationshipRegistry.getBySource(entityId);
+            relationships = cozoGraphRegistry.getRelationshipsBySource(entityId);
         } else {
-            relations = relationshipRegistry.getByEntity(entityId);
+            relationships = cozoGraphRegistry.getRelationshipsForEntity(entityId);
         }
 
-        return relations.map(r => ({
+        return relationships.map(r => ({
             id: r.id,
-            sourceId: r.sourceEntityId,
-            targetId: r.targetEntityId,
+            sourceId: r.sourceId,
+            targetId: r.targetId,
             type: r.type,
             confidence: r.confidence,
-            sourceNote: r.provenance[0]?.originId // Approximation
+            sourceNote: r.provenance?.[0]?.originId
         }));
     }
 
     async deleteEdge(edgeId: string): Promise<boolean> {
-        return relationshipRegistry.delete(edgeId);
+        return cozoGraphRegistry.deleteRelationship(edgeId);
     }
 
     getAllEdges(): Edge[] {
-        return relationshipRegistry.getAll().map(r => ({
+        return cozoGraphRegistry.getAllRelationshipsSync().map(r => ({
             id: r.id,
-            sourceId: r.sourceEntityId,
-            targetId: r.targetEntityId,
+            sourceId: r.sourceId,
+            targetId: r.targetId,
             type: r.type,
             confidence: r.confidence,
-            sourceNote: r.provenance[0]?.originId
+            sourceNote: r.provenance?.[0]?.originId
         }));
     }
 
@@ -217,23 +257,54 @@ export class SmartGraphRegistryFacade {
     // =========================================================================
 
     async searchEntities(query: string) {
-        return entityRegistry.searchEntities(query);
+        const entities = cozoGraphRegistry.searchEntities(query);
+        const normalized = query.toLowerCase().trim();
+
+        return entities.map(entity => {
+            let matchType: 'exact' | 'alias' | 'fuzzy' = 'fuzzy';
+            let score = 0.5;
+
+            if (entity.normalized === normalized) {
+                matchType = 'exact';
+                score = 1.0;
+            } else if (entity.aliases?.some(a => a.toLowerCase() === normalized)) {
+                matchType = 'alias';
+                score = 0.9;
+            } else if (entity.normalized.includes(normalized)) {
+                matchType = 'fuzzy';
+                score = 0.7;
+            }
+
+            return {
+                entity: this.toRegisteredEntity(entity),
+                matchType,
+                score,
+            };
+        }).sort((a, b) => b.score - a.score);
     }
 
     async addAlias(entityId: string, alias: string): Promise<boolean> {
-        return entityRegistry.addAlias(entityId, alias);
+        return cozoGraphRegistry.addAlias(entityId, alias);
     }
 
     async getStats() {
-        // approximate compatibility
-        const stats = await entityRegistry.getStats();
-        const edges = await relationshipRegistry.getAll();
+        const globalStats = cozoGraphRegistry.getGlobalStats();
+        const allEntities = cozoGraphRegistry.getAllEntities();
+
+        let totalMentions = 0;
+        let totalAliases = 0;
+
+        for (const entity of allEntities) {
+            totalMentions += entity.totalMentions || 0;
+            totalAliases += entity.aliases?.length || 0;
+        }
+
         return {
-            totalEntities: stats.totalEntities,
-            byKind: stats.byKind,
-            totalMentions: stats.totalMentions,
-            totalAliases: stats.totalAliases,
-            totalEdges: edges.length
+            totalEntities: globalStats.totalEntities,
+            byKind: globalStats.entitiesByKind,
+            totalMentions,
+            totalAliases,
+            totalEdges: globalStats.totalRelationships
         };
     }
 }
@@ -243,4 +314,6 @@ export class SmartGraphRegistryFacade {
 // ============================================================================
 
 export const smartGraphRegistry = new SmartGraphRegistryFacade();
+
+// Legacy alias for backwards compatibility
 export { smartGraphRegistry as entityRegistry };

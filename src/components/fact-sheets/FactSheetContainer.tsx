@@ -3,7 +3,7 @@ import { useNotesStore } from '@/hooks/useNotesStore';
 import { useEntitySelection, EntitySelectionProvider } from '@/contexts/EntitySelectionContext';
 import { useUnifiedEntityAttributes } from '@/hooks/useUnifiedEntityAttributes';
 // Use smartGraphRegistry (SYNC!) instead of async parseNoteConnectionsFromDocument
-import { smartGraphRegistry } from '@/lib/tauri';
+import { smartGraphRegistry } from '@/lib/registry';
 import type { ParsedEntity, EntityAttributes } from '@/types/factSheetTypes';
 import type { EntityKind } from '@/lib/types/entityTypes';
 import { FileQuestion, Sparkles, BrainCircuit, LayoutGrid, List, Plus } from 'lucide-react';

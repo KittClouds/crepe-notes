@@ -84,8 +84,8 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
         switch (msg.type) {
             case 'INIT':
                 if (!initialized) {
-                    // Initialize WASM
-                    await init(wasmUrl);
+                    // Initialize WASM (use object param to avoid deprecation warning)
+                    await init({ module_or_path: wasmUrl });
 
                     // Create Conductor
                     conductor = new ScanConductor();

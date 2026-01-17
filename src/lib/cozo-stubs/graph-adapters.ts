@@ -21,47 +21,47 @@ export interface RegisteredEntity {
 // Stub entityRegistry - consumers should use smartGraphRegistry
 export const entityRegistry = {
     init: async () => {
-        console.warn('[entityRegistry STUB] init() called - Browser CozoDB removed. Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] init() called - Browser CozoDB removed. Use smartGraphRegistry from @/lib/registry instead');
     },
     isReady: () => false,
     getAll: (): RegisteredEntity[] => {
-        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return [];
     },
     getAllEntities: (): RegisteredEntity[] => {
-        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return [];
     },
     getById: (_id: string): RegisteredEntity | null => {
-        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return null;
     },
     getEntityById: (_id: string): RegisteredEntity | null => {
-        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return null;
     },
     findByLabel: (_label: string): RegisteredEntity | null => {
-        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return null;
     },
     findEntity: (_label: string): RegisteredEntity | null => {
-        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return null;
     },
     findEntityByLabel: (_label: string): RegisteredEntity | null => {
-        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return null;
     },
     getEntitiesByKind: (_kind: EntityKind): RegisteredEntity[] => {
-        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return [];
     },
     register: async () => {
-        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return null;
     },
     registerEntity: async (_label: string, _kind: EntityKind, _noteId: string, _options?: any) => {
-        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[entityRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return { id: '', label: _label, kind: _kind, aliases: [], totalMentions: 0, mentionsByNote: new Map() };
     },
 };

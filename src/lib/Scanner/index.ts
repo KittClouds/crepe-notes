@@ -5,3 +5,7 @@ export * from './types';
 export * from './pattern-scanner';
 export * from './styles';
 export * from './ImplicitScanner';
+export * from './EntityEventBus';
+export * from './DeltaScanner';
+export * from './ScanCoordinator';
+export * from './scanCoordinatorInstance';

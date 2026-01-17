@@ -12,9 +12,19 @@ import init, { CozoDb } from 'cozo-lib-wasm';
 // @ts-ignore - Vite specific import
 import wasmUrl from 'cozo-lib-wasm/cozo_lib_wasm_bg.wasm?url';
 import { cozoPersistence } from './persistence/CozoPersistenceService';
+import { initContentRepo } from './content';
+import { createGraphSchemas } from './graph/GraphSchema';
 
-// Relations to persist
-const PERSISTED_RELATIONS = ['entities', 'edges', 'mentions', 'entity_aliases'];
+// Relations to persist (graph + content)
+const PERSISTED_RELATIONS = [
+    // Graph relations
+    'entities', 'edges', 'mentions', 'entity_aliases',
+    // Content relations
+    'notes', 'folders', 'tags', 'note_tags',
+    // Calendar relations
+    'calendar_definitions', 'calendar_months', 'calendar_weekdays',
+    'calendar_events', 'calendar_periods',
+];
 
 export class CozoDbService {
     private db: CozoDb | null = null;
@@ -23,8 +33,11 @@ export class CozoDbService {
     private wasmReady = false;
     private walEntryCount = 0;
     private lastCompactTime = Date.now();
-    private readonly COMPACT_THRESHOLD = 50;      // Compact after N WAL entries
-    private readonly COMPACT_INTERVAL_MS = 300000; // Or after 5 minutes
+    private isCompacting = false;                    // Mutex to prevent concurrent compaction
+    private compactDebounceTimer: number | null = null;
+    private readonly COMPACT_THRESHOLD = 50;         // Compact after N WAL entries
+    private readonly COMPACT_INTERVAL_MS = 300000;   // Or after 5 minutes
+    private readonly COMPACT_DEBOUNCE_MS = 5000;     // Debounce: wait 5s after last mutation
 
     /**
      * Preload the WASM module (fire-and-forget, non-blocking)
@@ -82,7 +95,14 @@ export class CozoDbService {
         this.db = CozoDb.new();
         console.log('[CozoDB] ✅ Database instance created (In-Memory)');
 
-        // Step 3: Restore from OPFS persistence
+        // Step 3: Create ALL schemas BEFORE restoring from persistence
+        // This ensures relations exist for import_relations to fill
+        console.log('[CozoDB] Creating all schemas before restore...');
+        initContentRepo();      // Content schemas (notes, folders, etc.)
+        createGraphSchemas();   // Graph schemas (entities, relationships, etc.)
+        console.log('[CozoDB] ✅ All schemas created');
+
+        // Step 4: Restore from OPFS persistence (snapshot + WAL)
         await this.restoreFromPersistence();
     }
 
@@ -91,16 +111,57 @@ export class CozoDbService {
      */
     private async restoreFromPersistence(): Promise<void> {
         try {
-            console.log('[CozoDB] Loading persistence...');
             const { snapshot, wal } = await cozoPersistence.load();
 
             // Restore snapshot if exists
             if (snapshot) {
                 try {
-                    // Cozo's export format wraps data - we need to handle it
+                    // Cozo's export format wraps data in {data: {...}, ok: true}
+                    // But import_relations expects just the relation data directly
                     const dataStr = typeof snapshot === 'string' ? snapshot : JSON.stringify(snapshot);
-                    this.db!.import_relations(dataStr);
-                    console.log('[CozoDB] ✅ Snapshot restored');
+                    const parsed = JSON.parse(dataStr);
+
+                    // Extract the actual data part for import
+                    const dataToImport = parsed.data || parsed;
+                    const relationNames = Object.keys(dataToImport);
+
+                    // Track expected counts for validation
+                    const expectedCounts: Record<string, number> = {};
+                    for (const rel of relationNames) {
+                        expectedCounts[rel] = dataToImport[rel]?.rows?.length ?? 0;
+                    }
+
+                    // Import just the data part, not the {data, ok} wrapper
+                    const importPayload = JSON.stringify(dataToImport);
+                    const importResult = this.db!.import_relations(importPayload);
+                    const importParsed = JSON.parse(importResult);
+
+                    if (importParsed.ok === false) {
+                        console.error('[CozoDB] ❌ import_relations FAILED:', importParsed.message);
+                    } else {
+                        // Validate import - check row counts match expected
+                        let totalExpected = 0;
+                        let totalActual = 0;
+
+                        for (const [rel, expected] of Object.entries(expectedCounts)) {
+                            if (expected > 0) {
+                                try {
+                                    const result = this.db!.run(`?[count(id)] := *${rel}{id}`, '{}', false);
+                                    const actual = JSON.parse(result).rows?.[0]?.[0] ?? 0;
+                                    totalExpected += expected;
+                                    totalActual += actual;
+
+                                    if (actual !== expected) {
+                                        console.warn(`[CozoDB] ⚠️ ${rel}: expected ${expected} rows, got ${actual}`);
+                                    }
+                                } catch {
+                                    // Relation might not have 'id' column, skip validation
+                                }
+                            }
+                        }
+
+                        console.log(`[CozoDB] ✅ Snapshot restored (${relationNames.length} relations, ${totalActual}/${totalExpected} rows)`);
+                    }
                 } catch (e) {
                     console.warn('[CozoDB] Snapshot restore failed, starting fresh:', e);
                 }
@@ -109,17 +170,32 @@ export class CozoDbService {
             // Replay WAL entries
             if (wal && wal.length > 0) {
                 console.log(`[CozoDB] Replaying ${wal.length} WAL entries...`);
+
+                // 🔍 DIAGNOSTIC: Show first few WAL entries
+                console.log('[CozoDB] 🔍 WAL entries preview:');
+                wal.slice(0, 3).forEach((entry, i) => {
+                    console.log(`  [${i}] ${entry.script.slice(0, 200)}...`);
+                });
+
                 let replayedCount = 0;
                 for (const entry of wal) {
                     try {
-                        this.db!.run(entry.script, '{}', false);
+                        // Use stored params if available, otherwise empty object
+                        const params = entry.params || '{}';
+                        this.db!.run(entry.script, params, false);
                         replayedCount++;
                     } catch (e) {
-                        console.warn('[CozoDB] WAL entry replay failed:', entry.script, e);
+                        console.warn('[CozoDB] WAL entry replay failed:', entry.script.slice(0, 100), e);
                     }
                 }
                 console.log(`[CozoDB] ✅ Replayed ${replayedCount}/${wal.length} WAL entries`);
                 this.walEntryCount = wal.length;
+
+                // 🔍 DIAGNOSTIC: Check relations after WAL replay
+                try {
+                    const result = this.db!.run('::relations', '{}', false);
+                    console.log('[CozoDB] 🔍 Relations after WAL replay:', result);
+                } catch { }
             }
         } catch (e) {
             console.warn('[CozoDB] Persistence load failed, starting fresh:', e);
@@ -169,7 +245,7 @@ export class CozoDbService {
             // Auto-persist mutations to WAL (fire and forget)
             // Skip schema creation scripts (already idempotent)
             if (this.isMutationScript(script) && !script.toLowerCase().includes(':create ')) {
-                cozoPersistence.appendWal(script);
+                cozoPersistence.appendWal(script, paramsStr);
                 this.walEntryCount++;
                 this.maybeCompact();
             }
@@ -213,16 +289,31 @@ export class CozoDbService {
     }
 
     /**
-     * Check if compaction should run and trigger it
+     * Check if compaction should run and trigger it (with debouncing)
      */
     private maybeCompact(): void {
+        // Clear any pending debounce timer
+        if (this.compactDebounceTimer) {
+            clearTimeout(this.compactDebounceTimer);
+            this.compactDebounceTimer = null;
+        }
+
         const timeSinceCompact = Date.now() - this.lastCompactTime;
 
+        // Don't compact if we just did one recently
+        if (timeSinceCompact < this.COMPACT_DEBOUNCE_MS) {
+            return;
+        }
+
+        // Only compact if we hit threshold or time limit
         if (this.walEntryCount >= this.COMPACT_THRESHOLD || timeSinceCompact >= this.COMPACT_INTERVAL_MS) {
-            // Run compaction in background
-            this.compact().catch(e => {
-                console.warn('[CozoDB] Background compaction failed:', e);
-            });
+            // Debounce: schedule compaction for 5s from now
+            this.compactDebounceTimer = window.setTimeout(() => {
+                this.compactDebounceTimer = null;
+                this.compact().catch(e => {
+                    console.warn('[CozoDB] Background compaction failed:', e);
+                });
+            }, this.COMPACT_DEBOUNCE_MS);
         }
     }
 
@@ -232,22 +323,30 @@ export class CozoDbService {
     async compact(): Promise<void> {
         if (!this.db) return;
 
-        try {
-            console.log('[CozoDB] Starting compaction...');
+        // Mutex: prevent concurrent compactions
+        if (this.isCompacting) {
+            return;
+        }
+        this.isCompacting = true;
 
+        try {
             // Check which relations exist before exporting
             const existingRelations: string[] = [];
             for (const rel of PERSISTED_RELATIONS) {
                 try {
-                    this.db.run(`?[x] := *${rel}[x, ..] :limit 1`, '{}', false);
-                    existingRelations.push(rel);
+                    // Check if relation has any rows using exact count pattern
+                    const result = this.db.run(`?[count(id)] := *${rel}{id}`, '{}', false);
+                    const parsed = JSON.parse(result);
+                    const count = parsed.rows?.[0]?.[0] || 0;
+                    if (count > 0) {
+                        existingRelations.push(rel);
+                    }
                 } catch {
                     // Relation doesn't exist, skip
                 }
             }
 
             if (existingRelations.length === 0) {
-                console.log('[CozoDB] No relations to compact');
                 return;
             }
 
@@ -256,9 +355,10 @@ export class CozoDbService {
 
             this.walEntryCount = 0;
             this.lastCompactTime = Date.now();
-            console.log('[CozoDB] ✅ Compaction complete');
         } catch (e) {
             console.error('[CozoDB] Compaction failed:', e);
+        } finally {
+            this.isCompacting = false;
         }
     }
 

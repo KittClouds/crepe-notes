@@ -2,7 +2,7 @@
  * CozoDB OPFS Core Adapter
  * 
  * Provides atomic snapshot + append-only WAL persistence for CozoDB.
- * Reuses hardened patterns from NebulaDB's OPFS adapter.
+ * Enterprise-grade: atomic commits, backup rotation, integrity checks, quota guardrails.
  * 
  * File Layout (under OPFS root):
  *   /cozo/snapshot.json      - Full Cozo export
@@ -14,9 +14,15 @@
 // Types
 // ==========================================
 
+/** Current schema version - bump when envelope format changes */
+export const SCHEMA_VERSION = 1;
+
+/** Maximum snapshot size in bytes (50MB) */
+export const MAX_SNAPSHOT_SIZE_BYTES = 50 * 1024 * 1024;
+
 export type CozoSnapshotEnvelope = {
     magic: "cozo-snapshot";
-    schema: 1;
+    schema: number;
     createdAtMs: number;
     payloadJson: string;      // Raw JSON string from CozoDB export
     payloadSha256Hex: string; // Integrity check
@@ -26,6 +32,20 @@ export type WalEntry = {
     ts: number;           // Timestamp
     op: 'script';         // Operation type (just scripts for now)
     script: string;       // CozoScript that was run
+    params?: string;      // JSON-stringified params (needed for replay)
+};
+
+export type LoadResult = {
+    snapshot: any | null;
+    recoveryMode: boolean;  // True if fallback was used
+    source: 'primary' | 'backup' | 'none';
+};
+
+export type QuotaStatus = {
+    usageBytes: number;
+    quotaBytes: number;
+    usagePercent: number;
+    available: number;
 };
 
 export class CozoOpfsError extends Error {
@@ -37,6 +57,7 @@ export class CozoOpfsError extends Error {
             | "SchemaMismatch"
             | "Quota"
             | "Locked"
+            | "TooLarge"
             | "Io",
         public readonly cause?: unknown,
     ) {
@@ -57,19 +78,32 @@ export async function sha256Hex(text: string): Promise<string> {
     return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function writeTextFileExclusive(handle: FileSystemFileHandle, text: string) {
+/**
+ * Write text to file with exclusive lock - short-lived handle pattern
+ */
+async function writeTextFileExclusive(handle: FileSystemFileHandle, text: string): Promise<void> {
+    let writable: FileSystemWritableFileStream | null = null;
     try {
-        const writable = await (handle as any).createWritable({ mode: "exclusive" });
+        writable = await (handle as any).createWritable({ mode: "exclusive" });
         await writable.write(text);
-        await writable.close();
     } catch (e: any) {
         if (e?.name === "NoModificationAllowedError") {
             throw new CozoOpfsError("File is locked by another writer", "Locked", e);
         }
         throw new CozoOpfsError("Failed writing file", "Io", e);
+    } finally {
+        // Always close - short-lived handle discipline
+        if (writable) {
+            try {
+                await writable.close();
+            } catch { /* ignore close errors */ }
+        }
     }
 }
 
+/**
+ * Read text from file - short-lived handle pattern
+ */
 async function readTextFileOrNull(handle: FileSystemFileHandle): Promise<string | null> {
     try {
         const file = await handle.getFile();
@@ -81,17 +115,34 @@ async function readTextFileOrNull(handle: FileSystemFileHandle): Promise<string 
     }
 }
 
+/**
+ * Append text to file - short-lived handle pattern
+ */
 async function appendTextFile(handle: FileSystemFileHandle, text: string): Promise<void> {
+    let writable: FileSystemWritableFileStream | null = null;
     try {
-        const writable = await (handle as any).createWritable({ keepExistingData: true });
+        writable = await (handle as any).createWritable({ keepExistingData: true });
         const file = await handle.getFile();
         await writable.seek(file.size);
         await writable.write(text);
-        await writable.close();
     } catch (e: any) {
         throw new CozoOpfsError("Failed appending to file", "Io", e);
+    } finally {
+        if (writable) {
+            try {
+                await writable.close();
+            } catch { /* ignore close errors */ }
+        }
     }
 }
+
+/**
+ * Schema migrations - add new migrations here when schema changes
+ */
+const SCHEMA_MIGRATIONS: Record<number, (env: any) => any> = {
+    // Example: 1 -> 2 migration
+    // 2: (env) => ({ ...env, schema: 2, newField: defaultValue })
+};
 
 async function tryParseEnvelope(text: string): Promise<CozoSnapshotEnvelope> {
     let env: any;
@@ -104,8 +155,21 @@ async function tryParseEnvelope(text: string): Promise<CozoSnapshotEnvelope> {
     if (env?.magic !== "cozo-snapshot") {
         throw new CozoOpfsError("Envelope magic mismatch", "Corrupt");
     }
-    if (env?.schema !== 1) {
-        throw new CozoOpfsError("Envelope schema mismatch", "SchemaMismatch");
+
+    // Apply migrations if needed
+    let currentSchema = env.schema;
+    while (currentSchema < SCHEMA_VERSION) {
+        const migrator = SCHEMA_MIGRATIONS[currentSchema + 1];
+        if (!migrator) {
+            throw new CozoOpfsError(`No migration path from schema ${currentSchema} to ${SCHEMA_VERSION}`, "SchemaMismatch");
+        }
+        env = migrator(env);
+        currentSchema = env.schema;
+        console.log(`[CozoOpfs] Migrated envelope from schema ${currentSchema - 1} to ${currentSchema}`);
+    }
+
+    if (env.schema !== SCHEMA_VERSION) {
+        throw new CozoOpfsError(`Unsupported schema version ${env.schema}`, "SchemaMismatch");
     }
     if (typeof env.payloadJson !== "string" || typeof env.payloadSha256Hex !== "string") {
         throw new CozoOpfsError("Envelope fields missing", "Corrupt");
@@ -143,70 +207,115 @@ export class CozoOpfsAdapter {
     }
 
     /**
-     * Load the snapshot from OPFS
+     * Get current quota status
+     */
+    async getQuotaStatus(): Promise<QuotaStatus> {
+        try {
+            const est = await navigator.storage.estimate();
+            const usage = est.usage ?? 0;
+            const quota = est.quota ?? 0;
+            return {
+                usageBytes: usage,
+                quotaBytes: quota,
+                usagePercent: quota > 0 ? (usage / quota) * 100 : 0,
+                available: quota - usage,
+            };
+        } catch (e) {
+            return { usageBytes: 0, quotaBytes: 0, usagePercent: 0, available: 0 };
+        }
+    }
+
+    /**
+     * Load the snapshot from OPFS with fallback chain
      * Returns parsed payload or null if no snapshot exists
      */
-    async loadSnapshot(): Promise<any | null> {
+    async loadSnapshot(): Promise<LoadResult> {
         const dir = await this.getDirectory();
-        let primaryText: string | null = null;
-        let bakText: string | null = null;
+        let recoveryMode = false;
 
         // Try primary
         try {
             const primary = await dir.getFileHandle(this.snapshotName, { create: true });
-            primaryText = await readTextFileOrNull(primary);
-        } catch (e) {
-            console.warn("[CozoOpfs] Primary load error", e);
-        }
+            const primaryText = await readTextFileOrNull(primary);
 
-        if (primaryText) {
-            try {
+            if (primaryText) {
                 const env = await tryParseEnvelope(primaryText);
-                return JSON.parse(env.payloadJson);
-            } catch (e) {
-                console.warn("[CozoOpfs] Primary corrupt, trying backup", e);
+                return {
+                    snapshot: JSON.parse(env.payloadJson),
+                    recoveryMode: false,
+                    source: 'primary',
+                };
             }
+        } catch (e) {
+            console.warn("[CozoOpfs] Primary load failed, trying backup", e);
+            recoveryMode = true;
         }
 
         // Try backup
         try {
             const bak = await dir.getFileHandle(this.bakName(), { create: true });
-            bakText = await readTextFileOrNull(bak);
+            const bakText = await readTextFileOrNull(bak);
+
+            if (bakText) {
+                const env = await tryParseEnvelope(bakText);
+                console.warn("[CozoOpfs] ⚠️ Recovered from backup");
+                return {
+                    snapshot: JSON.parse(env.payloadJson),
+                    recoveryMode: true,
+                    source: 'backup',
+                };
+            }
         } catch (e) {
-            console.warn("[CozoOpfs] Backup load error", e);
+            console.warn("[CozoOpfs] Backup load also failed", e);
         }
 
-        if (!bakText) return null;
-
-        const env = await tryParseEnvelope(bakText);
-        return JSON.parse(env.payloadJson);
+        // No snapshot available
+        console.warn('[CozoOpfs] 🔍 No snapshot found - source: none');
+        return {
+            snapshot: null,
+            recoveryMode,
+            source: 'none',
+        };
     }
 
     /**
-     * Save a snapshot atomically with backup rotation
+     * Save a snapshot atomically with backup rotation and size guardrails
      */
     async saveSnapshot(data: any): Promise<void> {
         const dir = await this.getDirectory();
 
-        // Quota check
-        try {
-            const est = await navigator.storage.estimate();
-            if (est.quota && est.usage && (est.usage / est.quota > 0.9)) {
-                console.warn("[CozoOpfs] Quota warning > 90%");
-            }
-        } catch { /* ignore */ }
-
         const payloadJson = JSON.stringify(data);
+
+        // Size guardrail
+        if (payloadJson.length > MAX_SNAPSHOT_SIZE_BYTES) {
+            throw new CozoOpfsError(
+                `Snapshot too large: ${(payloadJson.length / 1024 / 1024).toFixed(1)}MB exceeds ${MAX_SNAPSHOT_SIZE_BYTES / 1024 / 1024}MB limit`,
+                "TooLarge"
+            );
+        }
+
+        // Quota check
+        const quota = await this.getQuotaStatus();
+        if (quota.usagePercent > 90) {
+            console.warn(`[CozoOpfs] ⚠️ Quota warning: ${quota.usagePercent.toFixed(1)}% used`);
+        }
+        if (quota.available < payloadJson.length * 2) {
+            throw new CozoOpfsError(
+                `Insufficient quota: need ${(payloadJson.length * 2 / 1024 / 1024).toFixed(1)}MB, have ${(quota.available / 1024 / 1024).toFixed(1)}MB`,
+                "Quota"
+            );
+        }
+
         const env: CozoSnapshotEnvelope = {
             magic: "cozo-snapshot",
-            schema: 1,
+            schema: SCHEMA_VERSION,
             createdAtMs: Date.now(),
             payloadJson,
             payloadSha256Hex: await sha256Hex(payloadJson),
         };
         const envText = JSON.stringify(env);
 
-        // Write to temp file
+        // Write to temp file first
         const tmpName = `${this.snapshotName}.tmp-${Date.now()}-${Math.random().toString(16).slice(2)}`;
         const tmp = await dir.getFileHandle(tmpName, { create: true });
         await writeTextFileExclusive(tmp, envText);
@@ -215,16 +324,23 @@ export class CozoOpfsAdapter {
         try {
             try {
                 const cur = await dir.getFileHandle(this.snapshotName);
-                await (cur as any).move(this.bakName());
+                await (cur as any).move(dir, this.bakName());
             } catch (e: any) {
                 if (e.name !== 'NotFoundError') throw e;
             }
         } catch (e) {
-            console.warn("[CozoOpfs] Rotation failed", e);
+            console.warn("[CozoOpfs] Rotation failed (continuing)", e);
         }
 
         // Commit: move tmp -> current
-        await (tmp as any).move(this.snapshotName);
+        try {
+            await (tmp as any).move(dir, this.snapshotName);
+        } catch (e) {
+            // Fallback: try to clean up tmp
+            try { await dir.removeEntry(tmpName); } catch { }
+            throw new CozoOpfsError("Failed to commit snapshot", "Io", e);
+        }
+
         console.log("[CozoOpfs] Snapshot saved");
     }
 
@@ -246,7 +362,7 @@ export class CozoOpfsAdapter {
                 try {
                     entries.push(JSON.parse(line));
                 } catch (e) {
-                    console.warn("[CozoOpfs] Skipping corrupt WAL line:", line);
+                    console.warn("[CozoOpfs] Skipping corrupt WAL line:", line.slice(0, 100));
                 }
             }
             return entries;
@@ -271,14 +387,21 @@ export class CozoOpfsAdapter {
      */
     async truncateWal(): Promise<void> {
         const dir = await this.getDirectory();
+        let writable: FileSystemWritableFileStream | null = null;
+
         try {
             const walHandle = await dir.getFileHandle(this.walName, { create: true });
-            const writable = await (walHandle as any).createWritable();
+            writable = await (walHandle as any).createWritable();
             await writable.truncate(0);
-            await writable.close();
-            console.log("[CozoOpfs] WAL truncated");
         } catch (e) {
             console.warn("[CozoOpfs] WAL truncate failed", e);
+        } finally {
+            if (writable) {
+                try {
+                    await writable.close();
+                } catch { /* ignore */ }
+            }
         }
+        console.log("[CozoOpfs] WAL truncated");
     }
 }

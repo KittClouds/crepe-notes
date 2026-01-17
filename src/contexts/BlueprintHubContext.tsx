@@ -1,6 +1,6 @@
 // src/contexts/BlueprintHubContext.tsx
 // Blueprint Hub Context - provides versionId and hub state
-// Stub for V2 - will be connected to TauRPC version management
+// Stub for V2 - will be connected to native backend version management
 
 import React, { createContext, useContext, useState, type ReactNode } from 'react';
 

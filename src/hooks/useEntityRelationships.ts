@@ -75,7 +75,7 @@ export function useEntityRelationships(entity: ParsedEntity | null) {
             return;
         }
 
-        // TODO: Connect to TauRPC to load relationships
+        // Stub - not implemented to load relationships
         console.warn('[useEntityRelationships] Stub - would load relationships for:', entity.label);
 
         // Return empty data for now
@@ -88,18 +88,18 @@ export function useEntityRelationships(entity: ParsedEntity | null) {
         relationshipTypeId: string;
     }) => {
         console.warn('[useEntityRelationships] Stub - would create relationship:', params);
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
         return null;
     }, []);
 
     const deleteRelationship = useCallback(async (relationshipId: string) => {
         console.warn('[useEntityRelationships] Stub - would delete relationship:', relationshipId);
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
     }, []);
 
     const getCandidates = useCallback(async (typeId: string): Promise<CandidateEntity[]> => {
         console.warn('[useEntityRelationships] Stub - would get candidates for type:', typeId);
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
         return [];
     }, []);
 

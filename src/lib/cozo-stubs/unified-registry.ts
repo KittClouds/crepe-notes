@@ -1,7 +1,7 @@
 /**
  * CozoDB UnifiedRegistry Stub - DEPRECATED
  * 
- * Use smartGraphRegistry from @/lib/tauri instead.
+ * Use smartGraphRegistry from @/lib/registry instead.
  */
 
 import type { EntityKind } from '@/lib/types/entityTypes';
@@ -16,11 +16,11 @@ export interface CozoEntity {
 export const unifiedRegistry = {
     isReady: () => false,
     getAll: (): CozoEntity[] => {
-        console.warn('[unifiedRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[unifiedRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return [];
     },
     getById: (_id: string): CozoEntity | null => {
-        console.warn('[unifiedRegistry STUB] Use smartGraphRegistry from @/lib/tauri instead');
+        console.warn('[unifiedRegistry STUB] Use smartGraphRegistry from @/lib/registry instead');
         return null;
     },
 };

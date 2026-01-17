@@ -2,12 +2,13 @@
  * CozoDB Persistence Service
  * 
  * Main thread singleton that owns the OPFS worker and provides:
- * - load(): Returns snapshot + WAL on startup
+ * - load(): Returns snapshot + WAL on startup (with recovery mode indicator)
  * - appendWal(script): Debounced append to WAL
  * - compact(exportData): Save snapshot + truncate WAL
+ * - getQuotaStatus(): Check storage quota
  */
 
-import type { WalEntry } from './cozo-opfs-core';
+import type { WalEntry, LoadResult, QuotaStatus } from './cozo-opfs-core';
 
 type PendingRequest = {
     resolve: (val?: any) => void;
@@ -21,6 +22,7 @@ class CozoPersistenceServiceImpl {
     private walBuffer: WalEntry[] = [];
     private flushTimer: ReturnType<typeof setTimeout> | null = null;
     private readonly FLUSH_DELAY_MS = 500; // Debounce WAL writes
+    private lastRecoveryMode = false;
 
     /**
      * Initialize the worker
@@ -69,24 +71,54 @@ class CozoPersistenceServiceImpl {
     /**
      * Load snapshot and WAL from OPFS
      */
-    async load(): Promise<{ snapshot: any | null; wal: WalEntry[] }> {
+    async load(): Promise<{ snapshot: any | null; wal: WalEntry[]; recoveryMode: boolean }> {
         await this.init();
-        const result = await this.sendToWorker<{ snapshot: any; wal: WalEntry[] }>('LOAD');
-        console.log(`[CozoPersistence] Loaded: snapshot=${!!result.snapshot}, wal entries=${result.wal?.length || 0}`);
-        return result;
+        const result = await this.sendToWorker<{ snapshot: LoadResult; wal: WalEntry[] }>('LOAD');
+
+        // Handle new LoadResult format
+        const loadResult = result.snapshot as unknown as LoadResult;
+        this.lastRecoveryMode = loadResult?.recoveryMode ?? false;
+
+        if (loadResult?.recoveryMode) {
+            console.warn(`[CozoPersistence] ⚠️ Recovery mode: loaded from ${loadResult.source}`);
+        }
+
+        console.log(`[CozoPersistence] Loaded: snapshot=${!!loadResult?.snapshot}, wal entries=${result.wal?.length || 0}, source=${loadResult?.source || 'unknown'}`);
+
+        return {
+            snapshot: loadResult?.snapshot ?? null,
+            wal: result.wal ?? [],
+            recoveryMode: this.lastRecoveryMode,
+        };
+    }
+
+    /**
+     * Check if last load was in recovery mode
+     */
+    get wasRecoveryMode(): boolean {
+        return this.lastRecoveryMode;
     }
 
     /**
      * Queue a script to be appended to the WAL (debounced)
+     * @param script The CozoScript that was executed
+     * @param params JSON-stringified params (needed for replay)
      */
-    appendWal(script: string): void {
+    appendWal(script: string, params?: string): void {
         const entry: WalEntry = {
             ts: Date.now(),
             op: 'script',
             script,
+            params,
         };
 
         this.walBuffer.push(entry);
+
+        // Flush immediately if buffer is large (memory optimization)
+        if (this.walBuffer.length >= 20) {
+            this.flushWal();
+            return;
+        }
         this.scheduleFlush();
     }
 
@@ -135,6 +167,14 @@ class CozoPersistenceServiceImpl {
         // Truncate WAL
         await this.sendToWorker('TRUNCATE_WAL');
         console.log('[CozoPersistence] Compaction complete');
+    }
+
+    /**
+     * Get current quota status
+     */
+    async getQuotaStatus(): Promise<QuotaStatus> {
+        await this.init();
+        return await this.sendToWorker<QuotaStatus>('GET_QUOTA');
     }
 
     /**

@@ -2,7 +2,7 @@
 // Entity Attributes System - Pure TypeScript (no framework dependencies)
 //
 // Provides reactive state for entity attributes, meta cards, and field schemas.
-// PERSISTED: Uses FactSheetService (NebulaDB)
+// PERSISTED: Uses EntityMetadataService (CozoDB)
 
 import { generateId } from '@/lib/utils/ids';
 import type {
@@ -12,8 +12,8 @@ import type {
     FieldSchema,
 } from '@/lib/types/entityAttributes';
 import type { EntityKind } from '@/lib/types/entityTypes';
-import { factSheetService } from '@/lib/fact-sheets';
-import { db, Collections } from '../db';
+import { entityMetadataService, ensureMetadataSchemas } from '@/lib/cozo/content/EntityMetadataService';
+import { cozoDb } from '@/lib/cozo/db';
 import { isPrimaryField } from '@/lib/fact-sheets/schema-definitions';
 import { smartGraphRegistry } from '@/lib/registry/SmartGraphRegistry';
 
@@ -49,93 +49,89 @@ class EntityAttributeStore {
         if (this.initialized) return;
 
         try {
-            // Load ALL fact sheets from NebulaDB to hydrate cache
-            // Optimized: We could load only on demand, but this mimics previous behavior for now
-            const sheets = await db.collection(Collections.FACT_SHEETS).find({});
+            // Wait for CozoDB to be ready
+            if (!cozoDb.isReady()) {
+                console.log('[EntityAttributeStore] CozoDB not ready, deferring init...');
+                return;
+            }
 
-            for (const doc of sheets) {
-                const sheet = doc as any;
-                if (sheet.type === 'primary') {
-                    this.hydratePrimaryData(sheet.entityId, sheet.data);
-                } else if (sheet.type === 'meta') {
-                    this.hydrateMetaData(sheet.entityId, sheet.data);
-                }
+            // Ensure schemas exist
+            ensureMetadataSchemas();
+
+            // Load all entities from graph registry to hydrate metadata
+            const entities = smartGraphRegistry.getAllEntities?.() ?? [];
+
+            for (const entity of entities) {
+                this.hydrateEntityMetadata(entity.id);
             }
 
             this.initialized = true;
             this.notify();
-            console.log('[EntityAttributeStore] Initialized from FactSheets');
+            console.log('[EntityAttributeStore] Initialized from CozoDB');
         } catch (e) {
             console.error("Failed to init EntityAttributeStore", e);
         }
     }
 
-    private hydratePrimaryData(entityId: string, data: Record<string, any>) {
-        const list = this.attributes.get(entityId) || [];
+    private hydrateEntityMetadata(entityId: string): void {
+        // Load metadata from CozoDB
+        const metadata = entityMetadataService.getAsRecord(entityId);
+        const cards = entityMetadataService.getCards(entityId);
 
-        for (const [key, value] of Object.entries(data)) {
-            // Primary fields: Value is just the value. Type/Schema is implicit in UI.
-            // Check if already exists to avoid dupes
-            if (!list.find(a => a.fieldName === key)) {
-                list.push({
-                    id: `${entityId}:${key}`,
-                    entityId,
-                    fieldName: key,
-                    value,
-                    fieldType: 'text', // Default, UI will restrict input based on Schema
-                    createdAt: Date.now(),
-                    updatedAt: Date.now()
-                });
-            } else {
-                // Update existing
-                const idx = list.findIndex(a => a.fieldName === key);
-                if (idx !== -1) list[idx].value = value;
-            }
-        }
+        const list: EntityAttribute[] = [];
 
-        this.attributes.set(entityId, list);
-    }
-
-    private hydrateMetaData(entityId: string, data: Record<string, any>) {
-        // Meta data contains "metaCards" array and loose fields
-        if (data.metaCards) {
-            this.metaCards.set(entityId, data.metaCards as MetaCard[]);
-        }
-
-        const list = this.attributes.get(entityId) || [];
-        for (const [key, valueObj] of Object.entries(data)) {
-            if (key === 'metaCards') continue;
-
-            // Meta fields are stored as { value, type, cardId } or legacy raw value
-            let value = valueObj;
+        for (const [key, value] of Object.entries(metadata)) {
+            // Parse key format: might be "cardId:fieldName" or just "fieldName"
+            let fieldName = key;
+            let cardId: string | undefined;
             let fieldType: FieldType = 'text';
-            let cardId: string | undefined = undefined;
 
-            if (valueObj && typeof valueObj === 'object' && 'value' in valueObj && 'type' in valueObj) {
-                value = valueObj.value;
-                fieldType = valueObj.type;
-                cardId = valueObj.cardId;
-            }
+            // Check if value is structured (has type info)
+            if (value && typeof value === 'object' && 'value' in value && 'type' in value) {
+                fieldName = key;
+                fieldType = value.type || 'text';
+                cardId = value.cardId;
 
-            const existingIdx = list.findIndex(a => a.fieldName === key);
-            if (existingIdx === -1) {
                 list.push({
                     id: `${entityId}:${key}`,
                     entityId,
-                    fieldName: key,
-                    value,
+                    fieldName,
+                    value: value.value,
                     fieldType,
                     cardId,
                     createdAt: Date.now(),
                     updatedAt: Date.now()
                 });
             } else {
-                list[existingIdx].value = value;
-                list[existingIdx].fieldType = fieldType;
-                list[existingIdx].cardId = cardId;
+                // Simple key-value
+                list.push({
+                    id: `${entityId}:${key}`,
+                    entityId,
+                    fieldName: key,
+                    value,
+                    fieldType: 'text',
+                    createdAt: Date.now(),
+                    updatedAt: Date.now()
+                });
             }
         }
+
         this.attributes.set(entityId, list);
+
+        // Load cards
+        if (cards.length > 0) {
+            this.metaCards.set(entityId, cards.map(c => ({
+                id: c.id,
+                ownerId: c.entityId,
+                name: c.name,
+                color: c.color,
+                icon: c.icon,
+                displayOrder: c.displayOrder,
+                isCollapsed: c.isCollapsed,
+                createdAt: c.createdAt,
+                updatedAt: c.updatedAt,
+            })));
+        }
     }
 
     // ============================================
@@ -143,6 +139,10 @@ class EntityAttributeStore {
     // ============================================
 
     getAttributes(entityId: string): EntityAttribute[] {
+        // Lazy load if not cached
+        if (!this.attributes.has(entityId)) {
+            this.hydrateEntityMetadata(entityId);
+        }
         return this.attributes.get(entityId) || [];
     }
 
@@ -189,11 +189,11 @@ class EntityAttributeStore {
         this.attributes.set(entityId, updatedAttrs);
         this.notify();
 
-        // 2. Persist to NebulaDB via FactSheetService
+        // 2. Persist to CozoDB
         this.persistAttribute(entityId, fieldName, value, fieldType, cardId);
     }
 
-    private async persistAttribute(entityId: string, fieldName: string, value: any, fieldType: FieldType, cardId?: string) {
+    private persistAttribute(entityId: string, fieldName: string, value: any, fieldType: FieldType, cardId?: string) {
         // Determine if Primary or Meta
         const entity = smartGraphRegistry.getEntityById(entityId);
         const kind = entity?.kind;
@@ -201,19 +201,17 @@ class EntityAttributeStore {
         // Check schema logic
         const isPrimary = isPrimaryField(kind, fieldName);
 
-        if (isPrimary && kind) {
-            // Primary Sheet: Store raw value
-            await factSheetService.getPrimarySheet(entityId, kind);
-            await factSheetService.updateSheet(entityId, 'primary', { [fieldName]: value });
+        if (isPrimary) {
+            // Primary field: Store raw value
+            entityMetadataService.setValue(entityId, fieldName, value);
         } else {
-            // Meta Sheet: Store metadata object
-            await factSheetService.getMetaSheet(entityId);
+            // Meta field: Store with type info
             const storageValue = {
                 value,
                 type: fieldType,
                 cardId
             };
-            await factSheetService.updateSheet(entityId, 'meta', { [fieldName]: storageValue });
+            entityMetadataService.setValue(entityId, fieldName, storageValue);
         }
     }
 
@@ -240,16 +238,8 @@ class EntityAttributeStore {
         this.attributes.set(entityId, filtered);
         this.notify();
 
-        const entity = smartGraphRegistry.getEntityById(entityId);
-        const kind = entity?.kind;
-        const isPrimary = isPrimaryField(kind, fieldName);
-
-        // We set to null to indicate deletion in the merge logic
-        if (isPrimary && kind) {
-            await factSheetService.updateSheet(entityId, 'primary', { [fieldName]: null });
-        } else {
-            await factSheetService.updateSheet(entityId, 'meta', { [fieldName]: null });
-        }
+        // Delete from CozoDB
+        entityMetadataService.deleteValue(entityId, fieldName);
     }
 
     // ============================================
@@ -257,6 +247,23 @@ class EntityAttributeStore {
     // ============================================
 
     getMetaCards(entityId: string): MetaCard[] {
+        // Lazy load if not cached
+        if (!this.metaCards.has(entityId)) {
+            const cards = entityMetadataService.getCards(entityId);
+            if (cards.length > 0) {
+                this.metaCards.set(entityId, cards.map(c => ({
+                    id: c.id,
+                    ownerId: c.entityId,
+                    name: c.name,
+                    color: c.color,
+                    icon: c.icon,
+                    displayOrder: c.displayOrder,
+                    isCollapsed: c.isCollapsed,
+                    createdAt: c.createdAt,
+                    updatedAt: c.updatedAt,
+                })));
+            }
+        }
         return this.metaCards.get(entityId) || [];
     }
 
@@ -267,26 +274,33 @@ class EntityAttributeStore {
         icon?: string;
     }): MetaCard {
         const { ownerId, name, color, icon } = params;
-        const timestamp = Date.now();
 
-        const existingCards = this.metaCards.get(ownerId) || [];
-        const newCard: MetaCard = {
-            id: generateId(),
-            ownerId,
+        // Create in CozoDB
+        const created = entityMetadataService.createCard({
+            entityId: ownerId,
             name,
             color,
             icon,
-            displayOrder: existingCards.length,
-            isCollapsed: false,
-            createdAt: timestamp,
-            updatedAt: timestamp,
+        });
+
+        // Update local cache
+        const existingCards = this.metaCards.get(ownerId) || [];
+        const newCard: MetaCard = {
+            id: created.id,
+            ownerId,
+            name: created.name,
+            color: created.color,
+            icon: created.icon,
+            displayOrder: created.displayOrder,
+            isCollapsed: created.isCollapsed,
+            createdAt: created.createdAt,
+            updatedAt: created.updatedAt,
         };
 
         const newCards = [...existingCards, newCard];
         this.metaCards.set(ownerId, newCards);
         this.notify();
 
-        this.persistMetaCards(ownerId, newCards);
         return newCard;
     }
 
@@ -296,11 +310,14 @@ class EntityAttributeStore {
         for (const [ownerId, cards] of this.metaCards.entries()) {
             const idx = cards.findIndex(c => c.id === cardId);
             if (idx >= 0) {
+                // Update in CozoDB
+                entityMetadataService.updateCard(ownerId, cardId, updates);
+
+                // Update local cache
                 const updatedCards = [...cards];
                 updatedCards[idx] = { ...updatedCards[idx], ...updates, updatedAt: timestamp };
                 this.metaCards.set(ownerId, updatedCards);
                 this.notify();
-                this.persistMetaCards(ownerId, updatedCards);
                 return;
             }
         }
@@ -309,36 +326,21 @@ class EntityAttributeStore {
     deleteMetaCard(cardId: string): void {
         for (const [ownerId, cards] of this.metaCards.entries()) {
             if (cards.some(c => c.id === cardId)) {
+                // Delete from CozoDB
+                entityMetadataService.deleteCard(ownerId, cardId);
+
+                // Update local cache
                 const newCards = cards.filter(c => c.id !== cardId);
                 this.metaCards.set(ownerId, newCards);
+
                 // Also delete fields associated with this card
                 const attributes = this.attributes.get(ownerId) || [];
-                const cardsFields = attributes.filter(a => a.cardId === cardId);
                 const keptAttributes = attributes.filter(a => a.cardId !== cardId);
                 this.attributes.set(ownerId, keptAttributes);
 
                 this.notify();
-                this.persistMetaCards(ownerId, newCards);
-
-                // Delete fields from DB
-                // We do this by setting them to null in the sheet
-                const deletionUpdate: Record<string, any> = {};
-                cardsFields.forEach(f => deletionUpdate[f.fieldName] = null);
-                if (Object.keys(deletionUpdate).length > 0) {
-                    factSheetService.updateSheet(ownerId, 'meta', deletionUpdate);
-                }
-
                 return;
             }
-        }
-    }
-
-    private async persistMetaCards(entityId: string, cards: MetaCard[]) {
-        try {
-            await factSheetService.getMetaSheet(entityId);
-            await factSheetService.updateSheet(entityId, 'meta', { metaCards: cards });
-        } catch (error) {
-            console.error('Failed to persist meta cards:', error);
         }
     }
 
@@ -362,14 +364,20 @@ class EntityAttributeStore {
     }
 
     clearAll(): void {
+        // Delete all from CozoDB for each entity
+        for (const entityId of this.attributes.keys()) {
+            entityMetadataService.deleteAllForEntity(entityId);
+            entityMetadataService.deleteAllCardsForEntity(entityId);
+        }
+
         this.attributes.clear();
         this.metaCards.clear();
         this.fieldSchemas = [];
         this.notify();
-
-        db.collection(Collections.FACT_SHEETS).delete({});
     }
 }
 
 export const entityAttributeStore = new EntityAttributeStore();
-entityAttributeStore.init();
+
+// NOTE: init() should be called by AppOrchestrator after CozoDB is ready
+// entityAttributeStore.init(); is called in AppOrchestrator.ts

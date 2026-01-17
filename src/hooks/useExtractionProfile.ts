@@ -43,7 +43,7 @@ export function useExtractionProfile(versionId: string | null) {
             return;
         }
 
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
         console.warn('[useExtractionProfile] Stub - would load profile for version:', versionId);
 
         // Return default profile for UI to render
@@ -68,22 +68,22 @@ export function useExtractionProfile(versionId: string | null) {
 
     const addMapping = useCallback(async (data: Omit<LabelMapping, 'mapping_id' | 'profile_id'>) => {
         console.warn('[useExtractionProfile] Stub - would add mapping:', data);
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
     }, []);
 
     const removeMapping = useCallback(async (mappingId: string) => {
         console.warn('[useExtractionProfile] Stub - would remove mapping:', mappingId);
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
     }, []);
 
     const addIgnore = useCallback(async (data: Omit<IgnoreEntry, 'ignore_id' | 'profile_id'>) => {
         console.warn('[useExtractionProfile] Stub - would add to ignore list:', data);
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
     }, []);
 
     const removeIgnore = useCallback(async (ignoreId: string) => {
         console.warn('[useExtractionProfile] Stub - would remove from ignore list:', ignoreId);
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
     }, []);
 
     return {

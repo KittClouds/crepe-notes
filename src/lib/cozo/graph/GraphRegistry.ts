@@ -1,10 +1,12 @@
 /**
- * GraphRegistry - Single source of truth for entities and relationships
+ * CozoGraphRegistry - Single source of truth for entities and relationships
  * 
- * Built directly on CozoDB (WASM/In-Memory)
+ * Built directly on CozoDB (WASM/In-Memory) with GraphHotCache integration.
  * 
  * NOTE: Most methods are SYNCHRONOUS because CozoDB WASM is synchronous.
  * Async is only needed for initialization or heavy I/O.
+ * 
+ * REFACTORED: Renamed from GraphRegistry, integrated GraphHotCache for O(1) lookups.
  */
 
 import { cozoDb } from '../db';
@@ -13,6 +15,7 @@ import { FOLDER_HIERARCHY_SCHEMA } from '../schema/layer2-folder-hierarchy';
 import { NETWORK_INSTANCE_SCHEMA } from '../schema/layer2-network-instance';
 import { NETWORK_MEMBERSHIP_SCHEMA } from '../schema/layer2-network-membership';
 import { NETWORK_RELATIONSHIP_SCHEMA } from '../schema/layer2-network-relationship';
+import { GraphHotCache } from './GraphHotCache';
 
 // ==================== TYPES ====================
 
@@ -79,12 +82,15 @@ export interface GlobalStats {
 
 // ==================== GRAPH REGISTRY ====================
 
-export class GraphRegistry {
+export class CozoGraphRegistry {
     private initialized = false;
 
-    private entityCache = new Map<string, CozoEntity>();
-    private relationshipCache = new Map<string, CozoRelationship>();
-    private cacheMaxSize = 500;
+    // Hot cache for O(1) entity/relationship lookups
+    private hotCache = new GraphHotCache({
+        maxEntities: 1000,
+        maxRelationships: 2000,
+        bootCacheEnabled: true
+    });
 
     private onEntityDeleteCallback?: (entityId: string) => void;
     private onEntityMergeCallback?: (oldId: string, newId: string) => void;
@@ -92,17 +98,41 @@ export class GraphRegistry {
     async init(): Promise<void> {
         if (this.initialized) return;
 
-        console.log('[GraphRegistry] Initializing...');
+        console.log('[CozoGraphRegistry] Initializing...');
+
+        // Try warming from boot cache first for instant UI
+        const bootCacheCount = this.hotCache.warmFromBootCache();
+        if (bootCacheCount > 0) {
+            console.log(`[CozoGraphRegistry] Boot cache pre-warmed with ${bootCacheCount} entities`);
+        }
 
         await cozoDb.init();
-        this.createSchema();
+
+        // Schemas are now created during db.init() BEFORE persistence restore
+        // So entities relation already exists and is populated from snapshot
+
+        // Full hydration from DB if boot cache was empty or stale
+        if (!this.hotCache.isWarmed || bootCacheCount === 0) {
+            const entities = this.loadAllEntitiesFromDB();
+            this.hotCache.warmWithEntities(entities);
+        }
 
         this.initialized = true;
-        console.log('[GraphRegistry] ✅ Initialized');
+        console.log(`[CozoGraphRegistry] ✅ Initialized (${this.hotCache.size} entities cached)`);
+    }
+
+    /**
+     * Load all entities from DB (used for cache warming)
+     */
+    private loadAllEntitiesFromDB(): CozoEntity[] {
+        const query = `?[id, label, normalized, kind, subtype, first_note, created_at, created_by] := *entities{id, label, normalized, kind, subtype, first_note, created_at, created_by}`;
+        const result = cozoDb.runQuery(query);
+        console.log('[CozoGraphRegistry] 🔍 loadAllEntitiesFromDB query result:', result);
+        return (result.rows || []).map((row: any) => this.hydrateEntity(row));
     }
 
     private createSchema(): void {
-        console.log('[GraphRegistry] Creating schemas...');
+        console.log('[CozoGraphRegistry] Creating schemas...');
 
         const basicSchemas = [
             { name: 'entities', script: `:create entities { id: String => label: String, normalized: String, kind: String, subtype: String?, first_note: String, created_at: Float, created_by: String }` },
@@ -143,7 +173,14 @@ export class GraphRegistry {
             }
         }
 
-        console.log('[GraphRegistry] Schema creation complete');
+        console.log('[CozoGraphRegistry] Schema creation complete');
+    }
+
+    /**
+     * Get the hot cache for direct access (e.g., for scanner hydration)
+     */
+    getHotCache(): GraphHotCache {
+        return this.hotCache;
     }
 
     // ==================== ENTITY OPERATIONS ====================
@@ -174,8 +211,9 @@ export class GraphRegistry {
                     this.addAlias(existing.id, alias);
                 }
             }
-            this.entityCache.delete(existing.id);
-            return this.getEntityById(existing.id)!;
+            const updated = this.getEntityById(existing.id)!;
+            this.hotCache.setEntity(updated);
+            return updated;
         }
 
         const id = this.generateId();
@@ -222,22 +260,26 @@ export class GraphRegistry {
 
         const insertedEntity = this.getEntityById(id);
         if (!insertedEntity) {
-            console.error('[GraphRegistry] Entity not found after insert, id:', id);
+            console.error('[CozoGraphRegistry] Entity not found after insert, id:', id);
             throw new Error(`Entity insert succeeded but retrieval failed for id: ${id}`);
         }
+        this.hotCache.setEntity(insertedEntity);
         return insertedEntity;
     }
 
     getEntityById(id: string): CozoEntity | null {
-        if (this.entityCache.has(id)) return this.entityCache.get(id)!;
+        // Check hot cache first (O(1))
+        const cached = this.hotCache.getEntity(id);
+        if (cached) return cached;
 
+        // Fall back to DB
         const query = `?[id, label, normalized, kind, subtype, first_note, created_at, created_by] := *entities{id, label, normalized, kind, subtype, first_note, created_at, created_by}, id == $id`;
         const result = cozoDb.runQuery(query, { id });
 
         if (!result.rows || result.rows.length === 0) return null;
 
         const entity = this.hydrateEntity(result.rows[0]);
-        this.cacheEntity(entity);
+        this.hotCache.setEntity(entity);
         return entity;
     }
 
@@ -247,19 +289,32 @@ export class GraphRegistry {
     }
 
     findEntityByLabel(label: string): CozoEntity | null {
+        // Check hot cache first (O(1) with alias index)
+        const cached = this.hotCache.findEntityByLabel(label);
+        if (cached) return cached;
+
+        // Fall back to DB
         const normalized = this.normalize(label);
 
         let result = cozoDb.runQuery(
             `?[id, label, normalized, kind, subtype, first_note, created_at, created_by] := *entities{id, label, normalized, kind, subtype, first_note, created_at, created_by}, normalized == $normalized`,
             { normalized }
         );
-        if (result.rows?.length > 0) return this.hydrateEntity(result.rows[0]);
+        if (result.rows?.length > 0) {
+            const entity = this.hydrateEntity(result.rows[0]);
+            this.hotCache.setEntity(entity);
+            return entity;
+        }
 
         result = cozoDb.runQuery(
             `?[id, label, normalized, kind, subtype, first_note, created_at, created_by] := *entity_aliases{entity_id, normalized: alias_norm}, alias_norm == $normalized, *entities{id: entity_id, label, normalized, kind, subtype, first_note, created_at, created_by}`,
             { normalized }
         );
-        if (result.rows?.length > 0) return this.hydrateEntity(result.rows[0]);
+        if (result.rows?.length > 0) {
+            const entity = this.hydrateEntity(result.rows[0]);
+            this.hotCache.setEntity(entity);
+            return entity;
+        }
 
         return null;
     }
@@ -270,6 +325,10 @@ export class GraphRegistry {
     }
 
     isRegisteredEntity(label: string): boolean {
+        // Check hot cache first (O(1))
+        if (this.hotCache.hasEntity(label)) return true;
+
+        // Fall back to DB for cache misses
         const normalized = this.normalize(label);
         try {
             const query = `?[exists] := *entities{normalized}, normalized == $normalized, exists = true ?[exists] := *entity_aliases{normalized}, normalized == $normalized, exists = true`;
@@ -343,14 +402,16 @@ export class GraphRegistry {
                     created_at: entity.createdAt.getTime(),
                     created_by: entity.createdBy
                 });
-            } catch (err) { console.error('[GraphRegistry] Update failed:', err); return false; }
+            } catch (err) { console.error('[CozoGraphRegistry] Update failed:', err); return false; }
         }
 
         if (updates.metadata) {
             for (const [key, value] of Object.entries(updates.metadata)) this.setEntityMetadata(id, key, value);
         }
 
-        this.entityCache.delete(id);
+        // Refresh cache with updated entity
+        const updated = this.getEntityById(id);
+        if (updated) this.hotCache.setEntity(updated);
         return true;
     }
 
@@ -369,7 +430,7 @@ export class GraphRegistry {
         cozoDb.runQuery(`?[entity_id, key] := *entity_metadata{entity_id, key}, entity_id == $entity_id :rm entity_metadata {entity_id, key}`, { entity_id: id });
         cozoDb.runQuery(`?[id] := *entities{id}, id == $id :rm entities {id}`, { id });
 
-        this.entityCache.delete(id);
+        this.hotCache.removeEntity(id);
         return true;
     }
 
@@ -443,7 +504,9 @@ export class GraphRegistry {
             `?[entity_id, alias, normalized] <- [[$entity_id, $alias, $normalized]] :put entity_aliases {entity_id, alias, normalized}`,
             { entity_id: entityId, alias, normalized }
         );
-        this.entityCache.delete(entityId);
+        // Refresh cache with updated aliases
+        const updated = this.getEntityById(entityId);
+        if (updated) this.hotCache.setEntity(updated);
         return true;
     }
 
@@ -453,7 +516,9 @@ export class GraphRegistry {
             `?[entity_id, alias, normalized] := *entity_aliases{entity_id, alias, normalized}, entity_id == $entity_id, normalized == $normalized :rm entity_aliases {entity_id, alias, normalized}`,
             { entity_id: entityId, normalized }
         );
-        this.entityCache.delete(entityId);
+        // Refresh cache with updated aliases
+        const updated = this.getEntityById(entityId);
+        if (updated) this.hotCache.setEntity(updated);
         return true;
     }
 
@@ -492,7 +557,9 @@ export class GraphRegistry {
                 { entity_id: entityId, note_id: noteId, mention_count: count, last_seen: Date.now() }
             );
         }
-        this.entityCache.delete(entityId);
+        // Refresh cache
+        const updated = this.getEntityById(entityId);
+        if (updated) this.hotCache.setEntity(updated);
     }
 
     // ==================== METADATA MANAGEMENT ====================
@@ -503,7 +570,8 @@ export class GraphRegistry {
             `?[entity_id, key, value] <- [[$entity_id, $key, $value]] :put entity_metadata {entity_id, key, value}`,
             { entity_id: entityId, key, value: valueStr }
         );
-        this.entityCache.delete(entityId);
+        // Invalidate cache - metadata changed
+        this.hotCache.removeEntity(entityId);
     }
 
     getEntityMetadata(entityId: string): Record<string, any> {
@@ -529,7 +597,7 @@ export class GraphRegistry {
         if (existing) {
             this.addProvenance(existing.id, provenance);
             this.recalculateRelationshipConfidence(existing.id);
-            this.relationshipCache.delete(existing.id);
+            this.hotCache.removeRelationship(existing.id);
             return (this.getRelationshipById(existing.id))!;
         }
 
@@ -569,7 +637,9 @@ export class GraphRegistry {
     }
 
     getRelationshipById(id: string): CozoRelationship | null {
-        if (this.relationshipCache.has(id)) return this.relationshipCache.get(id)!;
+        // Check hot cache first
+        const cached = this.hotCache.getRelationship(id);
+        if (cached) return cached;
 
         const result = cozoDb.runQuery(
             `?[id, source_id, target_id, type, inverse_type, bidirectional, confidence, namespace, created_at, updated_at] := *relationships{id, source_id, target_id, type, inverse_type, bidirectional, confidence, namespace, created_at, updated_at}, id == $id`,
@@ -578,7 +648,7 @@ export class GraphRegistry {
         if (!result.rows?.length) return null;
 
         const relationship = this.hydrateRelationship(result.rows[0]);
-        this.cacheRelationship(relationship);
+        this.hotCache.setRelationship(relationship);
         return relationship;
     }
 
@@ -682,7 +752,7 @@ export class GraphRegistry {
         this.deleteRelationshipProvenance(id);
         this.deleteRelationshipAttributes(id);
         cozoDb.runQuery(`?[id] := *relationships{id}, id == $id :rm relationships {id}`, { id });
-        this.relationshipCache.delete(id);
+        this.hotCache.removeRelationship(id);
         return true;
     }
 
@@ -768,7 +838,7 @@ export class GraphRegistry {
                 }
             );
         }
-        this.relationshipCache.delete(relationshipId);
+        this.hotCache.removeRelationship(relationshipId);
     }
 
     recalculateRelationshipConfidenceSync(relationshipId: string): void {
@@ -781,7 +851,7 @@ export class GraphRegistry {
             `?[relationship_id, key, value] <- [[$relationship_id, $key, $value]] :put relationship_attributes {relationship_id, key, value}`,
             { relationship_id: relationshipId, key, value: valueStr }
         );
-        this.relationshipCache.delete(relationshipId);
+        this.hotCache.removeRelationship(relationshipId);
     }
 
     setRelationshipAttributeSync(relationshipId: string, key: string, value: any): void {
@@ -839,7 +909,7 @@ export class GraphRegistry {
 
             return { totalEntities: entityCount, totalRelationships: relCount, totalProvenance: provCount, entitiesByKind, relationshipsByType };
         } catch (err) {
-            console.error('[GraphRegistry] getGlobalStats failed:', err);
+            console.error('[CozoGraphRegistry] getGlobalStats failed:', err);
             return { totalEntities: 0, totalRelationships: 0, totalProvenance: 0, entitiesByKind: {}, relationshipsByType: {} };
         }
     }
@@ -857,8 +927,10 @@ export class GraphRegistry {
 
     async importFromFile(fileContent: string): Promise<void> {
         await cozoDb.importFromFile(fileContent);
-        this.entityCache.clear();
-        this.relationshipCache.clear();
+        this.hotCache.invalidateAll();
+        // Re-warm cache from imported data
+        const entities = this.loadAllEntitiesFromDB();
+        this.hotCache.warmWithEntities(entities);
     }
 
     async export(): Promise<{ version: string; timestamp: number; stats: GlobalStats; data: string }> {
@@ -872,17 +944,18 @@ export class GraphRegistry {
 
     async import(exported: { data: string }): Promise<void> {
         cozoDb.importRelations(exported.data);
-        this.entityCache.clear();
-        this.relationshipCache.clear();
+        this.hotCache.invalidateAll();
+        // Re-warm cache from imported data
+        const entities = this.loadAllEntitiesFromDB();
+        this.hotCache.warmWithEntities(entities);
     }
 
     async clear(): Promise<void> {
         const relations = ['entities', 'entity_aliases', 'entity_mentions', 'entity_metadata', 'relationships', 'relationship_provenance', 'relationship_attributes'];
         for (const relation of relations) {
-            try { cozoDb.run(`?[...args] := *${relation}{...args} :rm ${relation} {...args}`); } catch (err) { console.error(`[GraphRegistry] Failed to clear ${relation}:`, err); }
+            try { cozoDb.run(`?[...args] := *${relation}{...args} :rm ${relation} {...args}`); } catch (err) { console.error(`[CozoGraphRegistry] Failed to clear ${relation}:`, err); }
         }
-        this.entityCache.clear();
-        this.relationshipCache.clear();
+        this.hotCache.invalidateAll();
     }
 
     // ==================== HELPER METHODS ====================
@@ -891,16 +964,6 @@ export class GraphRegistry {
 
     private generateId(): string {
         return crypto.randomUUID();
-    }
-
-    private cacheEntity(entity: CozoEntity): void {
-        if (this.entityCache.size >= this.cacheMaxSize) { const firstKey = this.entityCache.keys().next().value; if (firstKey) this.entityCache.delete(firstKey); }
-        this.entityCache.set(entity.id, entity);
-    }
-
-    private cacheRelationship(relationship: CozoRelationship): void {
-        if (this.relationshipCache.size >= this.cacheMaxSize) { const firstKey = this.relationshipCache.keys().next().value; if (firstKey) this.relationshipCache.delete(firstKey); }
-        this.relationshipCache.set(relationship.id, relationship);
     }
 
     private hydrateEntity(row: any[]): CozoEntity {
@@ -933,4 +996,11 @@ export class GraphRegistry {
     }
 }
 
-export const graphRegistry = new GraphRegistry();
+// Singleton exports
+export const cozoGraphRegistry = new CozoGraphRegistry();
+
+// Legacy alias for backwards compatibility
+export const graphRegistry = cozoGraphRegistry;
+
+// Re-export old class name as alias
+export { CozoGraphRegistry as GraphRegistry };

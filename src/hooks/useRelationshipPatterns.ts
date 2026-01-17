@@ -27,7 +27,7 @@ export function useRelationshipPatterns(profileId: string | null | undefined) {
             return;
         }
 
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
         console.warn('[useRelationshipPatterns] Stub - would load patterns for profile:', profileId);
 
         // Return some default patterns for UI demonstration
@@ -94,7 +94,7 @@ export function useRelationshipPatterns(profileId: string | null | undefined) {
 
     const resetToDefaults = useCallback(async () => {
         console.warn('[useRelationshipPatterns] Stub - would reset to defaults');
-        // TODO: Connect to TauRPC
+        // Stub - not implemented
     }, []);
 
     return {
