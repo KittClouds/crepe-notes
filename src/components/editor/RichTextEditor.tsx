@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Crepe } from '@milkdown/crepe';
-import { defaultValueCtx, commandsCtx } from '@milkdown/kit/core';
+import { defaultValueCtx, commandsCtx, editorViewCtx } from '@milkdown/kit/core';
+import { replaceAll } from '@milkdown/kit/utils';
 import { undoCommand, redoCommand } from '@milkdown/kit/plugin/history';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
@@ -13,6 +14,12 @@ import { entityHighlighter } from '../../editor/plugins/entityHighlighter';
 
 // Highlighter API for scan coordinator integration
 import { getHighlighterApi } from '../../api';
+
+// KittCore for full document scan
+import { kittCore } from '../../lib/kittcore';
+
+// Performance instrumentation
+import { markNoteSwitchEnd } from '../../lib/utils/notePerf';
 
 // Custom selection toolbar plugin
 import { selectionTooltip, createSelectionToolbarView } from '../../editor/plugins/toolbar';
@@ -57,6 +64,8 @@ export interface RichTextEditorProps {
   noteId: string;
   /** Initial content - JSON preferred, markdown as fallback */
   initialContent: EditorContent;
+  /** Markdown content for content swap (needed when initial is JSON) */
+  markdownContent?: string;
   /** Called when content changes - provides both JSON and markdown */
   onContentChange: (content: { json: object; markdown: string }) => void;
   saveStatus?: SaveStatus;
@@ -72,6 +81,7 @@ export interface RichTextEditorRef {
 export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(({
   noteId,
   initialContent,
+  markdownContent: markdownContentProp,
   onContentChange,
   saveStatus = 'saved',
   readOnly = false,
@@ -83,6 +93,9 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
   // Stable callback ref to avoid recreating editor
   const onChangeRef = useRef(onContentChange);
   onChangeRef.current = onContentChange;
+
+  // Track previous noteId to detect switches
+  const prevNoteIdRef = useRef<string | null>(null);
 
   const handleContentUpdate = useCallback((json: object, markdown: string) => {
     onChangeRef.current({ json, markdown });
@@ -120,7 +133,8 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
           ? { type: 'json' as const, value: initialContent.value as any }
           : initialContent.value; // Markdown string
 
-        // Sanitize JSON to ensure types match schema (Fix for RangeError: spread attribute)
+
+
         const sanitizeJSON = (node: any): any => {
           if (!node) return node;
           if (Array.isArray(node)) return node.map(sanitizeJSON);
@@ -140,6 +154,7 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
           return node;
         };
 
+        performance.mark('editor_new_start');
         const crepe = new Crepe({
           root: editorRef.current!,
           defaultValue: initialContent.type === 'json'
@@ -220,7 +235,16 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
         crepe.editor.use(detailsInteractivePlugin);
         crepe.editor.use(indentGuidesPlugin);
 
+        performance.mark('editor_new_end');
+
+        performance.mark('editor_create_start');
         await crepe.create();
+        performance.mark('editor_create_end');
+
+        // Log timings
+        const tNew = performance.measure('editor_new', 'editor_new_start', 'editor_new_end').duration;
+        const tCreate = performance.measure('editor_create', 'editor_create_start', 'editor_create_end').duration;
+        console.log(`[NotePerf] 🔍 Editor Init: new=${tNew.toFixed(1)}ms, create=${tCreate.toFixed(1)}ms`);
 
         if (readOnly) {
           crepe.setReadonly(true);
@@ -228,6 +252,7 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
 
         crepeRef.current = crepe;
         isInitializedRef.current = true;
+        markNoteSwitchEnd(noteId);
       } catch (error) {
         console.error('Failed to initialize Milkdown Crepe editor:', error);
       }
@@ -237,12 +262,71 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
 
     return () => {
       if (crepeRef.current) {
+        performance.mark('editor_destroy_start');
         crepeRef.current.destroy();
+        performance.mark('editor_destroy_end');
+        const tDestroy = performance.measure('editor_destroy', 'editor_destroy_start', 'editor_destroy_end').duration;
+        console.log(`[NotePerf] 💥 Editor Destroy: ${tDestroy.toFixed(1)}ms`);
         crepeRef.current = null;
         isInitializedRef.current = false;
       }
     };
-  }, [noteId]);
+  }, []); // Only run once on mount - no noteId dependency
+
+  // Content swap when noteId changes (without remounting)
+  useEffect(() => {
+    if (!crepeRef.current || !isInitializedRef.current) return;
+    if (prevNoteIdRef.current === noteId) return;
+
+    performance.mark('content_swap_start');
+    prevNoteIdRef.current = noteId;
+
+    // Sanitize JSON to fix attribute type issues
+    const sanitizeJSON = (node: any): any => {
+      if (!node) return node;
+      if (Array.isArray(node)) return node.map(sanitizeJSON);
+      if (typeof node === 'object') {
+        const newNode = { ...node };
+        if (newNode.attrs && typeof newNode.attrs.spread === 'string') {
+          newNode.attrs = { ...newNode.attrs };
+          newNode.attrs.spread = newNode.attrs.spread === 'true';
+        }
+        if (newNode.content) {
+          newNode.content = newNode.content.map(sanitizeJSON);
+        }
+        return newNode;
+      }
+      return node;
+    };
+
+    try {
+      // Access the editor's ProseMirror view through Milkdown
+      crepeRef.current.editor.action((ctx) => {
+        const view = ctx.get(editorViewCtx);
+        const schema = view.state.schema;
+
+        if (initialContent.type === 'json') {
+          // Parse JSON doc using ProseMirror's nodeFromJSON - preserves colors/marks
+          const sanitizedDoc = sanitizeJSON(initialContent.value);
+          const newDoc = schema.nodeFromJSON(sanitizedDoc);
+
+          // Create transaction to replace entire document
+          const tr = view.state.tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
+          view.dispatch(tr);
+        } else {
+          // For markdown, use replaceAll
+          ctx.get(commandsCtx).call(replaceAll, initialContent.value);
+        }
+      });
+    } catch (e) {
+      console.error('[NotePerf] Content swap error:', e);
+    }
+
+    performance.mark('content_swap_end');
+    const tSwap = performance.measure('content_swap', 'content_swap_start', 'content_swap_end').duration;
+    console.log(`[NotePerf] ⚡ Content Swap: ${tSwap.toFixed(1)}ms`);
+    markNoteSwitchEnd(noteId);
+  }, [noteId, initialContent]);
 
   // Wire highlighterApi.setNoteId when noteId changes
   useEffect(() => {
@@ -251,6 +335,12 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
       api.setNoteId(noteId);
     }
   }, [noteId]);
+
+  // WASM scanning moved to event-driven (save/content change) - not on note switch
+  // This prevents UI blocking on note open. Scans now trigger via:
+  // - ScanCoordinator (on entity events)
+  // - Save events (via onContentChange debounce)
+  // KittCore stays hydrated and ready, but passive.
 
   // Keystroke handler for scan coordinator
   useEffect(() => {

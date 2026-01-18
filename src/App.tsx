@@ -6,6 +6,7 @@ import { queryClient } from "@/lib/queryClient";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UIStateProvider } from "@/contexts/UIStateContext";
 import { NERProvider } from "@/contexts/NERContext";
+import { ScopeProvider } from "@/contexts/ScopeContext";
 import { entityColorStore } from "@/lib/store/entityColorStore";
 import Index from "./pages/Index";
 import GraphPage from "./pages/GraphPage";
@@ -36,31 +37,33 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <UIStateProvider>
-        <NERProvider>
-          <NarrativeFocusProvider>
-            <CalendarProvider>
-              <TTSProvider>
-                <TooltipProvider>
-                  <LoadingScreen isVisible={isBooting} />
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/graph" element={<GraphPage />} />
-                      <Route path="/calendar" element={<FantasyCalendarPage />} />
-                      <Route path="/wiki/*" element={<WikiPage />} />
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </BrowserRouter>
-                </TooltipProvider>
-              </TTSProvider>
-            </CalendarProvider>
-          </NarrativeFocusProvider>
-        </NERProvider>
-      </UIStateProvider>
+      <ScopeProvider>
+        <UIStateProvider>
+          <NERProvider>
+            <NarrativeFocusProvider>
+              <CalendarProvider>
+                <TTSProvider>
+                  <TooltipProvider>
+                    <LoadingScreen isVisible={isBooting} />
+                    <Toaster />
+                    <Sonner />
+                    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/graph" element={<GraphPage />} />
+                        <Route path="/calendar" element={<FantasyCalendarPage />} />
+                        <Route path="/wiki/*" element={<WikiPage />} />
+                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </BrowserRouter>
+                  </TooltipProvider>
+                </TTSProvider>
+              </CalendarProvider>
+            </NarrativeFocusProvider>
+          </NERProvider>
+        </UIStateProvider>
+      </ScopeProvider>
     </QueryClientProvider>
   );
 };

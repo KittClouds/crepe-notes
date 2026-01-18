@@ -1,14 +1,13 @@
 // src/components/hub/tabs/ThemeTab.tsx
-// Entity Theme tab - customize entity highlighting colors
-// Uses entityColorStore for live CSS variable updates
+// Entity Theme tab - "Pro" Redesign with Dual Color System
+// Dense Grid Layout with Dual Color Pickers
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { RotateCcw } from 'lucide-react';
 import { ENTITY_KINDS, type EntityKind } from '@/lib/types/entityTypes';
-import { entityColorStore, useEntityColors, DEFAULT_ENTITY_COLORS } from '@/lib/store/entityColorStore';
+import { useEntityColors, DEFAULT_ENTITY_COLORS, DEFAULT_ENTITY_TEXT_COLORS } from '@/lib/store/entityColorStore';
 import { HighlightingModeToggle } from '@/components/ui/HighlightingModeToggle';
 
 /**
@@ -78,102 +77,136 @@ function hexToHsl(hex: string): string {
 }
 
 export function ThemeTab() {
-    const { colors, setColor, reset } = useEntityColors();
+    const { colors, textColors, setColor, setTextColor, reset } = useEntityColors();
 
-    // Convert HSL to hex for the color picker display
     const getHexColor = useCallback((kind: EntityKind) => {
         return hslToHex(colors[kind] || DEFAULT_ENTITY_COLORS[kind] || '220 10% 50%');
     }, [colors]);
 
-    // Update color - convert hex to HSL and update store
+    const getHexTextColor = useCallback((kind: EntityKind) => {
+        return hslToHex(textColors[kind] || DEFAULT_ENTITY_TEXT_COLORS[kind] || '220 10% 50%');
+    }, [textColors]);
+
     const updateColor = useCallback((kind: EntityKind, hexColor: string) => {
         const hsl = hexToHsl(hexColor);
         setColor(kind, hsl);
     }, [setColor]);
 
+    const updateTextColor = useCallback((kind: EntityKind, hexColor: string) => {
+        const hsl = hexToHsl(hexColor);
+        setTextColor(kind, hsl);
+    }, [setTextColor]);
+
     const sortedKinds = [...ENTITY_KINDS].sort();
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between">
+        <div className="space-y-6 animate-in fade-in duration-300">
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
                 <div>
-                    <h3 className="text-lg font-semibold">Entity Theme</h3>
-                    <p className="text-sm text-muted-foreground">
-                        Customize the colors used for entity highlighting and icons across the application.
-                        Changes apply instantly everywhere.
+                    <h2 className="text-xl font-semibold tracking-tight">Entity Theme</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Define the visual language of your story bible.
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     <HighlightingModeToggle />
-                    <Button variant="outline" size="sm" onClick={reset}>
-                        <RotateCcw className="w-4 h-4 mr-2" />
-                        Reset to Defaults
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={reset}
+                        className="text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                        <RotateCcw className="w-3.5 h-3.5 mr-2" />
+                        Reset
                     </Button>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Main Grid - Professional Palette Layout */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {sortedKinds.map((kind) => {
                     const hexColor = getHexColor(kind);
+                    const hexTextColor = getHexTextColor(kind);
+
                     return (
                         <div
                             key={kind}
-                            className="flex items-center gap-3 p-3 border rounded-lg bg-card hover:bg-muted/50 transition-colors"
+                            className="group flex items-center justify-between p-3 rounded-lg bg-card/50 hover:bg-muted/50 transition-all border border-transparent hover:border-border/50"
                         >
-                            <div
-                                className="w-10 h-10 rounded-md shadow-sm border shrink-0"
-                                style={{ backgroundColor: hexColor }}
-                            />
+                            {/* Entity Info */}
+                            <div className="flex flex-col gap-1 min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm font-medium truncate text-foreground/90 group-hover:text-foreground">
+                                        {kind}
+                                    </span>
 
-                            <div className="flex-1 min-w-0">
-                                <Label
-                                    htmlFor={`color-${kind}`}
-                                    className="text-sm font-medium mb-1 block truncate"
-                                    title={kind}
-                                >
-                                    {kind}
-                                </Label>
-                                <div className="flex gap-2">
-                                    <div className="relative w-8 h-8 overflow-hidden rounded border cursor-pointer">
-                                        <Input
-                                            id={`color-${kind}`}
-                                            type="color"
-                                            value={hexColor}
-                                            onChange={(e) => updateColor(kind, e.target.value)}
-                                            className="absolute -top-2 -left-2 w-16 h-16 p-0 border-0 cursor-pointer"
-                                        />
+                                    {/* Preview Badge */}
+                                    <div
+                                        className="hidden sm:inline-flex px-1.5 py-0.5 rounded-[3px] text-[9px] font-semibold border uppercase tracking-wider opacity-60 group-hover:opacity-100 transition-opacity"
+                                        style={{
+                                            backgroundColor: `hsl(var(--entity-${kind.toLowerCase().replace(/_/g, '-')}) / 0.15)`,
+                                            color: `hsl(var(--entity-${kind.toLowerCase().replace(/_/g, '-')}-text))`,
+                                            borderColor: `hsl(var(--entity-${kind.toLowerCase().replace(/_/g, '-')}) / 0.3)`,
+                                        }}
+                                    >
+                                        PREVIEW
                                     </div>
-                                    <Input
-                                        value={hexColor}
-                                        onChange={(e) => updateColor(kind, e.target.value)}
-                                        className="h-8 font-mono text-xs"
-                                        maxLength={7}
-                                    />
+                                </div>
+
+                                {/* Hex Codes (Subtle) */}
+                                <div className="flex gap-3 text-[10px] font-mono text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span>P: {hexColor}</span>
+                                    <span>T: {hexTextColor}</span>
                                 </div>
                             </div>
 
-                            {/* Preview Badge - uses CSS variables for live update */}
-                            <div
-                                className="px-2 py-1 rounded text-xs font-medium border"
-                                style={{
-                                    backgroundColor: `hsl(var(--entity-${kind.toLowerCase().replace(/_/g, '-')}) / 0.2)`,
-                                    color: `hsl(var(--entity-${kind.toLowerCase().replace(/_/g, '-')}))`,
-                                    borderColor: `hsl(var(--entity-${kind.toLowerCase().replace(/_/g, '-')}) / 0.4)`,
-                                }}
-                            >
-                                Preview
+                            {/* Controls */}
+                            <div className="flex items-center gap-2">
+                                {/* Pill Color Picker */}
+                                <div className="relative shrink-0 group/picker">
+                                    <div
+                                        className="w-8 h-8 rounded-md shadow-sm ring-1 ring-inset ring-black/10 dark:ring-white/10 transition-transform group-hover/picker:scale-110 cursor-pointer"
+                                        style={{ backgroundColor: hexColor }}
+                                        title="Pill/Badge color"
+                                    />
+                                    <Input
+                                        type="color"
+                                        value={hexColor}
+                                        onChange={(e) => updateColor(kind, e.target.value)}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    />
+                                </div>
+
+                                {/* Text Color Picker */}
+                                <div className="relative shrink-0 group/picker">
+                                    <div
+                                        className="w-8 h-8 rounded-full shadow-sm ring-1 ring-inset ring-black/10 dark:ring-white/10 transition-transform group-hover/picker:scale-110 flex items-center justify-center text-xs font-bold cursor-pointer bg-background"
+                                        style={{
+                                            color: hexTextColor,
+                                            border: `2px solid ${hexTextColor}`,
+                                        }}
+                                        title="Text/Character color"
+                                    >
+                                        Aa
+                                    </div>
+                                    <Input
+                                        type="color"
+                                        value={hexTextColor}
+                                        onChange={(e) => updateTextColor(kind, e.target.value)}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    />
+                                </div>
                             </div>
                         </div>
                     );
                 })}
             </div>
 
-            <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-lg text-sm text-emerald-600 dark:text-emerald-400 mt-8">
-                <p>
-                    <strong>✓ Live Updates:</strong> Colors are now applied instantly across the entire app -
-                    sidebar, editor, entity pills, and all UI components.
-                </p>
-            </div>
+            {/* Note about live updates */}
+            <p className="text-xs text-center text-muted-foreground/50 pt-8">
+                Changes apply instantly across the entire workspace.
+            </p>
         </div>
     );
 }

@@ -51,6 +51,9 @@ function cozoNoteToLegacy(cozo: CozoNote): Note {
 }
 
 function cozoFolderToLegacy(cozo: CozoFolder): Folder {
+  // Detect if this is a narrative vault root
+  const isNarrativeRoot = cozo.entityKind === 'NARRATIVE';
+
   return {
     id: cozo.id,
     name: cozo.name,
@@ -63,6 +66,11 @@ function cozoFolderToLegacy(cozo: CozoFolder): Folder {
     entitySubtype: cozo.entitySubtype ?? undefined,
     entityLabel: cozo.entityLabel ?? undefined,
     isTypedRoot: cozo.isTypedRoot,
+    // Narrative Vault Isolation
+    isNarrativeRoot,
+    // narrativeId is propagated by arborist adapter, not stored in DB
+    // NARRATIVE folders have narrativeId = self.id
+    narrativeId: isNarrativeRoot ? cozo.id : (cozo.narrativeId ?? undefined),
   };
 }
 

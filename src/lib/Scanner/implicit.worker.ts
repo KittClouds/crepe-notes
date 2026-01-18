@@ -4,17 +4,18 @@ import type { RegisteredEntity, DecorationSpan } from './types';
 
 // Worker State
 const core = new ImplicitCore();
+let lastEntityVersion = -1;  // Track hydrated entity version
 
 // Message Types
 type WorkerMessage =
-    | { type: 'HYDRATE'; entities: RegisteredEntity[] }
+    | { type: 'HYDRATE'; entities: RegisteredEntity[]; entityVersion: number }
     | { type: 'SCAN'; id: number; text: string }
     | { type: 'SCAN_BATCH'; id: number; items: { id: number, text: string }[] };
 
 type WorkerResponse =
     | { type: 'SCAN_RESULT'; id: number; spans: DecorationSpan[] }
     | { type: 'SCAN_BATCH_RESULT'; id: number; results: { id: number; spans: DecorationSpan[] }[] }
-    | { type: 'HYDRATE_DONE' }; // Optional ack
+    | { type: 'HYDRATE_DONE'; skipped?: boolean }; // Optional ack
 
 // Event Listener
 self.onmessage = (e: MessageEvent<WorkerMessage>) => {
@@ -23,8 +24,16 @@ self.onmessage = (e: MessageEvent<WorkerMessage>) => {
     switch (msg.type) {
         case 'HYDRATE':
             try {
+                // Skip hydration if version unchanged
+                if (msg.entityVersion === lastEntityVersion) {
+                    console.log('[ImplicitWorker] Skipping hydration (version unchanged)');
+                    postMessage({ type: 'HYDRATE_DONE', skipped: true });
+                    break;
+                }
+
+                lastEntityVersion = msg.entityVersion;
                 core.hydrate(msg.entities);
-                postMessage({ type: 'HYDRATE_DONE' });
+                postMessage({ type: 'HYDRATE_DONE', skipped: false });
             } catch (err) {
                 console.error('[ImplicitWorker] Hydration failed:', err);
             }

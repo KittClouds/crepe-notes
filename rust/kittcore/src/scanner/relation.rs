@@ -48,6 +48,7 @@
 use wasm_bindgen::prelude::*;
 use serde::{Deserialize, Serialize};
 use super::structured_relation::StructuredRelationExtractor;
+use crate::reality::evidence_graph::{EvidenceGraph, ProjectedRelation, EvidenceSpan, EvidenceSource};
 
 // =============================================================================
 // Types (Backward Compatible)
@@ -555,6 +556,148 @@ impl RelationEngine {
 
         stats.total_count = all_relations.len();
         stats.time_us = start.elapsed().as_micros() as u64;
+
+        (all_relations, stats)
+    }
+
+    /// Document-level extraction using EvidenceGraph
+    /// 
+    /// Extends CST to work across sentence boundaries:
+    /// 1. Builds evidence graph from entities and VPs
+    /// 2. Bridges mentions to entities via exact/alias matching
+    /// 3. Projects relations from VP patterns
+    /// 4. Computes multi-hop relations on demand
+    /// 
+    /// Returns both sentence-level and cross-sentence relations with full provenance
+    pub fn extract_document_level(
+        &self,
+        text: &str,
+        entities: &[EntitySpan],
+        sentence_bounds: &[(usize, usize)],
+        hydrated_entities: &[(String, String, String, Vec<String>)], // (id, label, kind, aliases)
+    ) -> (Vec<UnifiedRelation>, RelationStats) {
+        let start = instant::Instant::now();
+        let mut all_relations = Vec::new();
+        let mut stats = RelationStats::default();
+
+        // Early return if no content
+        if text.is_empty() || entities.is_empty() {
+            return (all_relations, stats);
+        }
+
+        // Build evidence graph
+        let mut evidence_graph = EvidenceGraph::new();
+
+        // Add hydrated entities to graph
+        for (id, label, kind, aliases) in hydrated_entities {
+            evidence_graph.add_entity(id.clone(), label.clone(), kind.clone(), aliases.clone());
+        }
+
+        // Set sentence boundaries (convert to u32 for evidence graph)
+        let bounds_u32: Vec<(u32, u32)> = sentence_bounds.iter()
+            .map(|(s, e)| (*s as u32, *e as u32))
+            .collect();
+        evidence_graph.set_sentence_bounds(bounds_u32);
+
+        // First, get CST relations (sentence-level) 
+        let cst_relations = self.project_from_cst(text, entities);
+        stats.cst_count = cst_relations.len();
+        all_relations.extend(cst_relations);
+
+        // Add mentions and VPs from the structured extractor
+        let extractor = StructuredRelationExtractor::new();
+        let (structured_rels, _extraction_stats) = extractor.extract_with_stats(text, entities);
+
+        // Determine which sentence each entity span belongs to
+        let find_sentence = |pos: usize| -> usize {
+            sentence_bounds.iter()
+                .position(|(s, e)| pos >= *s && pos < *e)
+                .unwrap_or(0)
+        };
+
+        // Add mentions to evidence graph (entity spans)
+        for span in entities {
+            let sentence_idx = find_sentence(span.start);
+            evidence_graph.add_mention(
+                span.label.clone(), 
+                (span.start as u32, span.end as u32), 
+                sentence_idx
+            );
+        }
+
+        // Add VPs and link subjects/objects
+        for rel in &structured_rels {
+            let vp_sentence = find_sentence(rel.predicate_span.start);
+            let vp_idx = evidence_graph.add_verb_phrase(
+                rel.predicate.clone(),
+                (rel.predicate_span.start as u32, rel.predicate_span.end as u32),
+                vp_sentence,
+            );
+
+            // Find and link subject mention
+            if let Some(subj_id) = &rel.subject_id {
+                // Find mention by entity_id
+                for (i, span) in entities.iter().enumerate() {
+                    if span.entity_id.as_deref() == Some(subj_id) {
+                        // Calculate mention node index: entities + i
+                        let mention_idx = rustworkx_core::petgraph::graph::NodeIndex::new(
+                            evidence_graph.stats().entity_count + i
+                        );
+                        evidence_graph.link_subject(mention_idx, vp_idx);
+                        break;
+                    }
+                }
+            }
+
+            // Find and link object mention
+            if let Some(obj_id) = &rel.object_id {
+                for (i, span) in entities.iter().enumerate() {
+                    if span.entity_id.as_deref() == Some(obj_id) {
+                        let mention_idx = rustworkx_core::petgraph::graph::NodeIndex::new(
+                            evidence_graph.stats().entity_count + i
+                        );
+                        evidence_graph.link_object(mention_idx, vp_idx);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Bridge mentions to entities across document
+        evidence_graph.bridge_mentions();
+
+        // Project cross-sentence relations
+        let cross_sentence_relations = evidence_graph.project_relations();
+        
+        // Convert ProjectedRelation to UnifiedRelation
+        for proj in cross_sentence_relations {
+            // Only add if it's actually cross-sentence (has bridge evidence)
+            let has_bridge = proj.evidence.iter().any(|e| matches!(e.source, EvidenceSource::MentionBridge));
+            
+            if has_bridge {
+                all_relations.push(UnifiedRelation {
+                    head: proj.head_label,
+                    head_id: Some(proj.head_id),
+                    tail: proj.tail_label,
+                    tail_id: Some(proj.tail_id),
+                    relation_type: proj.relation_type,
+                    source: RelationSource::CST, // Mark as CST but it's cross-sentence
+                    confidence: proj.confidence,
+                    span: proj.evidence.first().map(|e| (e.char_span.0 as usize, e.char_span.1 as usize)),
+                    verb_text: None,
+                });
+                stats.inferred_count += 1;
+            }
+        }
+
+        stats.total_count = all_relations.len();
+        stats.time_us = start.elapsed().as_micros() as u64;
+
+        #[cfg(target_arch = "wasm32")]
+        web_sys::console::log_1(&format!(
+            "[RelationEngine] document-level extraction: {} CST, {} cross-sentence, {} total",
+            stats.cst_count, stats.inferred_count, stats.total_count
+        ).into());
 
         (all_relations, stats)
     }

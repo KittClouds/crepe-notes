@@ -138,6 +138,9 @@ export interface FolderSchema {
     /** Whether subfolders inherit this schema's entity kind */
     propagateKindToChildren?: boolean;
 
+    /** Whether this folder type acts as an isolated vault/namespace (for NARRATIVE folders) */
+    isVaultRoot?: boolean;
+
     /** Relationship this entity has with its container (parent folder) if applicable */
     parentRelationship?: FolderRelationshipDefinition;
 

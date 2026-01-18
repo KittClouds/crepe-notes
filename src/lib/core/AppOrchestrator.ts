@@ -8,6 +8,7 @@ import { loadBootCache } from '@/lib/storage/bootCache';
 import { loadCozoBootCache, saveCozoBootCache, buildCozoBootCache } from '@/lib/storage/cozoBootCache';
 import { noteKeys } from '@/hooks/useNotes';
 import { folderKeys } from '@/hooks/useFolders';
+import { syncOrchestrator } from '@/lib/dexie/sync';
 
 export class AppOrchestrator {
     private static instance: AppOrchestrator;
@@ -188,6 +189,10 @@ export class AppOrchestrator {
         await entityAttributeStore.init();
         console.log('[AppOrchestrator] EntityAttributeStore initialized');
 
+        // Initialize Dexie sync orchestrator (Cozo → Dexie + background sync)
+        await syncOrchestrator.init();
+        console.log('[AppOrchestrator] SyncOrchestrator initialized (Dexie ↔ Cozo)');
+
         console.timeEnd('Step 2: Reconciliation');
     }
 
@@ -199,8 +204,8 @@ export class AppOrchestrator {
     private phase3_Background() {
         console.log('Step 3: Background Tasks (Fire & Forget)...');
 
-        // Hydrate Implicit Scanner
-        setTimeout(() => {
+        // Hydrate Implicit Scanner AND KittCore WASM
+        setTimeout(async () => {
             try {
                 const entities = smartGraphRegistry.getAllEntities();
                 const scannerEntities = entities.map(e => ({
@@ -213,7 +218,19 @@ export class AppOrchestrator {
                 }));
 
                 console.log(`[AppOrchestrator] Hydrating Scanner with ${scannerEntities.length} entities...`);
-                implicitScanner.hydrate(scannerEntities);
+                const entityVersion = smartGraphRegistry.getHotCache().entityVersion;
+                implicitScanner.hydrate(scannerEntities, entityVersion);
+
+                // Also hydrate KittCore WASM scanner (transitions conductor to Ready state)
+                const { kittCore } = await import('../kittcore');
+                const kittCoreEntities = entities.map(e => ({
+                    id: e.id,
+                    label: e.label,
+                    kind: e.kind,
+                    aliases: e.aliases ?? [],
+                }));
+                const hydratedCount = await kittCore.hydrateEntities(kittCoreEntities);
+                console.log(`[AppOrchestrator] KittCore hydrated with ${hydratedCount} entities`);
             } catch (err) {
                 console.error('[AppOrchestrator] Background hydration failed:', err);
             }

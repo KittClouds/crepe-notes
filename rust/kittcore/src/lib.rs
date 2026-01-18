@@ -62,6 +62,7 @@ pub mod hnsw;
 #[cfg(feature = "sqlite_wasm")]
 pub mod db;  // SQLite WASM (experimental)
 pub mod graphdb;  // Graph database layer
+pub mod narrative;  // FST-based narrative verb dictionary
 
 // Public exports - Scanner (explicit to avoid incremental collision with resorank)
 pub use scanner::{

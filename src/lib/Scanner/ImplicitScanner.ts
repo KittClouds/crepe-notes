@@ -61,9 +61,9 @@ export class ImplicitScanner {
         }
     }
 
-    hydrate(entities: RegisteredEntity[]) {
+    hydrate(entities: RegisteredEntity[], entityVersion: number = 0) {
         if (!this.worker) return;
-        this.worker.postMessage({ type: 'HYDRATE', entities });
+        this.worker.postMessage({ type: 'HYDRATE', entities, entityVersion });
     }
 
     scan(text: string): Promise<DecorationSpan[]> {

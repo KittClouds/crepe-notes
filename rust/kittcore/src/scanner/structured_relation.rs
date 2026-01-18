@@ -35,6 +35,7 @@ use serde::{Deserialize, Serialize};
 use super::chunker::{Chunk, ChunkKind, ChunkResult, Chunker, TextRange};
 use super::relation::EntitySpan;
 use super::verb_morphology::VerbLexicon;
+use crate::narrative::NarrativeMatcher;
 
 // =============================================================================
 // Core Types
@@ -165,8 +166,10 @@ pub struct StructuredRelationStats {
 pub struct StructuredRelationExtractor {
     /// The chunker for NP/VP/PP detection
     chunker: Chunker,
-    /// Unified verb lexicon with morphology + semantics
+    /// Unified verb lexicon with morphology + semantics (primary)
     lexicon: VerbLexicon,
+    /// FST-based narrative matcher for novel verbs (fallback)
+    narrative_matcher: NarrativeMatcher,
     /// Passive voice auxiliary verbs
     passive_auxiliaries: Vec<String>,
     /// Maximum character distance between entity and VP
@@ -185,6 +188,7 @@ impl StructuredRelationExtractor {
         Self {
             chunker: Chunker::new(),
             lexicon: VerbLexicon::new(),
+            narrative_matcher: NarrativeMatcher::new(),
             passive_auxiliaries: vec![
                 "was".to_string(),
                 "were".to_string(),
@@ -568,10 +572,17 @@ impl StructuredRelationExtractor {
         let verb_text = pattern.verb.head.slice(text);
         let verb_lower = verb_text.to_lowercase();
 
-        // Get relation type from lexicon, or use verb itself uppercased
+        // Priority 1: VerbLexicon (known verbs with full morphology)
+        // Priority 2: NarrativeMatcher (FST + stemmer for novel verbs)
+        // Priority 3: Uppercase verb as-is
         let relation_type = self.lexicon
             .get_relation(&verb_lower)
             .map(|s| s.to_string())
+            .or_else(|| {
+                // Fallback to NarrativeMatcher FST
+                self.narrative_matcher.lookup(&verb_lower)
+                    .map(|m| format!("{:?}", m.relation).to_uppercase())
+            })
             .unwrap_or_else(|| verb_lower.to_uppercase());
 
         // Convert PP modifiers to RelationModifiers

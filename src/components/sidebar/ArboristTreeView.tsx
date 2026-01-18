@@ -6,6 +6,7 @@ import { buildArboristTree } from '@/lib/arborist/adapter';
 import { TypedFolderMenu } from './TypedFolderMenu';
 import type { EntityKind } from '@/lib/types/entityTypes';
 import { narrativeRegistry } from '@/lib/narrative';
+import { useScopeContextSafe } from '@/contexts/ScopeContext';
 
 import {
     DropdownMenu,
@@ -88,16 +89,26 @@ export function ArboristTreeView({
         () => buildArboristTree(folderTree, globalNotes),
         [folderTree, globalNotes]
     );
+    // Get scope context (safe version for optional use)
+    const scopeContext = useScopeContextSafe();
 
-    // Handle node selection - PRESERVED 1:1
+    // Handle node selection - updates both note selection and scope context
     const handleSelect = useCallback((nodes: NodeApi<ArboristNode>[]) => {
         const node = nodes[0];
-        if (!node) return;
+        if (!node) {
+            // No selection - update scope to global
+            scopeContext?.setSelectedNode(null);
+            return;
+        }
 
+        // Update scope context with selected node
+        scopeContext?.setSelectedNode(node.data);
+
+        // If it's a note, also trigger note selection
         if (node.data.type === 'note') {
             selectNote(node.id);
         }
-    }, [selectNote]);
+    }, [selectNote, scopeContext]);
 
     // Handle node rename - TYPE-AWARE with silent conversion
     const handleRename = useCallback(({ node, name }: { node: any; name: string }) => {

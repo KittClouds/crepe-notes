@@ -11,20 +11,37 @@
 import init, { ScanConductor, InitOutput } from "../../rust/kittcore/pkg/kittcore.js";
 import wasmUrl from "../../rust/kittcore/pkg/kittcore_bg.wasm?url";
 
+// NOTE: Cross-doc processing (embeddings, CozoDB) happens on MAIN THREAD
+// Workers cannot share in-memory state with main thread.
+// The worker just receives ENTITIES_EXTRACTED and forwards to main thread for processing.
+
+// Types for linking config (inline to avoid imports)
+interface LinkingConfig {
+    stringThreshold: number;
+    semanticThreshold: number;
+    caseInsensitive: boolean;
+    stringWeight: number;
+    semanticWeight: number;
+}
+
 // Types for messages
 type KittCoreMessage =
     | { type: 'INIT' }
     | { type: 'GREET'; payload: { name: string } }
     | { type: 'VERSION' }
-    | { type: 'SCAN'; payload: { content: string; entities: EntityInput[] } }
-    | { type: 'HYDRATE_ENTITIES'; payload: { entities: EntityDefinition[] } }
-    | { type: 'SCAN_IMPLICIT'; payload: { content: string } }
-    | { type: 'EXTRACT_RELATIONS'; payload: { content: string; entities: EntitySpan[] } }
+    | { type: 'SCAN'; payload: { content: string; entities: EntityInput[]; narrativeId?: string } }
+    | { type: 'HYDRATE_ENTITIES'; payload: { entities: EntityDefinition[]; narrativeId?: string } }
+    | { type: 'SCAN_IMPLICIT'; payload: { content: string; narrativeId?: string } }
+    | { type: 'EXTRACT_RELATIONS'; payload: { content: string; entities: EntitySpan[]; narrativeId?: string } }
     | { type: 'EXTRACT_TRIPLES'; payload: { content: string } }
     | { type: 'SCAN_TEMPORAL'; payload: { content: string } }
     | { type: 'EMBED_TEXT'; payload: { text: string } }
     | { type: 'SEARCH'; payload: { query: string; k: number } }
-    | { type: 'GET_STATUS' };
+    | { type: 'GET_STATUS' }
+    // Cross-doc entity linking
+    | { type: 'ENTITIES_EXTRACTED'; payload: { noteId: string; noteTitle: string; entities: ExtractedEntity[] } }
+    | { type: 'RUN_LINKING'; payload?: { config?: Partial<LinkingConfig> } }
+    | { type: 'GET_CLUSTERS'; payload?: { entityId?: string } };
 
 interface EntityInput {
     label: string;
@@ -37,6 +54,8 @@ interface EntityDefinition {
     label: string;
     kind: string;
     aliases?: string[];
+    /** Narrative vault this entity belongs to (for isolation) */
+    narrativeId?: string;
 }
 
 interface EntitySpan {
@@ -44,6 +63,17 @@ interface EntitySpan {
     label: string;
     start: number;
     end: number;
+}
+
+/** Entity extracted from a note scan - for cross-doc embedding */
+interface ExtractedEntity {
+    id: string;
+    label: string;
+    kind: string;
+    start: number;
+    end: number;
+    contextBefore?: string;  // Text before the mention
+    contextAfter?: string;   // Text after the mention
 }
 
 type ResponseMessage =
@@ -59,7 +89,11 @@ type ResponseMessage =
     | { type: 'EMBED_RESULT'; payload: { embedding: Float32Array } }
     | { type: 'SEARCH_RESULT'; payload: { results: any[] } }
     | { type: 'STATUS'; payload: WorkerStatus }
-    | { type: 'ERROR'; payload: { message: string } };
+    | { type: 'ERROR'; payload: { message: string } }
+    // Cross-doc responses
+    | { type: 'ENTITIES_PROCESSED'; payload: { noteId: string; embedded: number; cooccurrences: number } }
+    | { type: 'LINKING_COMPLETE'; payload: { clusters: any[]; stats: { entities: number; clusters: number; timeMs: number } } }
+    | { type: 'CLUSTERS_RESULT'; payload: { clusters: any[] } };
 
 interface WorkerStatus {
     initialized: boolean;
@@ -74,6 +108,33 @@ let entitiesHydrated = 0;
 // We'll use the ScanConductor from WASM
 let conductor: ScanConductor | null = null;
 const VERSION = '0.1.0-wasm';
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Build context text for entity embedding.
+ * Combines entity metadata with surrounding context from the note.
+ */
+function buildEntityContext(entity: ExtractedEntity, noteTitle: string): string {
+    const parts: string[] = [];
+
+    // Entity identity
+    parts.push(`Entity: ${entity.label}`);
+    parts.push(`Type: ${entity.kind}`);
+    parts.push(`Source: ${noteTitle}`);
+
+    // Surrounding context if available
+    if (entity.contextBefore) {
+        parts.push(`Before: ${entity.contextBefore}`);
+    }
+    if (entity.contextAfter) {
+        parts.push(`After: ${entity.contextAfter}`);
+    }
+
+    return parts.join('\n');
+}
 
 // Message handler
 self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
@@ -117,9 +178,24 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
 
             case 'HYDRATE_ENTITIES':
                 if (!conductor) throw new Error('Not initialized');
-                // The WASM expects { id, label, kind, aliases } which matches EntityDefinition
-                conductor.hydrateEntities(msg.payload.entities);
-                entitiesHydrated = msg.payload.entities.length;
+                // Filter entities by narrative scope if provided
+                const filterNarrativeId = msg.payload.narrativeId;
+                let entitiesToHydrate = msg.payload.entities;
+
+                if (filterNarrativeId) {
+                    // Only hydrate entities from same narrative
+                    entitiesToHydrate = msg.payload.entities.filter(
+                        e => e.narrativeId === filterNarrativeId
+                    );
+                    console.log(`[KittCoreWorker] Filtered to ${entitiesToHydrate.length}/${msg.payload.entities.length} entities for narrative ${filterNarrativeId}`);
+                } else {
+                    // Global context - hydrate only global entities (no narrativeId)
+                    entitiesToHydrate = msg.payload.entities.filter(e => !e.narrativeId);
+                    console.log(`[KittCoreWorker] Filtered to ${entitiesToHydrate.length}/${msg.payload.entities.length} global entities`);
+                }
+
+                conductor.hydrateEntities(entitiesToHydrate);
+                entitiesHydrated = entitiesToHydrate.length;
                 self.postMessage({
                     type: 'ENTITIES_HYDRATED',
                     payload: { count: entitiesHydrated }
@@ -128,6 +204,7 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
 
             case 'SCAN':
                 if (!conductor) throw new Error('Not initialized');
+                console.log(`[KittCoreWorker] SCAN: contentLen=${msg.payload.content?.length}, entities=${msg.payload.entities?.length}`);
                 const result = conductor.scan(msg.payload.content, msg.payload.entities);
                 self.postMessage({
                     type: 'SCAN_RESULT',
@@ -151,7 +228,7 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
                 const implicitResult = conductor.scanForce(msg.payload.content, []); // No explicit spans provided
                 self.postMessage({
                     type: 'IMPLICIT_RESULT',
-                    payload: { mentions: implicitResult.implicit_mentions || [] }
+                    payload: { mentions: implicitResult.implicit || [] }
                 } as ResponseMessage);
                 break;
 
@@ -160,7 +237,7 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
                 const relResult = conductor.scanForce(msg.payload.content, msg.payload.entities);
                 self.postMessage({
                     type: 'RELATIONS_RESULT',
-                    payload: { relations: relResult.relations || [] }
+                    payload: { relations: relResult.unified_relations || [] }
                 } as ResponseMessage);
                 break;
 
@@ -178,7 +255,7 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
                 const tempResult = conductor.scanForce(msg.payload.content, []);
                 self.postMessage({
                     type: 'TEMPORAL_RESULT',
-                    payload: { mentions: tempResult.temporal_mentions || [] }
+                    payload: { mentions: tempResult.temporal || [] }
                 } as ResponseMessage);
                 break;
 
@@ -212,6 +289,74 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
                     }
                 } as ResponseMessage);
                 break;
+
+            // ================================================================
+            // Cross-Document Entity Linking
+            // 
+            // NOTE: These handlers are STUBS. Cross-doc processing (embeddings,
+            // CozoDB queries) MUST happen on the MAIN THREAD because:
+            // 1. Workers can't share in-memory state with main thread
+            // 2. CozoDB WASM instance lives on main thread
+            // 3. Transformers.js embedding models live on main thread
+            //
+            // Flow: Rust scan → worker parses → posts results → MAIN THREAD
+            // handles embedding & CozoDB storage via KittCoreService
+            // ================================================================
+
+            case 'ENTITIES_EXTRACTED': {
+                // Forward entity data back to main thread for processing
+                // Main thread will:
+                // 1. Build context text
+                // 2. Generate embeddings via EmbeddingEngine
+                // 3. Store vectors in CozoDB
+                // 4. Create co-occurrence edges
+                const { noteId, noteTitle, entities } = msg.payload;
+                console.log(`[KittCoreWorker] Forwarding ${entities.length} entities for processing (noteId: ${noteId})`);
+
+                // Just acknowledge receipt - actual processing happens on main thread
+                self.postMessage({
+                    type: 'ENTITIES_PROCESSED',
+                    payload: {
+                        noteId,
+                        embedded: 0,  // Main thread will update
+                        cooccurrences: 0,
+                        entities,  // Forward entities for main thread to process
+                        forwardToMainThread: true
+                    }
+                } as ResponseMessage);
+                break;
+            }
+
+            case 'RUN_LINKING': {
+                // Linking must happen on main thread (needs CozoDB + embedding access)
+                console.log('[KittCoreWorker] RUN_LINKING requested - forwarding to main thread');
+
+                self.postMessage({
+                    type: 'LINKING_COMPLETE',
+                    payload: {
+                        clusters: [],
+                        stats: { entities: 0, clusters: 0, timeMs: 0 },
+                        forwardToMainThread: true,
+                        config: msg.payload?.config || {}
+                    }
+                } as ResponseMessage);
+                break;
+            }
+
+            case 'GET_CLUSTERS': {
+                // Cluster retrieval must happen on main thread (needs CozoDB)
+                console.log('[KittCoreWorker] GET_CLUSTERS requested - forwarding to main thread');
+
+                self.postMessage({
+                    type: 'CLUSTERS_RESULT',
+                    payload: {
+                        clusters: [],
+                        forwardToMainThread: true,
+                        entityId: msg.payload?.entityId
+                    }
+                } as ResponseMessage);
+                break;
+            }
         }
     } catch (e) {
         console.error('[KittCoreWorker] Error:', e);
@@ -223,3 +368,4 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
 };
 
 console.log('[KittCoreWorker] Worker script loaded (WASM MODE)');
+

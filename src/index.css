@@ -471,3 +471,33 @@
 .dark .entity-editing {
   filter: none;
 }
+
+/* ============================================
+   Predicate Highlighting (in triples)
+   Shows the verb/relation connecting entities
+   ============================================ */
+
+/* Subtle predicate highlight - muted, not distracting */
+.predicate-highlight {
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+  font-size: 0.9em;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+.predicate-highlight:hover {
+  opacity: 1;
+  color: hsl(var(--primary) / 0.8);
+}
+
+/* Vivid mode - slightly more visible */
+.predicate-highlight.vivid {
+  color: hsl(var(--primary) / 0.7);
+  opacity: 0.85;
+}
+
+/* Light mode adjustments */
+:root:not(.dark) .predicate-highlight {
+  color: hsl(220 10% 40%);
+}

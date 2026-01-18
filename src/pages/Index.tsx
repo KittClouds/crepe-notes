@@ -246,7 +246,6 @@ const Index: React.FC = () => {
               <div className="flex-1 min-h-0 overflow-auto">
                 <RichTextEditor
                   ref={editorRef}
-                  key={currentNote.id}
                   noteId={currentNote.id}
                   initialContent={(() => {
                     // Try to parse content as JSON doc first
@@ -261,6 +260,7 @@ const Index: React.FC = () => {
                     // Fallback to markdown
                     return { type: 'markdown' as const, value: currentNote.markdownContent || currentNote.content || '' };
                   })()}
+                  markdownContent={currentNote.markdownContent || currentNote.content || ''}
                   onContentChange={handleContentChange}
                 />
               </div>

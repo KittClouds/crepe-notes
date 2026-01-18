@@ -1,6 +1,7 @@
 // src/lib/store/entityColorStore.ts
 // Unified Entity Color System - Single source of truth for all entity colors
 // Uses CSS custom properties for live updates across the entire app
+// Supports both PILL colors (background/border) and TEXT colors (foreground)
 
 import type { EntityKind } from '@/lib/types/entityTypes';
 import { ENTITY_KINDS } from '@/lib/types/entityTypes';
@@ -10,7 +11,28 @@ import { ENTITY_KINDS } from '@/lib/types/entityTypes';
 // ============================================
 
 // HSL values without the hsl() wrapper - used in CSS as: hsl(var(--entity-character))
+// These are used for pill backgrounds/borders
 export const DEFAULT_ENTITY_COLORS: Record<EntityKind, string> = {
+    CHARACTER: '280 70% 60%',      // Purple
+    LOCATION: '200 75% 55%',       // Blue
+    NPC: '30 80% 55%',             // Orange
+    ITEM: '45 90% 50%',            // Gold
+    FACTION: '0 70% 55%',          // Red
+    SCENE: '330 70% 60%',          // Pink
+    EVENT: '25 90% 55%',           // Orange
+    CONCEPT: '170 65% 45%',        // Teal
+    ARC: '270 70% 60%',            // Violet
+    ACT: '230 80% 55%',            // Royal Blue
+    CHAPTER: '175 65% 45%',        // Teal
+    BEAT: '320 70% 55%',           // Magenta
+    TIMELINE: '50 85% 50%',        // Gold
+    NARRATIVE: '250 60% 55%',      // Indigo
+    NETWORK: '190 70% 50%',        // Cyan
+};
+
+// Default TEXT colors - typically same as pill colors but can be customized separately
+// These are used for text foreground (implicit entities, headers, etc.)
+export const DEFAULT_ENTITY_TEXT_COLORS: Record<EntityKind, string> = {
     CHARACTER: '280 70% 60%',      // Purple
     LOCATION: '200 75% 55%',       // Blue
     NPC: '30 80% 55%',             // Orange
@@ -35,19 +57,23 @@ export const DEFAULT_ENTITY_COLORS: Record<EntityKind, string> = {
 
 class EntityColorStore {
     private colors: Record<EntityKind, string>;
+    private textColors: Record<EntityKind, string>;
     private listeners: Set<() => void> = new Set();
     private initialized = false;
-    // Cached snapshot for useSyncExternalStore - same reference until data changes
+    // Cached snapshots for useSyncExternalStore - same reference until data changes
     private snapshot: Record<EntityKind, string>;
+    private textSnapshot: Record<EntityKind, string>;
 
     constructor() {
         this.colors = { ...DEFAULT_ENTITY_COLORS };
+        this.textColors = { ...DEFAULT_ENTITY_TEXT_COLORS };
         this.snapshot = this.colors;
+        this.textSnapshot = this.textColors;
     }
 
     /**
      * Initialize store - must be called after DOM is ready
-     * Always uses DEFAULT_ENTITY_COLORS and syncs to CSS variables
+     * Always uses DEFAULT colors and syncs to CSS variables
      * NO localStorage loading - pure runtime defaults
      */
     initialize(): void {
@@ -55,13 +81,15 @@ class EntityColorStore {
 
         // Always start with defaults - no stale state
         this.colors = { ...DEFAULT_ENTITY_COLORS };
+        this.textColors = { ...DEFAULT_ENTITY_TEXT_COLORS };
         this.snapshot = { ...this.colors };
+        this.textSnapshot = { ...this.textColors };
 
         // Sync all colors to CSS variables
         this.syncAllToCssVars();
 
         this.initialized = true;
-        console.log('[EntityColorStore] Initialized with', Object.keys(this.colors).length, 'colors (pure runtime, no localStorage)');
+        console.log('[EntityColorStore] Initialized with', Object.keys(this.colors).length, 'pill colors and text colors');
     }
 
     // ============================================
@@ -69,11 +97,20 @@ class EntityColorStore {
     // ============================================
 
     /**
-     * Get color as CSS hsl() string using CSS variable
+     * Get pill color as CSS hsl() string using CSS variable
      * Returns: 'hsl(var(--entity-character))'
      */
     getEntityColor(kind: EntityKind | string): string {
         const varName = this.getCssVarName(kind);
+        return `hsl(var(${varName}))`;
+    }
+
+    /**
+     * Get text color as CSS hsl() string using CSS variable
+     * Returns: 'hsl(var(--entity-character-text))'
+     */
+    getEntityTextColor(kind: EntityKind | string): string {
+        const varName = this.getTextCssVarName(kind);
         return `hsl(var(${varName}))`;
     }
 
@@ -87,7 +124,7 @@ class EntityColorStore {
     }
 
     /**
-     * Get CSS variable name for a kind
+     * Get CSS variable name for pill color
      * Returns: '--entity-character'
      */
     getCssVarName(kind: EntityKind | string): string {
@@ -95,7 +132,15 @@ class EntityColorStore {
     }
 
     /**
-     * Get raw HSL value (without hsl() wrapper)
+     * Get CSS variable name for text color
+     * Returns: '--entity-character-text'
+     */
+    getTextCssVarName(kind: EntityKind | string): string {
+        return `--entity-${kind.toLowerCase().replace(/_/g, '-')}-text`;
+    }
+
+    /**
+     * Get raw HSL value for pill color (without hsl() wrapper)
      * Returns: '280 70% 60%'
      */
     getRawHsl(kind: EntityKind): string {
@@ -103,17 +148,39 @@ class EntityColorStore {
     }
 
     /**
-     * Get snapshot of all colors - returns STABLE reference for useSyncExternalStore
+     * Get raw HSL value for text color (without hsl() wrapper)
+     * Returns: '280 70% 60%'
+     */
+    getRawTextHsl(kind: EntityKind): string {
+        return this.textColors[kind] || '220 10% 50%'; // Gray fallback
+    }
+
+    /**
+     * Get snapshot of all pill colors - returns STABLE reference for useSyncExternalStore
      */
     getSnapshot(): Record<EntityKind, string> {
         return this.snapshot;
     }
 
     /**
-     * Get all colors (creates new object - use getSnapshot for React hooks)
+     * Get snapshot of all text colors - returns STABLE reference for useSyncExternalStore
+     */
+    getTextSnapshot(): Record<EntityKind, string> {
+        return this.textSnapshot;
+    }
+
+    /**
+     * Get all pill colors (creates new object - use getSnapshot for React hooks)
      */
     getAllColors(): Record<EntityKind, string> {
         return { ...this.colors };
+    }
+
+    /**
+     * Get all text colors (creates new object - use getTextSnapshot for React hooks)
+     */
+    getAllTextColors(): Record<EntityKind, string> {
+        return { ...this.textColors };
     }
 
     // ============================================
@@ -121,7 +188,7 @@ class EntityColorStore {
     // ============================================
 
     /**
-     * Set color for a kind - updates CSS variable immediately
+     * Set pill color for a kind - updates CSS variable immediately
      * Changes are session-only, NOT persisted to localStorage
      */
     setColor(kind: EntityKind, hslValue: string): void {
@@ -131,7 +198,17 @@ class EntityColorStore {
     }
 
     /**
-     * Set multiple colors at once
+     * Set text color for a kind - updates CSS variable immediately
+     * Changes are session-only, NOT persisted to localStorage
+     */
+    setTextColor(kind: EntityKind, hslValue: string): void {
+        this.textColors[kind] = hslValue;
+        this.setTextCssVar(kind, hslValue);
+        this.notify();
+    }
+
+    /**
+     * Set multiple pill colors at once
      */
     setColors(colors: Partial<Record<EntityKind, string>>): void {
         for (const [kind, hsl] of Object.entries(colors)) {
@@ -144,10 +221,24 @@ class EntityColorStore {
     }
 
     /**
+     * Set multiple text colors at once
+     */
+    setTextColors(colors: Partial<Record<EntityKind, string>>): void {
+        for (const [kind, hsl] of Object.entries(colors)) {
+            if (hsl) {
+                this.textColors[kind as EntityKind] = hsl;
+                this.setTextCssVar(kind as EntityKind, hsl);
+            }
+        }
+        this.notify();
+    }
+
+    /**
      * Reset all colors to defaults
      */
     reset(): void {
         this.colors = { ...DEFAULT_ENTITY_COLORS };
+        this.textColors = { ...DEFAULT_ENTITY_TEXT_COLORS };
         this.syncAllToCssVars();
         this.notify();
     }
@@ -161,9 +252,17 @@ class EntityColorStore {
         document.documentElement.style.setProperty(varName, hslValue);
     }
 
+    private setTextCssVar(kind: EntityKind | string, hslValue: string): void {
+        const varName = this.getTextCssVarName(kind);
+        document.documentElement.style.setProperty(varName, hslValue);
+    }
+
     private syncAllToCssVars(): void {
         for (const [kind, hsl] of Object.entries(this.colors)) {
             this.setCssVar(kind, hsl);
+        }
+        for (const [kind, hsl] of Object.entries(this.textColors)) {
+            this.setTextCssVar(kind, hsl);
         }
     }
 
@@ -177,8 +276,9 @@ class EntityColorStore {
     }
 
     private notify(): void {
-        // Create new snapshot reference so useSyncExternalStore detects change
+        // Create new snapshot references so useSyncExternalStore detects change
         this.snapshot = { ...this.colors };
+        this.textSnapshot = { ...this.textColors };
         this.listeners.forEach(fn => fn());
     }
 }
@@ -194,13 +294,23 @@ export const entityColorStore = new EntityColorStore();
 // ============================================
 
 /**
- * Get entity color as CSS hsl() string using CSS variable
- * Usage: style={{ color: getEntityColor('CHARACTER') }}
+ * Get entity pill color as CSS hsl() string using CSS variable
+ * Usage: style={{ backgroundColor: getEntityColor('CHARACTER') }}
  * Returns: 'hsl(var(--entity-character))'
  */
 export function getEntityColor(kind: EntityKind | string | undefined): string {
     if (!kind) return 'hsl(var(--entity-unknown))';
     return entityColorStore.getEntityColor(kind);
+}
+
+/**
+ * Get entity text color as CSS hsl() string using CSS variable
+ * Usage: style={{ color: getEntityTextColor('CHARACTER') }}
+ * Returns: 'hsl(var(--entity-character-text))'
+ */
+export function getEntityTextColor(kind: EntityKind | string | undefined): string {
+    if (!kind) return 'hsl(var(--entity-unknown-text))';
+    return entityColorStore.getEntityTextColor(kind);
 }
 
 /**
@@ -214,11 +324,19 @@ export function getEntityBgColor(kind: EntityKind | string | undefined, opacity 
 }
 
 /**
- * Get CSS variable name for an entity kind
+ * Get CSS variable name for pill color
  * Returns: '--entity-character'
  */
 export function getEntityColorVar(kind: EntityKind | string): string {
     return entityColorStore.getCssVarName(kind);
+}
+
+/**
+ * Get CSS variable name for text color
+ * Returns: '--entity-character-text'
+ */
+export function getEntityTextColorVar(kind: EntityKind | string): string {
+    return entityColorStore.getTextCssVarName(kind);
 }
 
 // ============================================
@@ -237,8 +355,17 @@ export function useEntityColors() {
         entityColorStore.getSnapshot.bind(entityColorStore)
     );
 
+    const textColors = useSyncExternalStore(
+        entityColorStore.subscribe.bind(entityColorStore),
+        entityColorStore.getTextSnapshot.bind(entityColorStore)
+    );
+
     const setColor = useCallback((kind: EntityKind, hsl: string) => {
         entityColorStore.setColor(kind, hsl);
+    }, []);
+
+    const setTextColor = useCallback((kind: EntityKind, hsl: string) => {
+        entityColorStore.setTextColor(kind, hsl);
     }, []);
 
     const reset = useCallback(() => {
@@ -247,10 +374,12 @@ export function useEntityColors() {
 
     return {
         colors,
+        textColors,
         setColor,
+        setTextColor,
         reset,
         getEntityColor,
+        getEntityTextColor,
         getEntityBgColor,
     };
 }
-

@@ -159,15 +159,62 @@ export class SmartGraphRegistryFacade {
             metadata: options?.attributes,
         });
 
-        // Update implicit scanner with all entities
+        // Update implicit scanner with all entities (includes version for skip-if-unchanged)
         const allEntities = this.getAllEntities();
-        implicitScanner.hydrate(allEntities.map(this.toScannerEntity));
+        const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
+        implicitScanner.hydrate(allEntities.map(this.toScannerEntity), entityVersion);
 
         return {
             entity: this.toRegisteredEntity(entity),
             isNew,
             wasMerged: false,
         };
+    }
+
+    /**
+     * Batch register entities - only triggers ONE hydration at the end
+     * Use this instead of registerEntity() in loops to avoid N× hydrations
+     */
+    async registerEntityBatch(
+        entities: Array<{
+            label: string;
+            kind: EntityKind;
+            noteId: string;
+            options?: {
+                subtype?: string;
+                aliases?: string[];
+                attributes?: Record<string, any>;
+                source?: 'user' | 'extraction' | 'auto';
+            };
+        }>
+    ): Promise<EntityRegistrationResult[]> {
+        const results: EntityRegistrationResult[] = [];
+
+        for (const { label, kind, noteId, options } of entities) {
+            const existing = cozoGraphRegistry.findEntityByLabel(label);
+            const isNew = !existing;
+
+            const entity = cozoGraphRegistry.registerEntity(label, kind, noteId, {
+                subtype: options?.subtype,
+                aliases: options?.aliases,
+                metadata: options?.attributes,
+            });
+
+            results.push({
+                entity: this.toRegisteredEntity(entity),
+                isNew,
+                wasMerged: false,
+            });
+        }
+
+        // Single hydration at end (not per-entity)
+        if (entities.length > 0) {
+            const allEntities = this.getAllEntities();
+            const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
+            implicitScanner.hydrate(allEntities.map(this.toScannerEntity), entityVersion);
+        }
+
+        return results;
     }
 
     async deleteEntity(id: string): Promise<boolean> {
@@ -177,7 +224,8 @@ export class SmartGraphRegistryFacade {
     async clearAll(): Promise<number> {
         const count = cozoGraphRegistry.getAllEntities().length;
         await cozoGraphRegistry.clear();
-        implicitScanner.hydrate([]);
+        const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
+        implicitScanner.hydrate([], entityVersion);
         return count;
     }
 
@@ -250,6 +298,83 @@ export class SmartGraphRegistryFacade {
             confidence: r.confidence,
             sourceNote: r.provenance?.[0]?.originId
         }));
+    }
+
+    // =========================================================================
+    // Scope-Aware Queries
+    // =========================================================================
+
+    /**
+     * Get entities filtered by scope (notes in scope).
+     * Uses derived join approach - entities are filtered by their firstNote/mentionsByNote.
+     * 
+     * @param notesInScope - Array of note IDs that are within the active scope
+     */
+    getEntitiesByScope(notesInScope: string[]): RegisteredEntity[] {
+        if (notesInScope.length === 0) {
+            return [];
+        }
+
+        const noteSet = new Set(notesInScope);
+        const all = cozoGraphRegistry.getAllEntities();
+
+        // Filter: entity must have firstNote in scope OR have mentions in scoped notes
+        return all
+            .filter(e => {
+                // Primary check: firstNote is in scope
+                if (e.firstNote && noteSet.has(e.firstNote)) {
+                    return true;
+                }
+                // Secondary check: any mention note is in scope
+                if (e.mentionsByNote) {
+                    for (const noteId of e.mentionsByNote.keys()) {
+                        if (noteSet.has(noteId)) return true;
+                    }
+                }
+                return false;
+            })
+            .map(e => this.toRegisteredEntity(e));
+    }
+
+    /**
+     * Get edges filtered by scope.
+     * Uses derived join approach - edges are filtered by their evidence (provenance) notes.
+     * 
+     * @param notesInScope - Array of note IDs that are within the active scope
+     */
+    getEdgesByScope(notesInScope: string[]): Edge[] {
+        if (notesInScope.length === 0) {
+            return [];
+        }
+
+        const noteSet = new Set(notesInScope);
+        const all = cozoGraphRegistry.getAllRelationshipsSync();
+
+        // Filter: edge must have provenance from a scoped note
+        return all
+            .filter(r => {
+                // Check provenance origins
+                if (r.provenance && r.provenance.length > 0) {
+                    return r.provenance.some(p => noteSet.has(p.originId));
+                }
+                return false;
+            })
+            .map(r => ({
+                id: r.id,
+                sourceId: r.sourceId,
+                targetId: r.targetId,
+                type: r.type,
+                confidence: r.confidence,
+                sourceNote: r.provenance?.[0]?.originId
+            }));
+    }
+
+    /**
+     * Get entity count by scope (for badge display)
+     */
+    getEntityCountByScope(notesInScope: string[]): number {
+        if (notesInScope.length === 0) return 0;
+        return this.getEntitiesByScope(notesInScope).length;
     }
 
     // =========================================================================

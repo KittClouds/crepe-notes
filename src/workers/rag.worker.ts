@@ -1,65 +1,118 @@
 /// <reference lib="webworker" />
-
-// NOTE: RAG WASM temporarily disabled during Tauri migration
-// Phase 4 will implement via Tauri commands
-// import init, { RagPipeline } from '@/lib/wasm/kittcore/kittcore';
+// src/workers/rag.worker.ts
+// RAG/Embedding worker - handles vector operations off main thread
 
 import { normalizeEmbedding, getEmbeddingMeta, validateDimension, truncateEmbedding } from '@/lib/rag/embedding-utils';
 
-// Stub class for Tauri migration
-class RagPipeline {
-    loadModel(_onnx: Uint8Array, _tokenizer: string) { }
-    indexNotes(_notes: any[]) { return 0; }
-    insertChunk(_chunk: any) { }
-    buildRaptorTree(_clusterSize: number) { return {}; }
-    search(_query: string, _k: number) { return []; }
-    searchHybrid(_query: string, _k: number, _weight: number) { return []; }
-    searchRaptor(_embedding: Float32Array, _k: number, _mode: string, _n: number) { return []; }
-    embed(_text: string) { return new Float32Array(); }
-    getChunks() { return []; }
-    getStats() { return { total_chunks: 0 }; }
-    isModelLoaded() { return false; }
-}
+// ============================================================================
+// Types
+// ============================================================================
 
-// Stub init function
-async function init() {
-    console.log('[RagWorker] Stub mode - WASM disabled during Tauri migration');
-}
-
-// Types for messages
 type WorkerMessage =
     | { type: 'INIT' }
     | { type: 'LOAD_MODEL'; payload: { onnx: ArrayBuffer; tokenizer: string; dims?: number; truncate?: string } }
-    | { type: 'SET_DIMENSIONS'; payload: { dims: number } } // NEW: For TypeScript embedding mode
+    | { type: 'SET_DIMENSIONS'; payload: { dims: number } }
     | { type: 'INDEX_NOTES'; payload: { notes: Array<{ id: string; title: string; content: string }> } }
-    | { type: 'INSERT_VECTORS'; payload: { chunks: Array<{ id: string; note_id: string; note_title: string; chunk_index: number; text: string; embedding: Float32Array; start: number; end: number }> } } // NEW: Pre-computed embeddings
+    | { type: 'INSERT_VECTORS'; payload: { chunks: Array<{ id: string; note_id: string; note_title: string; chunk_index: number; text: string; embedding: Float32Array; start: number; end: number }> } }
     | { type: 'BUILD_RAPTOR'; payload: { clusterSize: number } }
     | { type: 'SEARCH'; payload: { query: string; k: number } }
-    | { type: 'SEARCH_WITH_VECTOR'; payload: { embedding: Float32Array; k: number } } // NEW: For TS-side query embedding
+    | { type: 'SEARCH_WITH_VECTOR'; payload: { embedding: Float32Array; k: number } }
     | { type: 'SEARCH_HYBRID'; payload: { query: string; k: number; vectorWeight: number; lexicalWeight: number } }
-    | { type: 'SEARCH_WITH_DIVERSITY'; payload: { query: string; k: number; lambda: number } } // NEW: MMR diversity search
+    | { type: 'SEARCH_WITH_DIVERSITY'; payload: { query: string; k: number; lambda: number } }
     | { type: 'SEARCH_RAPTOR'; payload: { query: string; k: number; mode: string } }
     | { type: 'HYDRATE'; payload: { chunks: Array<any> } }
     | { type: 'GET_CHUNKS' }
-    | { type: 'GET_STATUS' }; // NEW: Get pipeline status
+    | { type: 'GET_STATUS' };
 
 type ResponseMessage =
     | { type: 'INIT_COMPLETE' }
     | { type: 'MODEL_LOADED' }
-    | { type: 'DIMENSIONS_SET'; payload: { dims: number } } // NEW
+    | { type: 'DIMENSIONS_SET'; payload: { dims: number } }
     | { type: 'INDEX_COMPLETE'; payload: { notes: number; chunks: number } }
     | { type: 'RAPTOR_BUILT'; payload: { stats: any } }
     | { type: 'SEARCH_RESULTS'; payload: { results: any[] } }
     | { type: 'CHUNKS_RETRIEVED'; payload: { chunks: any[] } }
-    | { type: 'STATUS'; payload: { dims: number; modelLoaded: boolean; externalMode: boolean; chunkCount: number } } // NEW
+    | { type: 'STATUS'; payload: { dims: number; modelLoaded: boolean; externalMode: boolean; chunkCount: number } }
     | { type: 'ERROR'; payload: { message: string } };
 
-// Worker state
+// ============================================================================
+// Stub Pipeline (will be replaced by kittcore WASM when available)
+// ============================================================================
+
+class RagPipeline {
+    private chunks: any[] = [];
+    private dims = 256;
+
+    setDimensions(dims: number) {
+        this.dims = dims;
+    }
+
+    loadModel(_onnx: Uint8Array, _tokenizer: string) {
+        console.log('[RagWorker] Stub loadModel called');
+    }
+
+    indexNotes(_notes: any[]) {
+        return 0;
+    }
+
+    insertChunk(chunk: any) {
+        this.chunks.push(chunk);
+    }
+
+    buildRaptorTree(_clusterSize: number) {
+        return { nodes: 0, levels: 0 };
+    }
+
+    search(_query: string, k: number) {
+        // Return top-k chunks by order
+        return this.chunks.slice(0, k).map((c, i) => ({
+            ...c,
+            score: 1 - (i * 0.1),
+        }));
+    }
+
+    searchHybrid(_query: string, k: number, _weight: number) {
+        return this.search(_query, k);
+    }
+
+    searchRaptor(_embedding: Float32Array, k: number, _mode: string, _n: number) {
+        return this.chunks.slice(0, k);
+    }
+
+    searchWithDiversity(_query: string, k: number, _lambda: number) {
+        return this.search(_query, k);
+    }
+
+    embed(_text: string) {
+        return new Float32Array(this.dims);
+    }
+
+    getChunks() {
+        return this.chunks;
+    }
+
+    getStats() {
+        return { total_chunks: this.chunks.length };
+    }
+
+    isModelLoaded() {
+        return false;
+    }
+}
+
+// ============================================================================
+// Worker State
+// ============================================================================
+
 let pipeline: RagPipeline | null = null;
 let initialized = false;
-let currentModelDim = 256; // Default to MDBR Leaf dimensions
+let currentModelDim = 256;
 let currentTruncateDim: number | null = null;
-let useExternalEmbedding = false; // NEW: True when using TS-side embeddings
+let useExternalEmbedding = false;
+
+// ============================================================================
+// Message Handler
+// ============================================================================
 
 self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
     const msg = e.data;
@@ -69,58 +122,46 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
         switch (msg.type) {
             case 'INIT':
                 if (!initialized) {
-                    await init();
                     pipeline = new RagPipeline();
                     initialized = true;
                 }
                 self.postMessage({ type: 'INIT_COMPLETE' });
                 break;
 
-            case 'LOAD_MODEL':
+            case 'LOAD_MODEL': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
-                const { onnx, tokenizer, dims, truncate } = msg.payload as any;
+                const { onnx, tokenizer, dims, truncate } = msg.payload;
 
                 pipeline.loadModel(new Uint8Array(onnx), tokenizer);
 
-                // Update state - Rust model mode
                 currentModelDim = dims || 384;
                 currentTruncateDim = truncate && truncate !== 'full' ? Number(truncate) : null;
-                useExternalEmbedding = false; // Using Rust embeddings
+                useExternalEmbedding = false;
 
                 console.log(`[RagWorker] Model loaded. Native Dim: ${currentModelDim}, Truncate: ${currentTruncateDim || 'None'}`);
-
                 self.postMessage({ type: 'MODEL_LOADED' });
                 break;
+            }
 
-            // NEW: Set dimensions for TypeScript embedding mode (no Rust model)
-            case 'SET_DIMENSIONS':
+            case 'SET_DIMENSIONS': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const newDims = msg.payload.dims;
 
-                // Use type assertion since wasm-bindgen may not export this yet
-                // The method exists in Rust but TypeScript types may be stale
-                const pipelineAny = pipeline as any;
-                if (typeof pipelineAny.setDimensions === 'function') {
-                    pipelineAny.setDimensions(newDims);
-                } else {
-                    // Fallback: reinitialize pipeline with new dimensions
-                    // Note: This loses any indexed data, but for fresh init it's fine
-                    console.warn('[RagWorker] setDimensions not available, dimensions will be set on first insert');
-                }
+                pipeline.setDimensions(newDims);
                 currentModelDim = newDims;
-                useExternalEmbedding = true; // Using TypeScript embeddings
+                useExternalEmbedding = true;
 
                 console.log(`[RagWorker] External embedding mode. Dims: ${newDims}`);
                 self.postMessage({ type: 'DIMENSIONS_SET', payload: { dims: newDims } });
                 break;
+            }
 
-            case 'INDEX_NOTES':
+            case 'INDEX_NOTES': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 if (useExternalEmbedding) {
                     throw new Error('INDEX_NOTES requires Rust model. Use INSERT_VECTORS for external embeddings.');
                 }
                 const notes = msg.payload.notes;
-
                 const totalChunks = pipeline.indexNotes(notes);
 
                 self.postMessage({
@@ -128,9 +169,9 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                     payload: { notes: notes.length, chunks: totalChunks }
                 });
                 break;
+            }
 
-            // NEW: Insert pre-computed embeddings from TypeScript
-            case 'INSERT_VECTORS':
+            case 'INSERT_VECTORS': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const vectorChunks = msg.payload.chunks;
                 let insertedCount = 0;
@@ -138,10 +179,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 
                 for (const chunk of vectorChunks) {
                     try {
-                        // Convert Float32Array to regular array for serde
                         const embeddingArray = Array.from(chunk.embedding);
 
-                        // Validate dimensions
                         if (embeddingArray.length !== currentModelDim) {
                             console.warn(`[RagWorker] Dimension mismatch: got ${embeddingArray.length}, expected ${currentModelDim}`);
                             insertErrors++;
@@ -171,59 +210,71 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                     payload: { notes: 0, chunks: insertedCount }
                 });
                 break;
+            }
 
-            case 'BUILD_RAPTOR':
+            case 'BUILD_RAPTOR': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const stats = pipeline.buildRaptorTree(msg.payload.clusterSize);
                 self.postMessage({ type: 'RAPTOR_BUILT', payload: { stats } });
                 break;
+            }
 
-            case 'SEARCH':
+            case 'SEARCH': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const results = pipeline.search(msg.payload.query, msg.payload.k);
                 self.postMessage({ type: 'SEARCH_RESULTS', payload: { results } });
                 break;
+            }
 
-            case 'SEARCH_HYBRID':
+            case 'SEARCH_HYBRID': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const { query, k, vectorWeight } = msg.payload;
                 const hResults = pipeline.searchHybrid(query, k, vectorWeight);
                 self.postMessage({ type: 'SEARCH_RESULTS', payload: { results: hResults } });
                 break;
+            }
 
-            case 'SEARCH_RAPTOR':
+            case 'SEARCH_RAPTOR': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const { query: rQuery, k: rK, mode } = msg.payload;
                 const embedding = pipeline.embed(rQuery);
                 const raptorResults = pipeline.searchRaptor(new Float32Array(embedding), rK, mode, 10);
                 self.postMessage({ type: 'SEARCH_RESULTS', payload: { results: raptorResults } });
                 break;
+            }
 
-            // NEW: Diversity search using MMR reranking
-            case 'SEARCH_WITH_DIVERSITY':
+            case 'SEARCH_WITH_DIVERSITY': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const { query: dQuery, k: dK, lambda } = msg.payload;
-                const diverseResults = (pipeline as any).searchWithDiversity(dQuery, dK, lambda);
+                const diverseResults = pipeline.searchWithDiversity(dQuery, dK, lambda);
                 self.postMessage({ type: 'SEARCH_RESULTS', payload: { results: diverseResults } });
                 break;
+            }
 
-            case 'HYDRATE':
+            case 'SEARCH_WITH_VECTOR': {
+                if (!pipeline) throw new Error('Pipeline not initialized');
+                const { embedding: queryEmb, k: searchK } = msg.payload;
+                const queryArray = Array.from(queryEmb);
+
+                if (queryArray.length !== currentModelDim) {
+                    throw new Error(`Query dimension mismatch: got ${queryArray.length}, expected ${currentModelDim}`);
+                }
+
+                const vectorResults = pipeline.searchRaptor(new Float32Array(queryArray), searchK, 'collapsed_leaves', 10);
+                self.postMessage({ type: 'SEARCH_RESULTS', payload: { results: vectorResults } });
+                break;
+            }
+
+            case 'HYDRATE': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const { chunks } = msg.payload;
                 let hydratedCount = 0;
                 let skippedCount = 0;
 
-                // Filter chunks that match current dimensionality
-                const targetDim = currentTruncateDim || currentModelDim; // Ideally match model
-
                 for (const chunk of chunks) {
-                    // Use centralized utility for robust format conversion
                     let emb = normalizeEmbedding(chunk.embedding);
-                    const meta = getEmbeddingMeta(chunk.embedding);
 
-                    // Validate dimension matches model
                     if (!validateDimension(emb, currentModelDim)) {
-                        // Truncation support: if source is larger, we can slice
                         if (currentTruncateDim && emb.length > currentTruncateDim) {
                             emb = truncateEmbedding(emb, currentTruncateDim);
                         } else {
@@ -232,7 +283,6 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                             continue;
                         }
                     } else if (currentTruncateDim && currentTruncateDim < emb.length) {
-                        // Model dim matches but truncation requested
                         emb = truncateEmbedding(emb, currentTruncateDim);
                     }
 
@@ -247,37 +297,20 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                         skippedCount++;
                     }
                 }
+
                 console.log(`[RagWorker] Hydrated ${hydratedCount} chunks, skipped ${skippedCount}`);
                 self.postMessage({ type: 'INDEX_COMPLETE', payload: { notes: 0, chunks: hydratedCount } });
                 break;
+            }
 
-            case 'GET_CHUNKS':
-                // ... existing
+            case 'GET_CHUNKS': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const allChunks = pipeline.getChunks();
                 self.postMessage({ type: 'CHUNKS_RETRIEVED', payload: { chunks: allChunks } });
                 break;
+            }
 
-            // NEW: Search with pre-computed query embedding (TypeScript embedding mode)
-            case 'SEARCH_WITH_VECTOR':
-                if (!pipeline) throw new Error('Pipeline not initialized');
-                const { embedding: queryEmb, k: searchK } = msg.payload;
-
-                // Convert to array if needed
-                const queryArray = Array.from(queryEmb);
-
-                // Validate dimensions
-                if (queryArray.length !== currentModelDim) {
-                    throw new Error(`Query dimension mismatch: got ${queryArray.length}, expected ${currentModelDim}`);
-                }
-
-                // Use RAPTOR search with vector (most flexible)
-                const vectorResults = pipeline.searchRaptor(new Float32Array(queryArray), searchK, 'collapsed_leaves', 10);
-                self.postMessage({ type: 'SEARCH_RESULTS', payload: { results: vectorResults } });
-                break;
-
-            // NEW: Get pipeline status
-            case 'GET_STATUS':
+            case 'GET_STATUS': {
                 if (!pipeline) {
                     self.postMessage({
                         type: 'STATUS',
@@ -296,6 +329,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                     });
                 }
                 break;
+            }
         }
     } catch (e) {
         console.error('[RagWorker] Error:', e);

@@ -55,6 +55,14 @@ export interface Folder {
     inherited_kind?: EntityKind;
     inheritedSubtype?: string;
     inherited_subtype?: string;
+
+    // Narrative Vault Isolation
+    /** If set, this folder belongs to the specified narrative vault */
+    narrativeId?: string;
+    narrative_id?: string;
+    /** If true, this folder IS a narrative vault root */
+    isNarrativeRoot?: boolean;
+    is_narrative_root?: number;
 }
 
 export interface FolderWithChildren extends Folder {

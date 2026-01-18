@@ -190,6 +190,19 @@ export const entityHighlighter = $prose(() => {
                         continue;
                     }
 
+                    // PREDICATE HIGHLIGHTS: Show as inline with subtle muted color
+                    if (span.type === 'predicate') {
+                        const mode = highlighterApi.getMode();
+                        const vividClass = mode === 'vivid' ? ' vivid' : '';
+                        decorations.push(
+                            Decoration.inline(span.from, span.to, {
+                                class: `predicate-highlight${vividClass}`,
+                                title: `${span.sourceEntity} → ${span.verb} → ${span.targetEntity}`,
+                            })
+                        );
+                        continue;
+                    }
+
                     if (isEditing) {
                         // EDITING MODE: Show raw text with subtle highlight
                         decorations.push(

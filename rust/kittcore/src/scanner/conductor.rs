@@ -14,14 +14,74 @@
 //! ```
 
 use crate::scanner::document::{DocumentCortex, ScanResult};
-use crate::scanner::relation::EntitySpan;
+use crate::scanner::relation::{EntitySpan, RelationEngine};
 use crate::scanner::implicit::EntityDefinition;
 use wasm_bindgen::prelude::*;
 use serde_wasm_bindgen;
 
 // =============================================================================
-// State Machine
+// Sentence Boundary Detection
 // =============================================================================
+
+/// Detect sentence boundaries in text (heuristic-based, no ML)
+/// Returns vector of (start, end) byte offsets for each sentence
+fn detect_sentence_bounds(text: &str) -> Vec<(usize, usize)> {
+    if text.is_empty() {
+        return vec![];
+    }
+
+    let mut bounds = Vec::new();
+    let mut sentence_start = 0;
+    let mut chars = text.char_indices().peekable();
+
+    while let Some((i, c)) = chars.next() {
+        // Check for sentence-ending punctuation
+        if matches!(c, '.' | '!' | '?') {
+            // Look ahead to see if this is really end of sentence
+            let mut is_end = false;
+            if let Some(&(next_i, next_c)) = chars.peek() {
+                // End if followed by whitespace + uppercase or end of string
+                if next_c.is_whitespace() {
+                    // Check if next non-whitespace is uppercase or we're at end
+                    let rest = &text[next_i..];
+                    let first_alpha = rest.chars().skip_while(|c| c.is_whitespace()).next();
+                    if first_alpha.map(|c| c.is_uppercase()).unwrap_or(true) {
+                        is_end = true;
+                    }
+                }
+            } else {
+                // End of text
+                is_end = true;
+            }
+
+            if is_end {
+                let end = i + c.len_utf8();
+                if end > sentence_start {
+                    bounds.push((sentence_start, end));
+                }
+                // Skip whitespace to find start of next sentence
+                while let Some(&(next_i, next_c)) = chars.peek() {
+                    if !next_c.is_whitespace() {
+                        sentence_start = next_i;
+                        break;
+                    }
+                    chars.next();
+                }
+                // If we consumed all remaining whitespace
+                if chars.peek().is_none() {
+                    sentence_start = text.len();
+                }
+            }
+        }
+    }
+
+    // Add final sentence if text doesn't end with punctuation
+    if sentence_start < text.len() {
+        bounds.push((sentence_start, text.len()));
+    }
+
+    bounds
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum State {
@@ -45,6 +105,8 @@ enum State {
 pub struct ScanConductor {
     cortex: DocumentCortex,
     state: State,
+    /// Stored for cross-sentence bridging: (id, label, kind, aliases)
+    hydrated_entities: Vec<(String, String, String, Vec<String>)>,
 }
 
 impl Default for ScanConductor {
@@ -59,6 +121,7 @@ impl ScanConductor {
         Self {
             cortex: DocumentCortex::default(),
             state: State::Uninitialized,
+            hydrated_entities: Vec::new(),
         }
     }
 
@@ -78,6 +141,12 @@ impl ScanConductor {
         if self.state == State::Uninitialized {
             self.init();
         }
+        
+        // Store entities for cross-sentence bridging
+        self.hydrated_entities = entities.iter()
+            .map(|e| (e.id.clone(), e.label.clone(), e.kind.clone(), e.aliases.clone()))
+            .collect();
+        
         self.cortex.hydrate_entities(entities)?;
         // CRITICAL: Reset change detector so next scan re-processes with new entities
         // Otherwise, same text would return cached result with OLD entity matches
@@ -141,9 +210,62 @@ impl ScanConductor {
     /// Also clears incremental state via cortex.reset()
     pub fn reset(&mut self) {
         self.cortex.reset();
+        self.hydrated_entities.clear();
         if self.state == State::Ready {
             self.state = State::Initialized;
         }
+    }
+
+    /// Document-level scan with cross-sentence relation extraction
+    /// 
+    /// Returns extended ScanResult with cross-sentence relations
+    pub fn scan_document_level(
+        &mut self, 
+        text: &str, 
+        external_spans: &[EntitySpan]
+    ) -> Option<ScanResult> {
+        if self.state != State::Ready {
+            return None;
+        }
+
+        // First, run standard scan
+        let mut result = self.cortex.scan(text, external_spans);
+
+        // Detect sentence boundaries
+        let sentence_bounds = detect_sentence_bounds(text);
+
+        // Run document-level relation extraction  
+        if !self.hydrated_entities.is_empty() && !sentence_bounds.is_empty() {
+            let relation_engine = RelationEngine::new();
+            let (doc_relations, _stats) = relation_engine.extract_document_level(
+                text,
+                external_spans,
+                &sentence_bounds,
+                &self.hydrated_entities,
+            );
+
+            // Add cross-sentence relations to result
+            // Only add those that aren't already in unified_relations
+            for rel in doc_relations {
+                let is_dupe = result.unified_relations.iter().any(|existing| {
+                    existing.head == rel.head && 
+                    existing.tail == rel.tail && 
+                    existing.relation_type == rel.relation_type
+                });
+                if !is_dupe {
+                    result.unified_relations.push(rel);
+                }
+            }
+
+            #[cfg(target_arch = "wasm32")]
+            web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+                "[ScanConductor] document-level: {} sentences, {} total relations",
+                sentence_bounds.len(),
+                result.unified_relations.len()
+            )));
+        }
+
+        Some(result)
     }
 }
 
@@ -204,12 +326,27 @@ impl ScanConductor {
     /// Returns null if not ready, ScanResult otherwise
     #[wasm_bindgen(js_name = "scan")]
     pub fn js_scan(&mut self, text: &str, entity_spans: JsValue) -> JsValue {
+        // DEBUG: Log received text length AND state at WASM boundary
+        #[cfg(target_arch = "wasm32")]
+        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+            "[WASM js_scan] text len={}, state={}, ready={}",
+            text.len(),
+            self.state_name(),
+            self.is_ready()
+        )));
+
         let spans: Vec<EntitySpan> = serde_wasm_bindgen::from_value(entity_spans)
             .unwrap_or_default();
 
         match self.scan(text, &spans) {
             Some(result) => serde_wasm_bindgen::to_value(&result).unwrap_or(JsValue::NULL),
-            None => JsValue::NULL,
+            None => {
+                #[cfg(target_arch = "wasm32")]
+                web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(
+                    "[WASM js_scan] returning NULL - not ready"
+                ));
+                JsValue::NULL
+            }
         }
     }
 
@@ -238,6 +375,33 @@ impl ScanConductor {
     #[wasm_bindgen(js_name = "reset")]
     pub fn js_reset(&mut self) {
         self.reset();
+    }
+
+    /// Document-level scan with cross-sentence relations (JS binding)
+    /// Returns null if not ready, ScanResult with cross-sentence relations otherwise
+    #[wasm_bindgen(js_name = "scanDocumentLevel")]
+    pub fn js_scan_document_level(&mut self, text: &str, entity_spans: JsValue) -> JsValue {
+        #[cfg(target_arch = "wasm32")]
+        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!(
+            "[WASM js_scan_document_level] text len={}, state={}, hydrated_entities={}",
+            text.len(),
+            self.state_name(),
+            self.hydrated_entities.len()
+        )));
+
+        let spans: Vec<EntitySpan> = serde_wasm_bindgen::from_value(entity_spans)
+            .unwrap_or_default();
+
+        match self.scan_document_level(text, &spans) {
+            Some(result) => serde_wasm_bindgen::to_value(&result).unwrap_or(JsValue::NULL),
+            None => {
+                #[cfg(target_arch = "wasm32")]
+                web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(
+                    "[WASM js_scan_document_level] returning NULL - not ready"
+                ));
+                JsValue::NULL
+            }
+        }
     }
 }
 
@@ -382,5 +546,47 @@ mod tests {
         // Should be back to initialized (not uninitialized)
         assert_eq!(conductor.state_name(), "initialized");
         assert!(!conductor.is_ready());
+    }
+
+    #[test]
+    fn test_sentence_boundary_detection() {
+        // Simple sentences
+        let bounds = super::detect_sentence_bounds("Hello world. This is a test.");
+        assert_eq!(bounds.len(), 2);
+        assert_eq!(&"Hello world. This is a test."[bounds[0].0..bounds[0].1], "Hello world.");
+        assert_eq!(&"Hello world. This is a test."[bounds[1].0..bounds[1].1], "This is a test.");
+        
+        // Exclamation and question marks
+        let bounds = super::detect_sentence_bounds("Stop! What is that?");
+        assert_eq!(bounds.len(), 2);
+        
+        // No punctuation
+        let bounds = super::detect_sentence_bounds("This has no ending punctuation");
+        assert_eq!(bounds.len(), 1);
+        
+        // Empty text
+        let bounds = super::detect_sentence_bounds("");
+        assert!(bounds.is_empty());
+    }
+
+    #[test]
+    fn test_document_level_scan() {
+        let mut conductor = ScanConductor::new();
+        conductor.hydrate_entities(vec![
+            make_entity("luffy", "Luffy", "CHARACTER"),
+            make_entity("arlong", "Arlong", "CHARACTER"),
+        ]).unwrap();
+        
+        // Text with two sentences
+        let result = conductor.scan_document_level(
+            "Luffy fought Arlong. He won the battle.",
+            &[]
+        ).unwrap();
+        
+        // Should have implicit matches
+        assert!(result.implicit.len() >= 2, "Should find entities");
+        
+        // Stats should be populated
+        assert!(result.stats.timings.total_us > 0);
     }
 }

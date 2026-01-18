@@ -1,4 +1,4 @@
-export type GraphScope = 'note' | 'folder' | 'vault';
+export type GraphScope = 'note' | 'folder' | 'vault' | 'narrative';
 
 export interface ScopeIdentifier {
     scope: GraphScope;
@@ -7,7 +7,12 @@ export interface ScopeIdentifier {
 }
 
 export function buildScopeIdentifier(scope: GraphScope, id: string): ScopeIdentifier {
-    const groupId = scope === 'vault' ? 'vault:global' : `${scope}:${id}`;
+    // Vault is always global, narrative uses its root folder ID
+    const groupId = scope === 'vault'
+        ? 'vault:global'
+        : scope === 'narrative'
+            ? `narrative:${id}`
+            : `${scope}:${id}`;
     return { scope, id, groupId };
 }
 
@@ -84,6 +89,8 @@ export interface CozoEntity {
     attributes?: Record<string, unknown>;
     temporalSpan?: CozoTemporalSpan;
     participants: string[];
+    /** If set, this entity belongs to a specific narrative vault (isolated from other narratives) */
+    narrativeId?: string;
 }
 
 export interface CozoMention {

@@ -5,7 +5,19 @@
  * Handles worker lifecycle, message passing, and type-safe responses.
  * 
  * NOTE: Worker is wired up to the real Rust WASM module.
+ * Entity embedding uses CrossDoc worker (MDBR-Leaf, off main thread).
  */
+
+// Cross-doc imports - crossDocService handles embedding in separate worker
+import {
+    crossDocService,
+    discoverClusters,
+    persistClusters,
+    type LinkingConfig,
+    DEFAULT_LINKING_CONFIG
+} from '@/lib/crossdoc';
+import { cozoDb } from '@/lib/cozo/db';
+import { CROSSDOC_QUERIES } from '@/lib/cozo/schema/layer2-crossdoc';
 
 // Message types (should match the worker)
 export interface EntityInput {
@@ -203,6 +215,7 @@ export class KittCoreService {
      * Full document scan - extracts syntax, implicit mentions, relations, triples, temporal
      */
     async scan(content: string, entities: EntityInput[] = []): Promise<ScanResult> {
+        console.log(`[KittCore] scan(): contentLen=${content?.length}, entities=${entities?.length}`);
         await this.ensureInitialized();
         return await this.sendMessage({
             type: 'SCAN',
@@ -304,6 +317,102 @@ export class KittCoreService {
             this.initPromise = null;
         }
     }
+
+    // ========================================================================
+    // Cross-Document Entity Linking (Delegated to CrossDoc Worker)
+    // ========================================================================
+
+    /**
+     * Process extracted entities - delegates to CrossDoc worker
+     * Embeddings run off main thread using MDBR-Leaf (256d, lightweight)
+     */
+    async processExtractedEntities(
+        noteId: string,
+        noteTitle: string,
+        entities: Array<{ id: string; label: string; kind: string; contextBefore?: string; contextAfter?: string }>
+    ): Promise<{ embedded: number; cooccurrences: number }> {
+        // Delegate to CrossDoc service (runs in separate worker)
+        return await crossDocService.processEntities(noteId, noteTitle, entities);
+    }
+
+    /**
+     * Run entity linking/clustering on main thread
+     */
+    async runLinking(config?: Partial<LinkingConfig>): Promise<{
+        clusters: any[];
+        stats: { entities: number; clusters: number; timeMs: number };
+    }> {
+        const startTime = performance.now();
+        const linkingConfig: LinkingConfig = {
+            ...DEFAULT_LINKING_CONFIG,
+            ...(config || {}),
+        };
+
+        console.log('[KittCore] Running entity linking on main thread...');
+
+        // Get all entities with vectors from CozoDB
+        const vectorsResult = cozoDb.runQuery(CROSSDOC_QUERIES.getAllVectors, {});
+        if (!vectorsResult.ok || !vectorsResult.rows) {
+            throw new Error('Failed to fetch entities for linking');
+        }
+
+        const entities = vectorsResult.rows.map((row: any[]) => ({
+            id: row[0],
+            label: row[0], // TODO: get actual label from entity store
+            normalized: row[0].toLowerCase(),
+            sourceNote: row[2] || '',
+        }));
+
+        // Discover clusters
+        const clusters = await discoverClusters(entities, linkingConfig);
+
+        // Persist to CozoDB
+        await persistClusters(clusters);
+
+        const elapsedMs = performance.now() - startTime;
+        console.log(`[KittCore] Linking complete: ${clusters.length} clusters in ${elapsedMs.toFixed(1)}ms`);
+
+        return {
+            clusters,
+            stats: {
+                entities: entities.length,
+                clusters: clusters.length,
+                timeMs: elapsedMs,
+            }
+        };
+    }
+
+    /**
+     * Get entity clusters from CozoDB
+     */
+    async getClusters(entityId?: string): Promise<any[]> {
+        let clusters: any[] = [];
+
+        if (entityId) {
+            const result = cozoDb.runQuery(CROSSDOC_QUERIES.getClusterForEntity, { node_id: entityId });
+            if (result.ok && result.rows) {
+                clusters = result.rows.map((row: any[]) => ({
+                    clusterId: row[0],
+                    canonicalId: row[1],
+                    canonicalName: row[2],
+                    confidence: row[3],
+                }));
+            }
+        } else {
+            const result = cozoDb.runQuery(CROSSDOC_QUERIES.getAllClusters, {});
+            if (result.ok && result.rows) {
+                clusters = result.rows.map((row: any[]) => ({
+                    clusterId: row[0],
+                    canonicalId: row[1],
+                    canonicalName: row[2],
+                    confidence: row[3],
+                }));
+            }
+        }
+
+        return clusters;
+    }
+
 }
 
 // Singleton export

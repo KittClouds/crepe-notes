@@ -112,6 +112,7 @@ export class ScanCoordinator {
      * Called when a note is opened - triggers full scan.
      */
     async onNoteOpen(noteId: string, content: string, entities: DecorationSpan[]): Promise<void> {
+        console.log(`[ScanCoordinator] onNoteOpen: noteId=${noteId}, contentLen=${content?.length ?? 'undefined'}, entities=${entities.length}`);
         if (this.disposed) return;
 
         // Skip if recently scanned
@@ -158,6 +159,12 @@ export class ScanCoordinator {
     private async handleScanRequest(request: ScanRequest): Promise<void> {
         if (this.disposed) return;
 
+        // Guard: Skip scan if no text provided (idle flush without context)
+        if (!request.sentenceText || request.sentenceText.length === 0) {
+            console.log(`[ScanCoordinator] Skipping scan - no sentenceText (trigger=${request.trigger}, entities=${request.entities.length})`);
+            return;
+        }
+
         try {
             this.stats.scansTriggered++;
 
@@ -169,7 +176,7 @@ export class ScanCoordinator {
             }));
 
             const relations = await this.config.kittCore.extractRelations(
-                request.sentenceText ?? '',
+                request.sentenceText,
                 entitySpans
             );
 

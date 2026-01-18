@@ -1,5 +1,5 @@
 // src/components/sidebar/EntityRegistryPanel.tsx
-// Entity Registry Panel for sidebar - Visual entity management
+// Entity Registry Panel for sidebar - Visual entity management with scope filtering
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
@@ -28,6 +28,11 @@ import { ENTITY_ICONS, ENTITY_KINDS, type EntityKind } from '@/lib/types/entityT
 import { getEntityColor } from '@/lib/store/entityColorStore';
 import { smartGraphRegistry, type RegisteredEntity } from '@/lib/registry';
 import { AddEntityDialog } from './AddEntityDialog';
+import { useScopeContextSafe } from '@/contexts/ScopeContext';
+import { getNotesInScope } from '@/lib/scope/computeNodeScope';
+import { buildArboristTree } from '@/lib/arborist/adapter';
+import { useNotesStore } from '@/hooks/useNotesStore';
+import { ScopeSelector } from '@/components/scope/ScopeSelector';
 
 interface EntityRegistryPanelProps {
     onNavigate?: (label: string) => void;
@@ -40,18 +45,44 @@ export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
     const [isFlushOpen, setIsFlushOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Load entities on mount
+    // Scope context for filtering
+    const scopeContext = useScopeContextSafe();
+    const { folderTree, globalNotes } = useNotesStore();
+
+    // Build tree for scope calculation
+    const treeData = useMemo(
+        () => buildArboristTree(folderTree, globalNotes),
+        [folderTree, globalNotes]
+    );
+
+    // Calculate notes in current scope
+    const notesInScope = useMemo(() => {
+        if (!scopeContext || scopeContext.activeScope.id === 'vault:global') {
+            // Global scope - all notes
+            return []; // Empty means "all" for registry
+        }
+        return getNotesInScope(scopeContext.activeScope, treeData);
+    }, [scopeContext?.activeScope, treeData]);
+
+    // Load entities on mount and when scope changes
     useEffect(() => {
         const loadEntities = async () => {
-            // Wait for registry to be ready (init is idempotent if already initialized)
+            // Wait for registry to be ready
             if (!smartGraphRegistry.isInitialized()) {
                 await smartGraphRegistry.init();
             }
-            setEntities(smartGraphRegistry.getAllEntities());
+
+            // Apply scope filter if we have notes in scope
+            if (notesInScope.length > 0) {
+                setEntities(smartGraphRegistry.getEntitiesByScope(notesInScope));
+            } else {
+                // Global scope or no notes - show all
+                setEntities(smartGraphRegistry.getAllEntities());
+            }
             setIsLoading(false);
         };
         loadEntities();
-    }, []);
+    }, [notesInScope]);
 
     // Group entities by kind
     const byKind = useMemo(() => {
@@ -95,6 +126,11 @@ export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
 
     return (
         <div className="flex flex-col h-full">
+            {/* Scope Selector */}
+            <div className="p-2 border-b border-border/50">
+                <ScopeSelector compact className="w-full" />
+            </div>
+
             {/* Header with Actions */}
             <div className="p-2 border-b border-border/50 flex items-center gap-1">
                 <Button
@@ -190,9 +226,14 @@ export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
                 </div>
             </ScrollArea>
 
-            {/* Total count footer */}
+            {/* Total count footer with scope indicator */}
             <div className="p-2 border-t border-border/50 text-[10px] text-muted-foreground text-center">
-                {entities.length} entities
+                <div>{entities.length} entities</div>
+                {scopeContext && scopeContext.activeScope.id !== 'vault:global' && (
+                    <div className="mt-0.5 opacity-70 truncate" title={scopeContext.scopeLabel}>
+                        📍 {scopeContext.scopeLabel}
+                    </div>
+                )}
             </div>
 
             {/* Add Entity Dialog */}

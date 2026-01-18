@@ -235,6 +235,7 @@ export const NARRATIVE_FOLDER_SCHEMA: FolderSchema = {
     icon: 'Book',
     containerOnly: false,
     propagateKindToChildren: false,
+    isVaultRoot: true, // NARRATIVE folders act as isolated vaults
 
     customAttributes: [
         { name: 'genre', type: 'string' },

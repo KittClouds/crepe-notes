@@ -50,6 +50,10 @@ export class GraphHotCache {
     private warmed = false;
     private dirty = false; // Needs boot cache sync
 
+    // Entity version for decoration cache invalidation
+    // Bumps whenever entities are added/updated/removed
+    private _entityVersion = 0;
+
     constructor(config: GraphHotCacheConfig = {}) {
         this.maxEntities = config.maxEntities ?? 500;       // Lower default for memory
         this.maxRelationships = config.maxRelationships ?? 1000;  // Lower default for memory
@@ -104,8 +108,9 @@ export class GraphHotCache {
 
     /**
      * Add or update entity in cache
+     * @param skipVersionBump - If true, don't bump entityVersion (used during bulk warming)
      */
-    setEntity(entity: CozoEntity): void {
+    setEntity(entity: CozoEntity, skipVersionBump = false): void {
         const normalized = this.normalize(entity.label);
 
         // Remove old index entries if updating
@@ -130,6 +135,9 @@ export class GraphHotCache {
         }
 
         this.dirty = true;
+        if (!skipVersionBump) {
+            this._entityVersion++;  // Bump for decoration cache invalidation
+        }
         this.evictEntitiesIfNeeded();
         this.maybeInvalidateQueries('entities');
     }
@@ -149,6 +157,7 @@ export class GraphHotCache {
         this.entityById.delete(id);
 
         this.dirty = true;
+        this._entityVersion++;  // Bump for decoration cache invalidation
         this.maybeInvalidateQueries('entities');
     }
 
@@ -234,12 +243,12 @@ export class GraphHotCache {
                 createdAt: new Date(),
                 createdBy: 'auto'
             };
-            this.setEntity(entity);
+            this.setEntity(entity, true);  // Skip version bump during bulk load
         }
 
         this.warmed = true;
         this.dirty = false; // Just loaded, not dirty
-        console.log(`[GraphHotCache] Warmed from boot cache: ${bootCache.entities.length} entities`);
+        console.log(`[GraphHotCache] Warmed from boot cache: ${bootCache.entities.length} entities, entityVersion=${this._entityVersion}`);
         return bootCache.entities.length;
     }
 
@@ -248,11 +257,11 @@ export class GraphHotCache {
      */
     warmWithEntities(entities: CozoEntity[]): void {
         for (const entity of entities) {
-            this.setEntity(entity);
+            this.setEntity(entity, true);  // Skip version bump during bulk load
         }
         this.warmed = true;
         this.syncToBootCache();
-        console.log(`[GraphHotCache] Warmed with ${entities.length} entities from DB`);
+        console.log(`[GraphHotCache] Warmed with ${entities.length} entities from DB, entityVersion=${this._entityVersion}`);
     }
 
     /**
@@ -317,6 +326,20 @@ export class GraphHotCache {
 
     get size(): number {
         return this.entityById.size;
+    }
+
+    /**
+     * Get current entity version (for decoration cache invalidation)
+     */
+    get entityVersion(): number {
+        return this._entityVersion;
+    }
+
+    /**
+     * Bump entity version (call when entities change)
+     */
+    bumpEntityVersion(): void {
+        this._entityVersion++;
     }
 
     // =========================================================================

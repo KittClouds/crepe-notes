@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { setCurrentNoteId as persistCurrentNoteId, getCurrentNoteId } from '@/lib/storage';
+import { markNoteSwitchStart } from '@/lib/utils/notePerf';
 
 interface UIState {
     selectedNoteId: string | null;
@@ -31,6 +32,7 @@ export function UIStateProvider({ children }: { children: ReactNode }) {
     });
 
     const selectNote = useCallback((id: string) => {
+        markNoteSwitchStart(id);
         setState(prev => {
             const isOpen = prev.openNoteIds.includes(id);
             persistCurrentNoteId(id);

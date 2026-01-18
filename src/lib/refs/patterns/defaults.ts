@@ -171,7 +171,7 @@ export const TRIPLE_PATTERN: PatternDefinition = {
     description: 'Relationship triples like [PERSON|Jon] ->KNOWS-> [PERSON|Jane]',
     kind: 'triple',
     enabled: true,
-    priority: 105, // Higher than ENTITY (100) to capture triples
+    priority: 205, // Higher than ENTITY (100) to capture triples
     pattern: '\\[([A-Z_]+)(?::([A-Z_]+))?\\|([^\\]]+)\\]\\s*->([A-Z_]+)->\\s*\\[([A-Z_]+)(?::([A-Z_]+))?\\|([^\\]]+)\\]',
     flags: 'g',
     captures: {
@@ -201,7 +201,7 @@ export const INLINE_RELATIONSHIP_PATTERN: PatternDefinition = {
     description: 'Compact relationship syntax like [PERSON|Jon->LOVES->Jane]',
     kind: 'triple', // Reuse triple kind, handled by parser
     enabled: true,
-    priority: 106, // Higher than ENTITY (100) and TRIPLE (105)
+    priority: 206, // Higher than ENTITY (100) and TRIPLE (105)
     pattern: '\\[([A-Z_]+)(?::([A-Z_]+))?\\|([^\\]]+)->([A-Z_]+)->([^\\]]+)\\]',
     flags: 'g',
     captures: {
@@ -311,6 +311,67 @@ export const TEMPORAL_PATTERNS: PatternDefinition[] = [
 ];
 
 /**
+ * Parenthesized Triple Pattern
+ * Matches: [KIND|Label] (PREDICATE) [KIND|Label]
+ */
+export const PARENTHESIZED_TRIPLE_PATTERN: PatternDefinition = {
+    id: 'builtin:triple-paren',
+    name: 'Parenthesized Triple',
+    description: 'Relationship triples like [PERSON|Jon] (KNOWS) [PERSON|Jane]',
+    kind: 'triple',
+    enabled: true,
+    priority: 203, // Significantly higher than ENTITY (100) to prevent partial matches
+    pattern: '\\[([A-Z_]+)(?::([A-Z_]+))?\\|([^\\]]+)\\]\\s*\\(([A-Za-z][A-Za-z0-9_]*)\\)\\s*\\[([A-Z_]+)(?::([A-Z_]+))?\\|([^\\]]+)\\]',
+    flags: 'g',
+    captures: {
+        subjectKind: { group: 1, transform: toUpperCase, required: true },
+        subjectSubtype: { group: 2, transform: toUpperCase },
+        subjectLabel: { group: 3, transform: trim, required: true },
+        predicate: { group: 4, transform: toUpperCase, required: true },
+        objectKind: { group: 5, transform: toUpperCase, required: true },
+        objectSubtype: { group: 6, transform: toUpperCase },
+        objectLabel: { group: 7, transform: trim, required: true },
+    },
+    rendering: {
+        template: '{{subjectLabel}} →{{predicate}}→ {{objectLabel}}',
+        widgetMode: true,
+    },
+    isBuiltIn: true,
+    createdAt: Date.now(),
+};
+
+/**
+ * Backward Arrow Triple Pattern
+ * Matches: [KIND|Label] <-PREDICATE<- [KIND|Label]
+ */
+export const BACKWARD_TRIPLE_PATTERN: PatternDefinition = {
+    id: 'builtin:triple-backward',
+    name: 'Backward Triple',
+    description: 'Backward relationship like [PERSON|Jane] <-KNOWS<- [PERSON|Jon]',
+    kind: 'triple',
+    enabled: true,
+    priority: 204, // Higher than paren (203) but lower than standard arrows (205)
+    pattern: '\\[([A-Z_]+)(?::([A-Z_]+))?\\|([^\\]]+)\\]\\s*<-([A-Z_]+)<-\\s*\\[([A-Z_]+)(?::([A-Z_]+))?\\|([^\\]]+)\\]',
+    flags: 'g',
+    captures: {
+        // Swapped: object is first, subject is second
+        objectKind: { group: 1, transform: toUpperCase, required: true },
+        objectSubtype: { group: 2, transform: toUpperCase },
+        objectLabel: { group: 3, transform: trim, required: true },
+        predicate: { group: 4, transform: toUpperCase, required: true },
+        subjectKind: { group: 5, transform: toUpperCase, required: true },
+        subjectSubtype: { group: 6, transform: toUpperCase },
+        subjectLabel: { group: 7, transform: trim, required: true },
+    },
+    rendering: {
+        template: '{{subjectLabel}} →{{predicate}}→ {{objectLabel}}',
+        widgetMode: true,
+    },
+    isBuiltIn: true,
+    createdAt: Date.now(),
+};
+
+/**
  * All default patterns
  */
 export const DEFAULT_PATTERNS: PatternDefinition[] = [
@@ -322,6 +383,8 @@ export const DEFAULT_PATTERNS: PatternDefinition[] = [
 
     TRIPLE_PATTERN,
     INLINE_RELATIONSHIP_PATTERN,
+    PARENTHESIZED_TRIPLE_PATTERN,
+    BACKWARD_TRIPLE_PATTERN,
     ...TEMPORAL_PATTERNS,
 ];
 

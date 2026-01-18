@@ -1,0 +1,77 @@
+﻿[36mvite v5.4.19 [32mbuilding for development...[36m[39m
+transforming...
+node.exe : Browserslist: browsers 
+data (caniuse-lite) is 7 months 
+old. Please run:
+At C:\Program 
+Files\nodejs\npx.ps1:29 char:3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotS 
+   pecified: (Browserslist: b...l  
+  d. Please run::String) [], Rem   
+ oteException
+    + FullyQualifiedErrorId : Nati 
+   veCommandError
+ 
+  npx update-browserslist-db@latest
+  Why you should do it regularly: h
+ttps://github.com/browserslist/upda
+te-db#readme
+[32mΓ£ô[39m 4653 modules transformed.
+[31mx[39m Build failed in 14.32s
+[31merror during build:
+[31m[vite:worker-import-meta-url] 
+Invalid value "iife" for option 
+"output.format" - UMD and IIFE 
+output formats are not supported 
+for code-splitting builds.[31m
+file: [36mC:/Users/shuga/1kittroot
+/1code/crepe-notes/src/lib/kittcore
+/index.ts[31m
+    at getRollupError (file:///C:/U
+sers/shuga/1kittroot/1code/crepe-no
+tes/node_modules/rollup/dist/es/sha
+red/parseAst.js:401:41)
+    at error (file:///C:/Users/shug
+a/1kittroot/1code/crepe-notes/node_
+modules/rollup/dist/es/shared/parse
+Ast.js:397:42)
+    at 
+validateOptionsForMultiChunkOutput 
+(file:///C:/Users/shuga/1kittroot/1
+code/crepe-notes/node_modules/rollu
+p/dist/es/shared/node-entry.js:2079
+3:16)
+    at Bundle.generate (file:///C:/
+Users/shuga/1kittroot/1code/crepe-n
+otes/node_modules/rollup/dist/es/sh
+ared/node-entry.js:20644:17)
+    at async file:///C:/Users/shuga
+/1kittroot/1code/crepe-notes/node_m
+odules/rollup/dist/es/shared/node-e
+ntry.js:23558:27
+    at async 
+catchUnfinishedHookActions (file://
+/C:/Users/shuga/1kittroot/1code/cre
+pe-notes/node_modules/rollup/dist/e
+s/shared/node-entry.js:22925:16)
+    at async bundleWorkerEntry (fil
+e:///C:/Users/shuga/1kittroot/1code
+/crepe-notes/node_modules/vite/dist
+/node/chunks/dep-C6uTJdX2.js:47634:
+9)
+    at async workerFileToUrl (file:
+///C:/Users/shuga/1kittroot/1code/c
+repe-notes/node_modules/vite/dist/n
+ode/chunks/dep-C6uTJdX2.js:47696:25
+)
+    at async Object.transform (file
+:///C:/Users/shuga/1kittroot/1code/
+crepe-notes/node_modules/vite/dist/
+node/chunks/dep-C6uTJdX2.js:48133:2
+6)
+    at async transform (file:///C:/
+Users/shuga/1kittroot/1code/crepe-n
+otes/node_modules/rollup/dist/es/sh
+ared/node-entry.js:21283:16)[39m

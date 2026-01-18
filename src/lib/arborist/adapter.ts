@@ -18,11 +18,13 @@ function isValidKind(kind: string | undefined): boolean {
 /**
  * Recursively transform FolderWithChildren tree to Arborist-compatible format
  * Preserves color inheritance and entity semantics
+ * Propagates narrativeId for vault isolation
  */
 function transformFolderToNode(
     folder: FolderWithChildren,
     depth: number = 0,
-    parentColor?: string
+    parentColor?: string,
+    parentNarrativeId?: string
 ): ArboristNode {
     // Map DB fields (snake_case) to UI fields (camelCase) if missing
     const rawFolder = folder as any;
@@ -31,6 +33,19 @@ function transformFolderToNode(
     const parentId = folder.parent_id || rawFolder.parent_id; // Handle all casings
     const inheritedKind = (folder as any).inheritedKind || rawFolder.inherited_kind || entityKind; // Folders can inherit from themselves or explicit prop
     const inheritedSubtype = (folder as any).inheritedSubtype || rawFolder.inherited_subtype || entitySubtype;
+
+    // Narrative Vault Detection: NARRATIVE folders are vault roots
+    const isNarrativeRoot = entityKind === 'NARRATIVE';
+    // If this is a narrative root, use own ID. Otherwise inherit from parent.
+    const narrativeId = isNarrativeRoot
+        ? folder.id
+        : (folder.narrativeId || rawFolder.narrative_id || parentNarrativeId);
+
+    // Compute scope ID for this folder
+    // Rule: narrative content → narrative scope, otherwise folder scope
+    const computedScopeId = narrativeId
+        ? `narrative:${narrativeId}`
+        : `folder:${folder.id}`;
 
     // Color resolution: folder.color → parentColor → entity CSS var → default by depth
     const effectiveColor = folder.color
@@ -43,6 +58,13 @@ function transformFolderToNode(
         const rawNote = note as any;
         const noteKind = (note.entityKind || rawNote.entity_kind) as any;
         const noteSubtype = note.entitySubtype || rawNote.entity_subtype;
+
+        // Compute scope ID for this note
+        // Rule: note-only for notes (design decision #1)
+        // Exception: narrative content uses vault-wide (design decision #2)
+        const noteScopeId = narrativeId
+            ? `narrative:${narrativeId}`  // Vault-wide for narrative content
+            : `note:${note.id}`;          // Note-only for global notes
 
         return {
             id: note.id,
@@ -61,12 +83,16 @@ function transformFolderToNode(
             depth: depth + 1,
             size: (note.content || '').length,  // D3-style metric
             noteData: note,
+            // Propagate narrativeId to notes
+            narrativeId,
+            // Computed scope for entity filtering
+            computedScopeId: noteScopeId,
         };
     });
 
-    // Transform child folders recursively
+    // Transform child folders recursively - pass narrativeId for propagation
     const folderNodes: ArboristNode[] = (folder.children || []).map(subfolder =>
-        transformFolderToNode(subfolder, depth + 1, effectiveColor)
+        transformFolderToNode(subfolder, depth + 1, effectiveColor, narrativeId)
     );
 
     // Combine children: folders first, then notes
@@ -87,6 +113,11 @@ function transformFolderToNode(
         inheritedKind,
         inheritedSubtype,
         networkId: (folder as any).networkId,
+        // Narrative vault isolation
+        isNarrativeRoot,
+        narrativeId,
+        // Computed scope for entity filtering
+        computedScopeId,
         effectiveColor,
         depth,
         count: children.length,
@@ -96,6 +127,8 @@ function transformFolderToNode(
             // Ensure folderData has correct props for TypedFolderMenu
             entityKind,
             entitySubtype,
+            narrativeId,
+            isNarrativeRoot,
         },
     };
 }

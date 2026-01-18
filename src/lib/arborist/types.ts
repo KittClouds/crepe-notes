@@ -33,6 +33,17 @@ export interface ArboristNode {
     // Network-specific properties
     networkId?: string;  // If this folder IS a network root
 
+    // Narrative Vault Isolation
+    /** If true, this folder IS a narrative vault root */
+    isNarrativeRoot?: boolean;
+    /** The narrative vault this node belongs to (propagated from root) */
+    narrativeId?: string;
+    /** 
+     * Computed scope ID for entity filtering.
+     * Format: "narrative:{id}" | "folder:{id}" | "note:{id}"
+     */
+    computedScopeId?: string;
+
     // D3-style metrics (optional - for future enhancements)
     size?: number;    // Content length in bytes
     count?: number;   // Child count for folders

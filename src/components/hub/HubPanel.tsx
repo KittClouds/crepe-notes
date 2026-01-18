@@ -1,7 +1,7 @@
 // src/components/hub/HubPanel.tsx
 // Main Hub Panel - integrates all Blueprint Hub functionality into footer
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ChevronDown, ChevronRight, Palette, Regex, Settings2, Network, Sparkles, Check, Clock, GitGraph, GripHorizontal, Volume2, Pause, Square, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,6 +16,12 @@ import { ExtractionTab } from './tabs/ExtractionTab';
 import { useTTS } from '@/lib/tts';
 import type { EntityStats } from './types';
 import type { Note } from '@/types/noteTypes';
+import { ScopeSelector } from '@/components/scope/ScopeSelector';
+import { useScopeContextSafe } from '@/contexts/ScopeContext';
+import { smartGraphRegistry } from '@/lib/registry';
+import { getNotesInScope } from '@/lib/scope/computeNodeScope';
+import { buildArboristTree } from '@/lib/arborist/adapter';
+import { useNotesStore } from '@/hooks/useNotesStore';
 
 interface HubPanelProps {
     entityStats: EntityStats[];
@@ -98,7 +104,34 @@ export function HubPanel({
         };
     }, [panelHeight]);
 
-    const entityCount = entityStats.length;
+    const scopeContext = useScopeContextSafe();
+    const { folderTree, globalNotes } = useNotesStore();
+
+    // Build tree for scope calculation
+    const treeData = useMemo(
+        () => buildArboristTree(folderTree, globalNotes),
+        [folderTree, globalNotes]
+    );
+
+    // Calculate notes in current scope
+    const notesInScope = useMemo(() => {
+        if (!scopeContext || scopeContext.activeScope.id === 'vault:global') {
+            return []; // Empty = global
+        }
+        return getNotesInScope(scopeContext.activeScope, treeData);
+    }, [scopeContext?.activeScope, treeData]);
+
+    // Scope-aware entity count
+    const entityCount = useMemo(() => {
+        // Guard: Don't query if registry not initialized yet
+        if (!smartGraphRegistry.isInitialized()) {
+            return 0;
+        }
+        if (notesInScope.length > 0) {
+            return smartGraphRegistry.getEntityCountByScope(notesInScope);
+        }
+        return smartGraphRegistry.getAllEntities().length;
+    }, [notesInScope, entityStats]); // Re-compute when entityStats (scan) changes
 
     return (
         <div className="sticky bottom-0 z-20 border-t border-border bg-background w-full shrink-0 shadow-[0_-1px_3px_rgba(0,0,0,0.2)]">
@@ -122,6 +155,9 @@ export function HubPanel({
                             </span>
                         </Button>
                     </CollapsibleTrigger>
+
+                    {/* Scope Selector */}
+                    <ScopeSelector compact />
 
                     {/* TTS Button */}
                     <div className="flex items-center">

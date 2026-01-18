@@ -46,6 +46,8 @@ unicode-segmentation = "1.10"
 rustworkx-core = "0.17"
 lasso = { version = "0.7", features = ["multi-threaded"] }
 ndarray = "0.16"
+fst = "0.4"                  # FST for narrative verb dictionary
+rust-stemmers = "1.2"        # Porter stemmer for verb normalization
 
 # WASM-specific dependencies (optional via wasm feature)
 wasm-bindgen = { version = "0.2", optional = true }

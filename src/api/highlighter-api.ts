@@ -2,6 +2,7 @@
 // Highlighter API - interface between Scanner and Editor
 // Connected to highlightingStore for live mode updates
 // Wired to ScanCoordinator for entity event emission
+// Local-first: writes decorations to Dexie, UI updates via useLiveQuery
 
 import type { DecorationSpan, HighlighterConfig, HighlightMode } from '../lib/Scanner';
 import { scanDocument, getDecorationStyle, getDecorationClass } from '../lib/Scanner';
@@ -9,6 +10,9 @@ import { highlightingStore } from '../lib/store/highlightingStore';
 import type { EntityKind } from '../lib/types/entityTypes';
 import { implicitScanner } from '../lib/Scanner/ImplicitScanner';
 import { getScanCoordinator } from '../lib/Scanner/scanCoordinatorInstance';
+import { saveNoteDecorations, getNoteDecorations, getDecorationContentHash, hashContent } from '../lib/dexie/decorations';
+import { graphHotCache } from '../lib/cozo/graph/GraphHotCache';
+import { kittCore } from '../lib/kittcore';
 
 // =============================================================================
 // HIGHLIGHTER API INTERFACE
@@ -74,10 +78,35 @@ class DefaultHighlighterApi implements HighlighterApi {
     private isScanning = false;
     private scanVersion = 0;
     private currentNoteId: string = '';
+    private prewarmCache: Map<string, DecorationSpan[] | null> = new Map();
+
+    // Smart scan tracking
+    private hasScannedOnOpen = false;  // Ensures one initial scan per note
+    private lastKnownEntityCount = 0;  // Track entity count for change detection
+
+    // Rust scanner tracking
+    private pendingRustScan = false;   // Entities found, waiting for sentence end
+    private lastSentenceEndPos = 0;    // Track last punctuation position
 
     /** Set the current note ID for scan coordinator */
     setNoteId(noteId: string): void {
+        const prevNoteId = this.currentNoteId;
         this.currentNoteId = noteId;
+
+        // Reset smart scan state when switching notes
+        if (noteId && noteId !== prevNoteId) {
+            this.hasScannedOnOpen = false;
+            this.lastKnownEntityCount = 0;
+            this.lastSentenceEndPos = 0;
+            this.prewarmCacheForNote(noteId);
+        }
+    }
+
+    /** Pre-warm cache by loading decorations early (before getDecorations is called) */
+    private async prewarmCacheForNote(noteId: string): Promise<void> {
+        // We don't have content yet, but we can check if we have ANY cached entry
+        // for this note. If we do, it'll be ready when getDecorations is called.
+        // The actual content-based cache lookup happens in tryLoadCachedOrScan.
     }
 
     /** Called on editor keystroke - forward to scan coordinator */
@@ -103,13 +132,32 @@ class DefaultHighlighterApi implements HighlighterApi {
         }
 
         const spans = scanDocument(doc);
-        const text = docContent(doc); // We need a helper to get text from doc to check change
+        const text = docContent(doc);
 
-        // Trigger implicit scan if text changed (debounced ideally, but simplistic for now)
-        // Or just scan always if not scanning?
+        // Smart scan logic:
+        // 1. First call after note switch: ALWAYS scan fresh (cache positions may be stale)
+        // 2. After that: use cache for unchanged content, re-scan on new entities
         if (text !== this.lastContext) {
             this.lastContext = text;
-            this.triggerImplicitScan(doc);
+
+            if (!this.hasScannedOnOpen) {
+                // ALWAYS scan fresh on note open - cached positions may be from different doc parse
+                console.log('[HighlighterApi] Initial scan on note open (fresh)');
+                this.hasScannedOnOpen = true;
+                this.triggerImplicitScan(doc, text);  // Direct scan, not cache check
+            } else {
+                // After initial scan: only re-scan if entity count increased
+                // This detects when user adds a new entity mention
+                const currentEntityCount = this.implicitDecorations.filter(d =>
+                    d.type === 'entity_implicit'
+                ).length;
+
+                // Quick heuristic: if no entities yet but text is being added, check again
+                // This catches the case where user types a known entity name
+                if (currentEntityCount === 0 || this.shouldCheckForNewEntities(text)) {
+                    this.tryLoadCachedOrScan(doc, text);
+                }
+            }
         }
 
         // Merge implicit spans
@@ -160,6 +208,21 @@ class DefaultHighlighterApi implements HighlighterApi {
         return filteredSpans;
     }
 
+    /**
+     * Heuristic to detect if user might have added a new entity.
+     * We check if text has grown by enough characters to potentially contain an entity name.
+     */
+    private shouldCheckForNewEntities(currentText: string): boolean {
+        // If we have entities and text grew, the implicit scanner will pick up new mentions
+        // This is a lightweight check - actual entity detection happens in the worker
+        const prevLength = this.lastContext.length;
+        const currLength = currentText.length;
+
+        // Text grew by at least 3 chars (minimum entity name length)
+        // This prevents scanning on every single keystroke
+        return currLength - prevLength >= 3;
+    }
+
     getStyle(span: DecorationSpan): string {
         const mode = highlightingStore.getMode();
         return getDecorationStyle(span, mode);
@@ -208,17 +271,57 @@ class DefaultHighlighterApi implements HighlighterApi {
         return () => this.listeners.delete(callback);
     }
 
-    private triggerImplicitScan(doc: ProseMirrorDoc) {
+    /**
+     * Try to load cached decorations, fall back to scanner if cache miss or stale
+     */
+    private async tryLoadCachedOrScan(doc: ProseMirrorDoc, text: string): Promise<void> {
+        // Must have noteId for local storage
+        if (!this.currentNoteId) {
+            this.triggerImplicitScan(doc, text);
+            return;
+        }
+
+        try {
+            // Local-first: read from Dexie
+            const cached = await getNoteDecorations(this.currentNoteId);
+
+            if (cached && cached.length > 0) {
+                // Validate content hash to ensure positions are still valid
+                const storedHash = await getDecorationContentHash(this.currentNoteId);
+                const currentHash = hashContent(text);
+
+                if (storedHash === currentHash) {
+                    console.log(`[HighlighterApi] Cache hit (hash match): ${cached.length} decorations for note ${this.currentNoteId}`);
+                    this.implicitDecorations = cached;
+                    this.notifyListeners();
+                    return;
+                }
+
+                // Hash mismatch: content changed, positions are stale
+                console.log(`[HighlighterApi] Cache stale (hash mismatch) for note ${this.currentNoteId}, re-scanning...`);
+            }
+        } catch (err) {
+            console.warn('[HighlighterApi] Dexie read failed:', err);
+        }
+
+        console.log(`[HighlighterApi] No valid cache for note ${this.currentNoteId}, scanning...`);
+        this.triggerImplicitScan(doc, text);
+    }
+
+    private triggerImplicitScan(doc: ProseMirrorDoc, text?: string, _entityVersion?: number) {
         const myVersion = ++this.scanVersion;
         const batch: { id: number, text: string }[] = [];
         const nodePositions = new Map<number, number>(); // Map batch ID to document position
 
+        // Collect full text for hash computation
+        let fullText = '';
         let batchIdCounter = 0;
         doc.descendants((node, pos) => {
             if (node.isText && node.text) {
                 const id = batchIdCounter++;
                 batch.push({ id, text: node.text });
                 nodePositions.set(id, pos);
+                fullText += node.text;
             }
         });
 
@@ -229,7 +332,11 @@ class DefaultHighlighterApi implements HighlighterApi {
             return;
         }
 
-        implicitScanner.scanBatch(batch).then(results => {
+        // Capture noteId and content hash for Dexie write
+        const noteIdForSave = this.currentNoteId;
+        const contentHashForSave = hashContent(fullText);
+
+        implicitScanner.scanBatch(batch).then(async results => {
             // Only apply if this is still the latest requested scan
             if (this.scanVersion !== myVersion) return;
 
@@ -251,7 +358,78 @@ class DefaultHighlighterApi implements HighlighterApi {
 
             this.implicitDecorations = mergedSpans;
             this.notifyListeners();
+
+            // Update entity count for change detection
+            const entityCount = mergedSpans.filter(d => d.type === 'entity_implicit').length;
+            const hadNewEntities = entityCount > this.lastKnownEntityCount;
+            this.lastKnownEntityCount = entityCount;
+
+            // Check if sentence ended (punctuation at end of new content)
+            const sentenceEnded = this.detectSentenceEnd(fullText);
+
+            // Trigger Rust scanner if: entities present AND sentence just completed
+            if (entityCount > 0 && sentenceEnded && hadNewEntities) {
+                this.triggerRustScan(fullText, mergedSpans);
+            }
+
+            // Local-first: write to Dexie with content hash for position validation
+            if (noteIdForSave) {
+                try {
+                    await saveNoteDecorations(noteIdForSave, mergedSpans, contentHashForSave);
+                } catch (err) {
+                    console.warn('[HighlighterApi] Dexie write failed:', err);
+                }
+            }
         });
+    }
+
+    /**
+     * Detect if text ends with sentence-ending punctuation
+     */
+    private detectSentenceEnd(text: string): boolean {
+        const trimmed = text.trimEnd();
+        if (!trimmed) return false;
+
+        const lastChar = trimmed[trimmed.length - 1];
+        const isPunctuation = lastChar === '.' || lastChar === '!' || lastChar === '?';
+
+        if (isPunctuation) {
+            // Track position to avoid re-triggering on same sentence
+            const pos = trimmed.length;
+            if (pos > this.lastSentenceEndPos) {
+                this.lastSentenceEndPos = pos;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Trigger Rust/KittCore scan for relationship extraction
+     */
+    private triggerRustScan(text: string, implicitSpans: DecorationSpan[]): void {
+        // Convert implicit decorations to entity spans for KittCore
+        const entitySpans = implicitSpans
+            .filter(d => d.type === 'entity_implicit')
+            .map(d => ({
+                label: d.label ?? '',
+                start: d.from,
+                end: d.to,
+            }));
+
+        if (entitySpans.length === 0) return;
+
+        console.log(`[HighlighterApi] Triggering Rust scan with ${entitySpans.length} entities`);
+
+        // Fire and forget - Rust scan runs in background
+        kittCore.scan(text, entitySpans)
+            .then(result => {
+                console.log(`[HighlighterApi] Rust scan complete: ${result.relations.length} relations, ${result.triples.length} triples`);
+                // Relations are automatically persisted by KittCore
+            })
+            .catch(err => {
+                console.warn('[HighlighterApi] Rust scan failed:', err);
+            });
     }
 }
 

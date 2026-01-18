@@ -77,6 +77,9 @@ export interface Folder {
     ownerId: string;
     createdAt: Date;
     updatedAt: Date;
+    // Narrative Vault Isolation
+    narrativeId: string | null;      // ID of the narrative vault this folder belongs to
+    isNarrativeRoot: boolean;        // true if this folder IS a narrative vault root
 }
 
 export interface FolderInput {
@@ -89,6 +92,9 @@ export interface FolderInput {
     color?: string;
     isTypedRoot?: boolean;
     isSubtypeRoot?: boolean;
+    // Narrative Vault Isolation
+    narrativeId?: string | null;
+    isNarrativeRoot?: boolean;
 }
 
 export interface FolderUpdate {

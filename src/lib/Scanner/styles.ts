@@ -3,7 +3,7 @@
 // Uses CSS variables from entityColorStore for live theming
 
 import type { EntityKind, HighlightMode, DecorationSpan } from './types';
-import { getEntityColor, getEntityBgColor, getEntityColorVar } from '@/lib/store/entityColorStore';
+import { getEntityColor, getEntityBgColor, getEntityColorVar, getEntityTextColorVar } from '@/lib/store/entityColorStore';
 
 /**
  * LEGACY: Color palette for entity kinds - DEPRECATED
@@ -81,14 +81,16 @@ function getAmbiguousStyle(mode: HighlightMode): string {
 
 /**
  * Entity style: Solid pill background using CSS variables
+ * Uses separate text color variable for foreground
  */
 function getEntityStyle(kind: EntityKind, mode: HighlightMode): string {
   const colorVar = getEntityColorVar(kind);
+  const textColorVar = getEntityTextColorVar(kind);
 
   if (mode === 'vivid') {
     return `
       background-color: hsl(var(${colorVar}) / 0.2);
-      color: hsl(var(${colorVar}));
+      color: hsl(var(${textColorVar}));
       border: 1px solid hsl(var(${colorVar}) / 0.3);
       padding: 1px 6px;
       border-radius: 4px;
@@ -99,8 +101,8 @@ function getEntityStyle(kind: EntityKind, mode: HighlightMode): string {
     `;
   }
 
-  // Clean/Subtle mode - just underline
-  return `border-bottom: 2px solid hsl(var(${colorVar})); padding-bottom: 1px;`;
+  // Clean/Subtle mode - unstyled/invisible
+  return '';
 }
 
 /**
