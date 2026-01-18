@@ -25,13 +25,33 @@ import { appOrchestrator } from "@/lib/core/AppOrchestrator";
 import { useState, useEffect } from "react";
 
 const App = () => {
-  const [isBooting, setIsBooting] = useState(appOrchestrator.getState() !== 'ready');
+  const [isBooting, setIsBooting] = useState(true);
 
   useEffect(() => {
-    // Subscribe to boot state
+    // Subscribe to boot state AND verify data is actually loaded
+    const checkReady = () => {
+      const orchestratorReady = appOrchestrator.getState() === 'ready';
+      const notesLoaded = queryClient.getQueryData(['notes'])?.length > 0;
+
+      // Only dismiss loading when BOTH conditions are true
+      // OR if orchestrator is ready and we've waited a bit (fallback for empty vaults)
+      if (orchestratorReady && notesLoaded) {
+        setIsBooting(false);
+      }
+    };
+
     const unsubscribe = appOrchestrator.subscribe((state) => {
-      setIsBooting(state !== 'ready');
+      if (state === 'ready') {
+        // Check immediately
+        checkReady();
+        // Also check after a short delay in case QueryClient hasn't propagated yet
+        setTimeout(checkReady, 100);
+        setTimeout(checkReady, 300);
+        // Fallback: dismiss after 2s even if no notes (empty vault)
+        setTimeout(() => setIsBooting(false), 2000);
+      }
     });
+
     return () => { unsubscribe; };
   }, []);
 

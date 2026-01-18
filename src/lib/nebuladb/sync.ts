@@ -1,8 +1,8 @@
-// src/lib/dexie/sync.ts
-// Sync Orchestrator: Dexie ↔ CozoDB background sync
-// Dexie = client-facing DB (instant), Cozo = backend graph store (async)
+// src/lib/nebuladb/sync.ts
+// Sync Orchestrator: NebulaDB ↔ CozoDB background sync
+// NebulaDB = client-facing DB (instant), Cozo = backend graph store (async)
 
-import { dexieDb, type DexieNote, type DexieEntity, type DexieEdge } from './db';
+import { syncOutbox, entities, edges, nebulaDb } from './db';
 import { cozoGraphRegistry, type CozoEntity } from '@/lib/cozo/graph/GraphRegistry';
 
 // ============================================================================
@@ -13,11 +13,11 @@ let syncInProgress = false;
 let syncLoopStarted = false;
 
 // ============================================================================
-// DEXIE → COZO (Push outbox to backend)
+// NEBULADB → COZO (Push outbox to backend)
 // ============================================================================
 
 /**
- * Push pending writes from Dexie outbox to CozoDB
+ * Push pending writes from NebulaDB outbox to CozoDB
  */
 export async function pushToCozoDB(): Promise<number> {
     if (syncInProgress) return 0;
@@ -26,7 +26,10 @@ export async function pushToCozoDB(): Promise<number> {
     let pushed = 0;
 
     try {
-        const pending = await dexieDb.syncOutbox.orderBy('clientTs').toArray();
+        const pending = await syncOutbox.find({});
+        // Sort by clientTs
+        pending.sort((a, b) => (a.clientTs || 0) - (b.clientTs || 0));
+
         if (pending.length === 0) return 0;
 
         console.log(`[SyncOrchestrator] Pushing ${pending.length} entries to CozoDB...`);
@@ -38,10 +41,8 @@ export async function pushToCozoDB(): Promise<number> {
                 switch (entry.table) {
                     case 'notes':
                         if (entry.op === 'delete') {
-                            // Cozo delete (if implemented)
                             console.log(`[SyncOrchestrator] Delete note ${entry.pk} (noop for now)`);
                         } else {
-                            // Cozo upsert note (if implemented)
                             console.log(`[SyncOrchestrator] Upsert note ${entry.pk} (noop for now)`);
                         }
                         break;
@@ -67,7 +68,7 @@ export async function pushToCozoDB(): Promise<number> {
                 }
 
                 // Remove from outbox after successful sync
-                await dexieDb.syncOutbox.delete(entry.opId!);
+                await syncOutbox.delete({ id: entry.id });
                 pushed++;
             } catch (err) {
                 console.warn(`[SyncOrchestrator] Failed to sync ${entry.table}:${entry.pk}:`, err);
@@ -86,18 +87,18 @@ export async function pushToCozoDB(): Promise<number> {
 }
 
 // ============================================================================
-// COZO → DEXIE (Pull graph data to cache)
+// COZO → NEBULADB (Pull graph data to cache)
 // ============================================================================
 
 /**
- * Pull entities from CozoDB into Dexie cache
+ * Pull entities from CozoDB into NebulaDB cache
  */
-export async function pullEntitiesToDexie(): Promise<number> {
+export async function pullEntitiesToNebula(): Promise<number> {
     try {
-        const entities = cozoGraphRegistry.getAllEntities();
-        if (entities.length === 0) return 0;
+        const cozoEntities = cozoGraphRegistry.getAllEntities();
+        if (cozoEntities.length === 0) return 0;
 
-        const dexieEntities = entities.map((e: CozoEntity) => ({
+        const nebulaEntities = cozoEntities.map((e: CozoEntity) => ({
             id: e.id,
             scopeId: 'default',
             label: e.label,
@@ -108,9 +109,9 @@ export async function pullEntitiesToDexie(): Promise<number> {
             rev: 0,
         }));
 
-        await dexieDb.entities.bulkPut(dexieEntities);
-        console.log(`[SyncOrchestrator] Pulled ${entities.length} entities from CozoDB to Dexie`);
-        return entities.length;
+        await entities.insertBatch(nebulaEntities);
+        console.log(`[SyncOrchestrator] Pulled ${cozoEntities.length} entities from CozoDB to NebulaDB`);
+        return cozoEntities.length;
     } catch (err) {
         console.warn('[SyncOrchestrator] Failed to pull entities:', err);
         return 0;
@@ -118,14 +119,14 @@ export async function pullEntitiesToDexie(): Promise<number> {
 }
 
 /**
- * Pull edges from CozoDB into Dexie cache
+ * Pull edges from CozoDB into NebulaDB cache
  */
-export async function pullEdgesToDexie(): Promise<number> {
+export async function pullEdgesToNebula(): Promise<number> {
     try {
         const relationships = cozoGraphRegistry.getAllRelationshipsSync();
         if (relationships.length === 0) return 0;
 
-        const dexieEdges = relationships.map(r => ({
+        const nebulaEdges = relationships.map(r => ({
             id: r.id,
             scopeId: 'default',
             headId: r.sourceId,
@@ -136,8 +137,8 @@ export async function pullEdgesToDexie(): Promise<number> {
             rev: 0,
         }));
 
-        await dexieDb.edges.bulkPut(dexieEdges);
-        console.log(`[SyncOrchestrator] Pulled ${relationships.length} edges from CozoDB to Dexie`);
+        await edges.insertBatch(nebulaEdges);
+        console.log(`[SyncOrchestrator] Pulled ${relationships.length} edges from CozoDB to NebulaDB`);
         return relationships.length;
     } catch (err) {
         console.warn('[SyncOrchestrator] Failed to pull edges:', err);
@@ -177,8 +178,8 @@ export function startSyncLoop(intervalMs = 2000): void {
  */
 export async function fullSync(): Promise<void> {
     await pushToCozoDB();
-    await pullEntitiesToDexie();
-    await pullEdgesToDexie();
+    await pullEntitiesToNebula();
+    await pullEdgesToNebula();
 }
 
 // ============================================================================
@@ -186,14 +187,14 @@ export async function fullSync(): Promise<void> {
 // ============================================================================
 
 /**
- * Hydrate Dexie from CozoDB on app start
+ * Hydrate NebulaDB from CozoDB on app start
  * Called after CozoDB is initialized
  */
 export async function hydrateFromCozoDB(): Promise<void> {
-    console.log('[SyncOrchestrator] Hydrating Dexie from CozoDB...');
+    console.log('[SyncOrchestrator] Hydrating NebulaDB from CozoDB...');
 
-    const entityCount = await pullEntitiesToDexie();
-    const edgeCount = await pullEdgesToDexie();
+    const entityCount = await pullEntitiesToNebula();
+    const edgeCount = await pullEdgesToNebula();
 
     console.log(`[SyncOrchestrator] Hydration complete: ${entityCount} entities, ${edgeCount} edges`);
 }
@@ -213,7 +214,7 @@ class SyncOrchestrator {
         if (this.started) return;
         this.started = true;
 
-        // Hydrate Dexie from Cozo
+        // Hydrate NebulaDB from Cozo
         await hydrateFromCozoDB();
 
         // Start background sync
@@ -222,8 +223,8 @@ class SyncOrchestrator {
 
     // Expose methods
     push = pushToCozoDB;
-    pullEntities = pullEntitiesToDexie;
-    pullEdges = pullEdgesToDexie;
+    pullEntities = pullEntitiesToNebula;
+    pullEdges = pullEdgesToNebula;
     fullSync = fullSync;
 }
 

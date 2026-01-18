@@ -2,7 +2,8 @@
 // src/workers/rag.worker.ts
 // RAG/Embedding worker - handles vector operations off main thread
 
-import { normalizeEmbedding, getEmbeddingMeta, validateDimension, truncateEmbedding } from '@/lib/rag/embedding-utils';
+import { normalizeEmbedding, getEmbeddingMeta, validateDimension, truncateEmbedding } from '../lib/rag/embedding-utils';
+import { kMeans, softAssign, cosineSimilarity, ClusterNode, ClusteringConfig } from '../lib/rag/clustering';
 
 // ============================================================================
 // Types
@@ -14,7 +15,7 @@ type WorkerMessage =
     | { type: 'SET_DIMENSIONS'; payload: { dims: number } }
     | { type: 'INDEX_NOTES'; payload: { notes: Array<{ id: string; title: string; content: string }> } }
     | { type: 'INSERT_VECTORS'; payload: { chunks: Array<{ id: string; note_id: string; note_title: string; chunk_index: number; text: string; embedding: Float32Array; start: number; end: number }> } }
-    | { type: 'BUILD_RAPTOR'; payload: { clusterSize: number } }
+    | { type: 'BUILD_RAPTOR'; payload: { config: ClusteringConfig } }
     | { type: 'SEARCH'; payload: { query: string; k: number } }
     | { type: 'SEARCH_WITH_VECTOR'; payload: { embedding: Float32Array; k: number } }
     | { type: 'SEARCH_HYBRID'; payload: { query: string; k: number; vectorWeight: number; lexicalWeight: number } }
@@ -29,19 +30,20 @@ type ResponseMessage =
     | { type: 'MODEL_LOADED' }
     | { type: 'DIMENSIONS_SET'; payload: { dims: number } }
     | { type: 'INDEX_COMPLETE'; payload: { notes: number; chunks: number } }
-    | { type: 'RAPTOR_BUILT'; payload: { stats: any } }
+    | { type: 'RAPTOR_BUILT'; payload: { nodes: ClusterNode[], stats: any } }
     | { type: 'SEARCH_RESULTS'; payload: { results: any[] } }
     | { type: 'CHUNKS_RETRIEVED'; payload: { chunks: any[] } }
     | { type: 'STATUS'; payload: { dims: number; modelLoaded: boolean; externalMode: boolean; chunkCount: number } }
     | { type: 'ERROR'; payload: { message: string } };
 
 // ============================================================================
-// Stub Pipeline (will be replaced by kittcore WASM when available)
+// Pipeline
 // ============================================================================
 
 class RagPipeline {
     private chunks: any[] = [];
     private dims = 256;
+    private raptorNodes: ClusterNode[] = []; // Stores generated internal nodes
 
     setDimensions(dims: number) {
         this.dims = dims;
@@ -56,27 +58,129 @@ class RagPipeline {
     }
 
     insertChunk(chunk: any) {
+        // Ensure embedding is array
+        if (chunk.embedding instanceof Float32Array) {
+            chunk.embedding = Array.from(chunk.embedding);
+        }
         this.chunks.push(chunk);
     }
 
-    buildRaptorTree(_clusterSize: number) {
-        return { nodes: 0, levels: 0 };
+    /**
+     * Build RAPTOR Tree (Bottom-Up)
+     */
+    buildRaptorTree(config: ClusteringConfig): { nodes: ClusterNode[], stats: any } {
+        const { maxClusterSize, overlapThreshold } = config;
+        console.log(`[RagWorker] Building RAPTOR tree. MaxClusterSize: ${maxClusterSize}, Overlap: ${overlapThreshold}`);
+
+        const startTime = performance.now();
+        this.raptorNodes = []; // Reset internal nodes
+
+        // Level 0: The chunks themselves (leaves)
+        // We don't store leaves in raptorNodes (they are in 'chunks'), but we treat them as nodes for clustering
+        let currentLevelIndices: number[] = this.chunks.map((_, i) => i);
+        let currentLevelVectors: number[][] = this.chunks.map(c => c.embedding);
+        let currentLevelIds: string[] = this.chunks.map(c => c.id);
+
+        let level = 0;
+        const stats = { levels: 0, totalNodes: 0, layerCounts: [] as number[] };
+
+        while (currentLevelIndices.length > maxClusterSize) {
+            console.log(`[RagWorker] building Level ${level + 1} from ${currentLevelIndices.length} nodes...`);
+
+            // 1. Determine k
+            let k = Math.ceil(currentLevelIndices.length / (maxClusterSize / 2));
+            if (k < 1) k = 1;
+
+            // 2. Run K-Means
+            const { centroids } = kMeans(currentLevelVectors, k, 10);
+
+            // 3. Create new nodes for centroids
+            const nextLevelNodes: ClusterNode[] = [];
+            const nextLevelVectors: number[][] = [];
+            const nextLevelIds: string[] = [];
+
+            for (let i = 0; i < centroids.length; i++) {
+                // Generate a deterministic ID based on level and index (or random UUID)
+                const nodeId = `cluster-l${level + 1}-${i}-${Math.random().toString(36).substring(7)}`;
+
+                const node: ClusterNode = {
+                    id: nodeId,
+                    level: level + 1,
+                    embedding: centroids[i],
+                    children: [] // Populated next
+                };
+
+                nextLevelNodes.push(node);
+                nextLevelVectors.push(centroids[i]);
+                nextLevelIds.push(nodeId);
+            }
+
+            // 4. Assign children to parents (Soft Assignment)
+            for (let i = 0; i < currentLevelIndices.length; i++) {
+                const vec = currentLevelVectors[i];
+                const childId = currentLevelIds[i];
+
+                // Find parent(s)
+                const parentIndices = softAssign(vec, nextLevelVectors, overlapThreshold);
+
+                for (const pIdx of parentIndices) {
+                    nextLevelNodes[pIdx].children.push(childId);
+                }
+            }
+
+            // 5. Store new nodes
+            this.raptorNodes.push(...nextLevelNodes);
+            stats.layerCounts.push(nextLevelNodes.length);
+
+            // 6. Prepare for next iteration
+            currentLevelVectors = nextLevelVectors;
+            currentLevelIds = nextLevelIds;
+            currentLevelIndices = nextLevelNodes.map((_, i) => i);
+            level++;
+        }
+
+        stats.levels = level;
+        stats.totalNodes = this.raptorNodes.length;
+
+        const elapsed = performance.now() - startTime;
+        console.log(`[RagWorker] RAPTOR build complete in ${elapsed.toFixed(0)}ms. Layers: ${stats.layerCounts.join(' -> ')}`);
+
+        return { nodes: this.raptorNodes, stats };
     }
 
     search(_query: string, k: number) {
-        // Return top-k chunks by order
-        return this.chunks.slice(0, k).map((c, i) => ({
+        // Simple mock search if no real embeddings
+        return this.chunks.slice(0, k).map((c, i) => ({ ...c, score: 1 }));
+    }
+
+    /**
+     * RAPTOR Traversal Search
+     */
+    searchRaptor(queryEmbedding: Float32Array, k: number, mode: string, _beamWidth: number) {
+        const queryVec = Array.from(queryEmbedding);
+
+        if (mode === 'collapsed_leaves') {
+            return this.searchFlat(queryVec, k);
+        }
+        else if (mode === 'collapsed_all') {
+            return [];
+        }
+        return [];
+    }
+
+    private searchFlat(queryVec: number[], k: number) {
+        // Brute force cosine scan over chunks
+        const scores = this.chunks.map(c => ({
             ...c,
-            score: 1 - (i * 0.1),
+            score: cosineSimilarity(queryVec, c.embedding)
         }));
+
+        scores.sort((a, b) => b.score - a.score);
+        return scores.slice(0, k);
     }
 
     searchHybrid(_query: string, k: number, _weight: number) {
         return this.search(_query, k);
-    }
-
-    searchRaptor(_embedding: Float32Array, k: number, _mode: string, _n: number) {
-        return this.chunks.slice(0, k);
     }
 
     searchWithDiversity(_query: string, k: number, _lambda: number) {
@@ -92,16 +196,19 @@ class RagPipeline {
     }
 
     getStats() {
-        return { total_chunks: this.chunks.length };
+        return {
+            total_chunks: this.chunks.length,
+            raptor_nodes: this.raptorNodes.length
+        };
     }
 
     isModelLoaded() {
-        return false;
+        return false; // Stub
     }
 }
 
 // ============================================================================
-// Worker State
+// Worker State & Handler
 // ============================================================================
 
 let pipeline: RagPipeline | null = null;
@@ -110,13 +217,14 @@ let currentModelDim = 256;
 let currentTruncateDim: number | null = null;
 let useExternalEmbedding = false;
 
-// ============================================================================
-// Message Handler
-// ============================================================================
-
-self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
+self.onmessage = async (e: MessageEvent<WorkerMessage & { _id?: number }>) => {
     const msg = e.data;
-    console.log('[RagWorker] Received:', msg.type);
+    const msgId = msg._id;
+    // console.log('[RagWorker] Received:', msg.type, msgId ? `(ID: ${msgId})` : '');
+
+    const reply = (response: ResponseMessage) => {
+        self.postMessage({ ...response, _id: msgId });
+    };
 
     try {
         switch (msg.type) {
@@ -125,7 +233,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                     pipeline = new RagPipeline();
                     initialized = true;
                 }
-                self.postMessage({ type: 'INIT_COMPLETE' });
+                reply({ type: 'INIT_COMPLETE' });
                 break;
 
             case 'LOAD_MODEL': {
@@ -138,8 +246,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                 currentTruncateDim = truncate && truncate !== 'full' ? Number(truncate) : null;
                 useExternalEmbedding = false;
 
-                console.log(`[RagWorker] Model loaded. Native Dim: ${currentModelDim}, Truncate: ${currentTruncateDim || 'None'}`);
-                self.postMessage({ type: 'MODEL_LOADED' });
+                // console.log(`[RagWorker] Model loaded. Native Dim: ${currentModelDim}, Truncate: ${currentTruncateDim || 'None'}`);
+                reply({ type: 'MODEL_LOADED' });
                 break;
             }
 
@@ -151,8 +259,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                 currentModelDim = newDims;
                 useExternalEmbedding = true;
 
-                console.log(`[RagWorker] External embedding mode. Dims: ${newDims}`);
-                self.postMessage({ type: 'DIMENSIONS_SET', payload: { dims: newDims } });
+                // console.log(`[RagWorker] External embedding mode. Dims: ${newDims}`);
+                reply({ type: 'DIMENSIONS_SET', payload: { dims: newDims } });
                 break;
             }
 
@@ -164,7 +272,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                 const notes = msg.payload.notes;
                 const totalChunks = pipeline.indexNotes(notes);
 
-                self.postMessage({
+                reply({
                     type: 'INDEX_COMPLETE',
                     payload: { notes: notes.length, chunks: totalChunks }
                 });
@@ -188,14 +296,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                         }
 
                         pipeline.insertChunk({
-                            id: chunk.id,
-                            note_id: chunk.note_id,
-                            note_title: chunk.note_title,
-                            chunk_index: chunk.chunk_index,
-                            text: chunk.text,
+                            ...chunk,
                             embedding: embeddingArray,
-                            start: chunk.start,
-                            end: chunk.end,
                         });
                         insertedCount++;
                     } catch (e) {
@@ -204,8 +306,8 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                     }
                 }
 
-                console.log(`[RagWorker] INSERT_VECTORS: ${insertedCount} inserted, ${insertErrors} errors`);
-                self.postMessage({
+                // console.log(`[RagWorker] INSERT_VECTORS: ${insertedCount} inserted, ${insertErrors} errors`);
+                reply({
                     type: 'INDEX_COMPLETE',
                     payload: { notes: 0, chunks: insertedCount }
                 });
@@ -214,15 +316,15 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
 
             case 'BUILD_RAPTOR': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
-                const stats = pipeline.buildRaptorTree(msg.payload.clusterSize);
-                self.postMessage({ type: 'RAPTOR_BUILT', payload: { stats } });
+                const { nodes, stats } = pipeline.buildRaptorTree(msg.payload.config);
+                reply({ type: 'RAPTOR_BUILT', payload: { nodes, stats } });
                 break;
             }
 
             case 'SEARCH': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const results = pipeline.search(msg.payload.query, msg.payload.k);
-                self.postMessage({ type: 'SEARCH_RESULTS', payload: { results } });
+                reply({ type: 'SEARCH_RESULTS', payload: { results } });
                 break;
             }
 
@@ -230,7 +332,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const { query, k, vectorWeight } = msg.payload;
                 const hResults = pipeline.searchHybrid(query, k, vectorWeight);
-                self.postMessage({ type: 'SEARCH_RESULTS', payload: { results: hResults } });
+                reply({ type: 'SEARCH_RESULTS', payload: { results: hResults } });
                 break;
             }
 
@@ -239,7 +341,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                 const { query: rQuery, k: rK, mode } = msg.payload;
                 const embedding = pipeline.embed(rQuery);
                 const raptorResults = pipeline.searchRaptor(new Float32Array(embedding), rK, mode, 10);
-                self.postMessage({ type: 'SEARCH_RESULTS', payload: { results: raptorResults } });
+                reply({ type: 'SEARCH_RESULTS', payload: { results: raptorResults } });
                 break;
             }
 
@@ -247,7 +349,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const { query: dQuery, k: dK, lambda } = msg.payload;
                 const diverseResults = pipeline.searchWithDiversity(dQuery, dK, lambda);
-                self.postMessage({ type: 'SEARCH_RESULTS', payload: { results: diverseResults } });
+                reply({ type: 'SEARCH_RESULTS', payload: { results: diverseResults } });
                 break;
             }
 
@@ -261,7 +363,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                 }
 
                 const vectorResults = pipeline.searchRaptor(new Float32Array(queryArray), searchK, 'collapsed_leaves', 10);
-                self.postMessage({ type: 'SEARCH_RESULTS', payload: { results: vectorResults } });
+                reply({ type: 'SEARCH_RESULTS', payload: { results: vectorResults } });
                 break;
             }
 
@@ -278,7 +380,7 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                         if (currentTruncateDim && emb.length > currentTruncateDim) {
                             emb = truncateEmbedding(emb, currentTruncateDim);
                         } else {
-                            console.debug(`[RagWorker] Skipping chunk: dim ${emb.length} != expected ${currentModelDim}`);
+                            // console.debug(`[RagWorker] Skipping chunk`);
                             skippedCount++;
                             continue;
                         }
@@ -298,27 +400,27 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
                     }
                 }
 
-                console.log(`[RagWorker] Hydrated ${hydratedCount} chunks, skipped ${skippedCount}`);
-                self.postMessage({ type: 'INDEX_COMPLETE', payload: { notes: 0, chunks: hydratedCount } });
+                // console.log(`[RagWorker] Hydrated ${hydratedCount} chunks`);
+                reply({ type: 'INDEX_COMPLETE', payload: { notes: 0, chunks: hydratedCount } });
                 break;
             }
 
             case 'GET_CHUNKS': {
                 if (!pipeline) throw new Error('Pipeline not initialized');
                 const allChunks = pipeline.getChunks();
-                self.postMessage({ type: 'CHUNKS_RETRIEVED', payload: { chunks: allChunks } });
+                reply({ type: 'CHUNKS_RETRIEVED', payload: { chunks: allChunks } });
                 break;
             }
 
             case 'GET_STATUS': {
                 if (!pipeline) {
-                    self.postMessage({
+                    reply({
                         type: 'STATUS',
                         payload: { dims: 0, modelLoaded: false, externalMode: false, chunkCount: 0 }
                     });
                 } else {
                     const pipelineStats = pipeline.getStats();
-                    self.postMessage({
+                    reply({
                         type: 'STATUS',
                         payload: {
                             dims: currentModelDim,
@@ -333,6 +435,6 @@ self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
         }
     } catch (e) {
         console.error('[RagWorker] Error:', e);
-        self.postMessage({ type: 'ERROR', payload: { message: e instanceof Error ? e.message : String(e) } });
+        reply({ type: 'ERROR', payload: { message: e instanceof Error ? e.message : String(e) } });
     }
 };

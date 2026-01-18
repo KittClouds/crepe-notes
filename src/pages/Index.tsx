@@ -254,8 +254,14 @@ const Index: React.FC = () => {
                         const parsed = JSON.parse(currentNote.content);
                         if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
                           return { type: 'json' as const, value: parsed };
+                        } else {
+                          console.warn('[Index] Content parsed but not a doc:', { hasType: !!parsed?.type, type: parsed?.type });
                         }
-                      } catch { }
+                      } catch (e) {
+                        console.warn('[Index] JSON parse failed:', e);
+                      }
+                    } else {
+                      console.warn('[Index] Note has no content field:', { id: currentNote.id, hasMarkdown: !!currentNote.markdownContent });
                     }
                     // Fallback to markdown
                     return { type: 'markdown' as const, value: currentNote.markdownContent || currentNote.content || '' };

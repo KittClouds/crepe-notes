@@ -314,10 +314,19 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
           const tr = view.state.tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
           view.dispatch(tr);
         } else {
-          // For markdown, use replaceAll
-          ctx.get(commandsCtx).call(replaceAll, initialContent.value);
+          // WARNING: Markdown path loses formatting (colors, etc.)
+          // This should only be used as absolute fallback
+          console.warn('[Editor] Using markdown fallback - formatting may be lost!');
+
+          // replaceAll is a macro - use it directly as action
+          // We need to call it outside the action callback
         }
       });
+
+      // Handle markdown outside the action callback (replaceAll is its own action)
+      if (initialContent.type !== 'json') {
+        crepeRef.current.editor.action(replaceAll(initialContent.value));
+      }
     } catch (e) {
       console.error('[NotePerf] Content swap error:', e);
     }

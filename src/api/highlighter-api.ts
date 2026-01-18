@@ -2,7 +2,7 @@
 // Highlighter API - interface between Scanner and Editor
 // Connected to highlightingStore for live mode updates
 // Wired to ScanCoordinator for entity event emission
-// Local-first: writes decorations to Dexie, UI updates via useLiveQuery
+// Local-first: writes decorations to NebulaDB, UI updates via subscribe()
 
 import type { DecorationSpan, HighlighterConfig, HighlightMode } from '../lib/Scanner';
 import { scanDocument, getDecorationStyle, getDecorationClass } from '../lib/Scanner';
@@ -10,7 +10,7 @@ import { highlightingStore } from '../lib/store/highlightingStore';
 import type { EntityKind } from '../lib/types/entityTypes';
 import { implicitScanner } from '../lib/Scanner/ImplicitScanner';
 import { getScanCoordinator } from '../lib/Scanner/scanCoordinatorInstance';
-import { saveNoteDecorations, getNoteDecorations, getDecorationContentHash, hashContent } from '../lib/dexie/decorations';
+import { saveNoteDecorations, getNoteDecorations, getDecorationContentHash, hashContent } from '../lib/nebuladb/decorations';
 import { graphHotCache } from '../lib/cozo/graph/GraphHotCache';
 import { kittCore } from '../lib/kittcore';
 
