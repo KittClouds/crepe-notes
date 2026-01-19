@@ -379,9 +379,9 @@ export class CozoGraphRegistry {
         });
     }
 
-    updateEntity(id: string, updates: { label?: string; kind?: EntityKind; subtype?: string; metadata?: Record<string, any>; attributes?: Record<string, any> }): boolean {
+    updateEntity(id: string, updates: { label?: string; kind?: EntityKind; subtype?: string; aliases?: string[]; metadata?: Record<string, any>; attributes?: Record<string, any> }): CozoEntity | null {
         const entity = this.getEntityById(id);
-        if (!entity) return false;
+        if (!entity) return null;
 
         if (updates.label || updates.kind || updates.subtype !== undefined) {
             const newLabel = updates.label || entity.label;
@@ -402,17 +402,30 @@ export class CozoGraphRegistry {
                     created_at: entity.createdAt.getTime(),
                     created_by: entity.createdBy
                 });
-            } catch (err) { console.error('[CozoGraphRegistry] Update failed:', err); return false; }
+            } catch (err) { console.error('[CozoGraphRegistry] Update failed:', err); return null; }
         }
 
         if (updates.metadata) {
             for (const [key, value] of Object.entries(updates.metadata)) this.setEntityMetadata(id, key, value);
         }
 
+        // Handle aliases update - clear and re-add
+        if (updates.aliases !== undefined) {
+            // Remove existing aliases
+            const existingAliases = this.getAliases(id);
+            for (const alias of existingAliases) {
+                this.removeAlias(id, alias);
+            }
+            // Add new aliases
+            for (const alias of updates.aliases) {
+                this.addAlias(id, alias);
+            }
+        }
+
         // Refresh cache with updated entity
         const updated = this.getEntityById(id);
         if (updated) this.hotCache.setEntity(updated);
-        return true;
+        return updated;
     }
 
     deleteEntity(id: string): boolean {

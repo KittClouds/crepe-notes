@@ -38,4 +38,5 @@ export const nebulaSchema: Record<string, CollectionOptions> = {
     },
     syncState: { name: 'syncState' },
     modelCache: { name: 'modelCache' },
+    scannerCache: { name: 'scannerCache' }, // DAFSA trie cache for fast boot
 };

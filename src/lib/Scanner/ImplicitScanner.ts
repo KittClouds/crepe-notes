@@ -1,22 +1,11 @@
 
 import type { DecorationSpan, RegisteredEntity } from './types';
 
-// We use a raw worker import compatible with Vite
-// Note: In Vite, we often use `import Worker from './implicit.worker?worker'`
-// But we'll try `new Worker(new URL(...))` standard pattern if generic import fails.
-// For now, let's assume standard Vite worker import syntax.
-
 export class ImplicitScanner {
     private worker: Worker | null = null;
     private pendingScans: Map<number, (spans: DecorationSpan[]) => void> = new Map();
     private pendingBatches: Map<number, (results: Map<number, DecorationSpan[]>) => void> = new Map();
     private nextId = 1;
-
-    // Callbacks for external subscribers (e.g. Highlighter)
-    private subscribers: Set<() => void> = new Set();
-
-    // Cache latest decorations by document ID (or text hash? - For now just ephemeral)
-    // Actually, Highlighter API manages state. We just provide scan().
 
     constructor() {
         if (typeof window !== 'undefined') {
@@ -26,13 +15,13 @@ export class ImplicitScanner {
 
     private initWorker() {
         try {
-            // Updated import syntax for Vite 5+ / Modern bundlers
             this.worker = new Worker(new URL('./implicit.worker.ts', import.meta.url), {
                 type: 'module'
             });
 
             this.worker.onmessage = (e) => {
                 const msg = e.data;
+
                 if (msg.type === 'SCAN_RESULT') {
                     const resolve = this.pendingScans.get(msg.id);
                     if (resolve) {
@@ -42,7 +31,6 @@ export class ImplicitScanner {
                 } else if (msg.type === 'SCAN_BATCH_RESULT') {
                     const resolve = this.pendingBatches.get(msg.id);
                     if (resolve) {
-                        // Reconstruct Map
                         const map = new Map<number, DecorationSpan[]>();
                         for (const item of msg.results) {
                             map.set(item.id, item.spans);
@@ -51,7 +39,7 @@ export class ImplicitScanner {
                         this.pendingBatches.delete(msg.id);
                     }
                 } else if (msg.type === 'HYDRATE_DONE') {
-                    console.log('[ImplicitScanner] Worker hydration complete');
+                    // console.log('[ImplicitScanner] Hydration complete');
                 }
             };
 
@@ -62,7 +50,11 @@ export class ImplicitScanner {
     }
 
     hydrate(entities: RegisteredEntity[], entityVersion: number = 0) {
-        if (!this.worker) return;
+        // console.log(`[ImplicitScanner:DIAG] hydrate() called: ${entities.length} entities, version=${entityVersion}`);
+        if (!this.worker) {
+            console.error('[ImplicitScanner:DIAG] No worker! Cannot hydrate.');
+            return;
+        }
         this.worker.postMessage({ type: 'HYDRATE', entities, entityVersion });
     }
 
@@ -74,10 +66,9 @@ export class ImplicitScanner {
             this.pendingScans.set(id, resolve);
             this.worker!.postMessage({ type: 'SCAN', id, text });
 
-            // Timeout safety?
+            // Timeout safety
             setTimeout(() => {
                 if (this.pendingScans.has(id)) {
-                    // console.warn('[ImplicitScanner] Scan timed out');
                     this.pendingScans.delete(id);
                     resolve([]);
                 }

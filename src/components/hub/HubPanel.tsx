@@ -18,7 +18,7 @@ import type { EntityStats } from './types';
 import type { Note } from '@/types/noteTypes';
 import { ScopeSelector } from '@/components/scope/ScopeSelector';
 import { useScopeContextSafe } from '@/contexts/ScopeContext';
-import { smartGraphRegistry } from '@/lib/registry';
+import { smartGraphRegistry, type RegisteredEntity } from '@/lib/registry';
 import { getNotesInScope } from '@/lib/scope/computeNodeScope';
 import { buildArboristTree } from '@/lib/arborist/adapter';
 import { useNotesStore } from '@/hooks/useNotesStore';
@@ -132,6 +132,56 @@ export function HubPanel({
         }
         return smartGraphRegistry.getAllEntities().length;
     }, [notesInScope, entityStats]); // Re-compute when entityStats (scan) changes
+
+    // Fetch actual entities in scope for the GraphTab list
+    const [scopedEntities, setScopedEntities] = useState<RegisteredEntity[]>([]);
+
+    useEffect(() => {
+        const fetch = async () => {
+            // Ensure registry is ready (sync check usually fine if app loaded)
+            if (!smartGraphRegistry.isInitialized()) {
+                return;
+            }
+
+            let entities: RegisteredEntity[] = [];
+            if (notesInScope.length > 0) {
+                entities = smartGraphRegistry.getEntitiesByScope(notesInScope);
+            } else {
+                entities = smartGraphRegistry.getAllEntities();
+            }
+            setScopedEntities(entities);
+        };
+        fetch();
+    }, [notesInScope, entityCount]); // Refresh when scope changes or count metric updates
+
+    // Merge repository entities with current note stats
+    const mergedStats = useMemo(() => {
+        const statsMap = new Map<string, EntityStats>();
+
+        // 1. Populate with registry entities (default count 0 if not in note)
+        for (const e of scopedEntities) {
+            const key = `${e.kind}:${e.label}`;
+            statsMap.set(key, {
+                entityKind: e.kind,
+                entityLabel: e.label,
+                mentionsInThisNote: 0
+            });
+        }
+
+        // 2. Overlay current note scan stats (contains actual mention counts)
+        for (const stat of entityStats) {
+            const key = `${stat.entityKind}:${stat.entityLabel}`;
+            const existing = statsMap.get(key);
+            if (existing) {
+                existing.mentionsInThisNote = stat.mentionsInThisNote;
+            } else {
+                // Entity found in note but not in registry (yet)
+                statsMap.set(key, stat);
+            }
+        }
+
+        return Array.from(statsMap.values());
+    }, [scopedEntities, entityStats]);
 
     return (
         <div className="sticky bottom-0 z-20 border-t border-border bg-background w-full shrink-0 shadow-[0_-1px_3px_rgba(0,0,0,0.2)]">
@@ -325,7 +375,7 @@ export function HubPanel({
                         {/* Graph Tab - full height, no padding for master-detail layout */}
                         <TabsContent value="graph" className="mt-0 h-full overflow-hidden">
                             <GraphTab
-                                entityStats={entityStats}
+                                entityStats={mergedStats}
                                 notes={notes}
                                 onNavigate={onNavigate}
                                 onCreate={onCreate}

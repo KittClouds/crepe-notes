@@ -20,6 +20,7 @@ export const decorationMeta = nebulaDb.collection('decorationMeta', nebulaSchema
 export const syncOutbox = nebulaDb.collection('syncOutbox', nebulaSchema.syncOutbox);
 export const syncState = nebulaDb.collection('syncState', nebulaSchema.syncState);
 export const modelCache = nebulaDb.collection('modelCache', nebulaSchema.modelCache);
+export const scannerCache = nebulaDb.collection('scannerCache', nebulaSchema.scannerCache);
 
 // Connection is now handled by AppOrchestrator.phase1_NebulaDB()
 // Do NOT auto-connect on import - this allows controlled boot sequence

@@ -4,6 +4,7 @@
 
 import type { EntityKind } from '@/lib/types/entityTypes';
 import { implicitScanner } from '../Scanner/ImplicitScanner';
+import { scheduleRecompile } from '../Scanner/dictionary-service';
 import { cozoGraphRegistry, type CozoEntity, type CozoRelationship, type RelationshipProvenance } from '@/lib/cozo/graph/GraphRegistry';
 import type { GraphHotCache } from '@/lib/cozo/graph/GraphHotCache';
 
@@ -24,6 +25,8 @@ export interface RegisteredEntity {
     createdAt: Date;
     createdBy: 'user' | 'extraction' | 'auto';
     attributes?: Record<string, any>;
+    /** Timestamp for Scanner compatibility */
+    registeredAt: number;
 }
 
 export interface EntityDefinition {
@@ -110,6 +113,7 @@ export class SmartGraphRegistryFacade {
             createdAt: e.createdAt,
             createdBy: e.createdBy,
             attributes: e.metadata || {},
+            registeredAt: e.createdAt.getTime(),
         };
     }
 
@@ -163,6 +167,9 @@ export class SmartGraphRegistryFacade {
         const allEntities = this.getAllEntities();
         const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
         implicitScanner.hydrate(allEntities.map(this.toScannerEntity), entityVersion);
+
+        // Schedule dictionary recompilation (debounced)
+        scheduleRecompile(allEntities);
 
         return {
             entity: this.toRegisteredEntity(entity),
@@ -218,7 +225,47 @@ export class SmartGraphRegistryFacade {
     }
 
     async deleteEntity(id: string): Promise<boolean> {
-        return cozoGraphRegistry.deleteEntity(id);
+        const result = cozoGraphRegistry.deleteEntity(id);
+        if (result) {
+            // Schedule dictionary recompilation
+            const allEntities = this.getAllEntities();
+            scheduleRecompile(allEntities);
+        }
+        return result;
+    }
+
+    async updateEntity(id: string, updates: {
+        label?: string;
+        kind?: EntityKind;
+        aliases?: string[];
+        subtype?: string;
+        attributes?: Record<string, any>;
+    }): Promise<RegisteredEntity | null> {
+        const existing = cozoGraphRegistry.getEntityById(id);
+        if (!existing) return null;
+
+        // Update in CozoDB
+        const updated = await cozoGraphRegistry.updateEntity(id, {
+            label: updates.label ?? existing.label,
+            kind: updates.kind ?? existing.kind,
+            aliases: updates.aliases ?? existing.aliases,
+            subtype: updates.subtype ?? existing.subtype,
+            attributes: updates.attributes ?? existing.attributes,
+        });
+
+        if (updated) {
+            // Re-hydrate scanner with updated entity list
+            const allEntities = cozoGraphRegistry.getAllEntities();
+            const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
+            const scannerEntities = allEntities.map(e => this.toScannerEntity(this.toRegisteredEntity(e)));
+            implicitScanner.hydrate(scannerEntities, entityVersion);
+
+            // Schedule dictionary recompilation
+            scheduleRecompile(this.getAllEntities());
+
+            return this.toRegisteredEntity(updated);
+        }
+        return null;
     }
 
     async clearAll(): Promise<number> {
@@ -226,6 +273,10 @@ export class SmartGraphRegistryFacade {
         await cozoGraphRegistry.clear();
         const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
         implicitScanner.hydrate([], entityVersion);
+
+        // Schedule dictionary recompilation (empty)
+        scheduleRecompile([]);
+
         return count;
     }
 

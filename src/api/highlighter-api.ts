@@ -74,6 +74,7 @@ class DefaultHighlighterApi implements HighlighterApi {
     private enableEntityRefs = true;
     private implicitDecorations: DecorationSpan[] = [];
     private lastContext: string = '';
+    private lastScannedContext: string = '';
     private listeners: Set<() => void> = new Set();
     private isScanning = false;
     private scanVersion = 0;
@@ -98,6 +99,8 @@ class DefaultHighlighterApi implements HighlighterApi {
             this.hasScannedOnOpen = false;
             this.lastKnownEntityCount = 0;
             this.lastSentenceEndPos = 0;
+            this.lastContext = '';
+            this.lastScannedContext = '';
             this.prewarmCacheForNote(noteId);
         }
     }
@@ -138,12 +141,13 @@ class DefaultHighlighterApi implements HighlighterApi {
         // 1. First call after note switch: ALWAYS scan fresh (cache positions may be stale)
         // 2. After that: use cache for unchanged content, re-scan on new entities
         if (text !== this.lastContext) {
-            this.lastContext = text;
+            this.lastContext = text; // Always update 'seen' text
 
             if (!this.hasScannedOnOpen) {
                 // ALWAYS scan fresh on note open - cached positions may be from different doc parse
-                console.log('[HighlighterApi] Initial scan on note open (fresh)');
+                console.log('[HighlighterApi:DIAG] Initial scan on note open (fresh)');
                 this.hasScannedOnOpen = true;
+                this.lastScannedContext = text;
                 this.triggerImplicitScan(doc, text);  // Direct scan, not cache check
             } else {
                 // After initial scan: only re-scan if entity count increased
@@ -152,9 +156,14 @@ class DefaultHighlighterApi implements HighlighterApi {
                     d.type === 'entity_implicit'
                 ).length;
 
+                const prevLength = this.lastScannedContext.length;
+                const shouldCheck = this.shouldCheckForNewEntities(text, prevLength);
+
                 // Quick heuristic: if no entities yet but text is being added, check again
                 // This catches the case where user types a known entity name
-                if (currentEntityCount === 0 || this.shouldCheckForNewEntities(text)) {
+                if (currentEntityCount === 0 || shouldCheck) {
+                    console.log(`[HighlighterApi:DIAG] Threshold met (Diff: ${Math.abs(text.length - prevLength)}). Scanning...`);
+                    this.lastScannedContext = text;
                     this.tryLoadCachedOrScan(doc, text);
                 }
             }
@@ -212,15 +221,14 @@ class DefaultHighlighterApi implements HighlighterApi {
      * Heuristic to detect if user might have added a new entity.
      * We check if text has grown by enough characters to potentially contain an entity name.
      */
-    private shouldCheckForNewEntities(currentText: string): boolean {
+    private shouldCheckForNewEntities(currentText: string, prevLength: number): boolean {
         // If we have entities and text grew, the implicit scanner will pick up new mentions
         // This is a lightweight check - actual entity detection happens in the worker
-        const prevLength = this.lastContext.length;
         const currLength = currentText.length;
 
         // Text grew by at least 3 chars (minimum entity name length)
         // This prevents scanning on every single keystroke
-        return currLength - prevLength >= 3;
+        return Math.abs(currLength - prevLength) >= 3;
     }
 
     getStyle(span: DecorationSpan): string {
@@ -309,6 +317,7 @@ class DefaultHighlighterApi implements HighlighterApi {
     }
 
     private triggerImplicitScan(doc: ProseMirrorDoc, text?: string, _entityVersion?: number) {
+        console.log('[HighlighterApi:DIAG] triggerImplicitScan called!');
         const myVersion = ++this.scanVersion;
         const batch: { id: number, text: string }[] = [];
         const nodePositions = new Map<number, number>(); // Map batch ID to document position
@@ -336,9 +345,26 @@ class DefaultHighlighterApi implements HighlighterApi {
         const noteIdForSave = this.currentNoteId;
         const contentHashForSave = hashContent(fullText);
 
+        // DEBUG: Log what we're sending to scanner
+        console.log(`[HighlighterApi:DIAG] Sending ${batch.length} text nodes to scanner, fullText length: ${fullText.length}`);
+
         implicitScanner.scanBatch(batch).then(async results => {
             // Only apply if this is still the latest requested scan
-            if (this.scanVersion !== myVersion) return;
+            if (this.scanVersion !== myVersion) {
+                console.log('[HighlighterApi:DIAG] Stale scan version, ignoring results');
+                return;
+            }
+
+            // DEBUG: Log what came back from scanner
+            console.log(`[HighlighterApi:DIAG] Scanner returned ${results.size} result entries`);
+            let totalSpans = 0;
+            for (const [id, spans] of results.entries()) {
+                totalSpans += spans.length;
+                if (spans.length > 0) {
+                    console.log(`[HighlighterApi:DIAG] Node ${id}: ${spans.length} spans`, spans.slice(0, 2));
+                }
+            }
+            console.log(`[HighlighterApi:DIAG] Total spans from scanner: ${totalSpans}`);
 
             const mergedSpans: DecorationSpan[] = [];
 
@@ -355,6 +381,8 @@ class DefaultHighlighterApi implements HighlighterApi {
                     }
                 }
             }
+
+            console.log(`[HighlighterApi:DIAG] Merged spans for decoration: ${mergedSpans.length}`);
 
             this.implicitDecorations = mergedSpans;
             this.notifyListeners();

@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
 import { ENTITY_ICONS, ENTITY_KINDS, type EntityKind } from '@/lib/types/entityTypes';
 import { getEntityColor } from '@/lib/store/entityColorStore';
 import { smartGraphRegistry, type RegisteredEntity } from '@/lib/registry';
-import { AddEntityDialog } from './AddEntityDialog';
+import { EntityCreator } from './EntityCreator';
 import { useScopeContextSafe } from '@/contexts/ScopeContext';
 import { getNotesInScope } from '@/lib/scope/computeNodeScope';
 import { buildArboristTree } from '@/lib/arborist/adapter';
@@ -41,9 +41,11 @@ interface EntityRegistryPanelProps {
 export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
     const [entities, setEntities] = useState<RegisteredEntity[]>([]);
     const [expandedKinds, setExpandedKinds] = useState<Set<string>>(new Set(ENTITY_KINDS));
-    const [isAddOpen, setIsAddOpen] = useState(false);
+    const [isCreatorOpen, setIsCreatorOpen] = useState(false);
+    const [editingEntity, setEditingEntity] = useState<RegisteredEntity | null>(null);
     const [isFlushOpen, setIsFlushOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [customKinds, setCustomKinds] = useState<string[]>([]);
 
     // Scope context for filtering
     const scopeContext = useScopeContextSafe();
@@ -105,10 +107,42 @@ export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
         });
     };
 
-    const handleAddEntity = useCallback(async (label: string, kind: EntityKind) => {
-        await smartGraphRegistry.registerEntity(label, kind, 'manual', { source: 'user' });
+    const handleSaveEntity = useCallback(async (entityData: {
+        id?: string;
+        label: string;
+        kind: EntityKind | string;
+        aliases: string[];
+    }) => {
+        if (entityData.id) {
+            // Editing existing entity
+            await smartGraphRegistry.updateEntity(entityData.id, {
+                label: entityData.label,
+                kind: entityData.kind as EntityKind,
+                aliases: entityData.aliases,
+            });
+        } else {
+            // Creating new entity
+            await smartGraphRegistry.registerEntity(
+                entityData.label,
+                entityData.kind as EntityKind,
+                'manual',
+                { source: 'user', aliases: entityData.aliases }
+            );
+        }
+
+        // Track custom kinds
+        if (!ENTITY_KINDS.includes(entityData.kind as EntityKind)) {
+            setCustomKinds(prev => [...new Set([...prev, entityData.kind])]);
+        }
+
         setEntities(smartGraphRegistry.getAllEntities());
-        setIsAddOpen(false);
+        setIsCreatorOpen(false);
+        setEditingEntity(null);
+    }, []);
+
+    const handleEditEntity = useCallback((entity: RegisteredEntity) => {
+        setEditingEntity(entity);
+        setIsCreatorOpen(true);
     }, []);
 
     const handleDeleteEntity = useCallback(async (id: string) => {
@@ -137,7 +171,7 @@ export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
                     variant="ghost"
                     size="sm"
                     className="h-7 gap-1.5 text-xs flex-1 justify-start"
-                    onClick={() => setIsAddOpen(true)}
+                    onClick={() => { setEditingEntity(null); setIsCreatorOpen(true); }}
                 >
                     <Plus className="w-3.5 h-3.5" />
                     Add Entity
@@ -199,12 +233,12 @@ export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
                                             {kindEntities.map((entity) => (
                                                 <div
                                                     key={entity.id}
-                                                    className="group w-full flex items-center gap-1.5 px-1.5 py-1 rounded text-left text-xs hover:bg-muted/50 transition-colors"
+                                                    className="group w-full flex items-center gap-1.5 px-1.5 py-1 rounded text-left text-xs hover:bg-muted/50 transition-colors cursor-pointer"
+                                                    onClick={() => handleEditEntity(entity)}
                                                 >
                                                     <span
-                                                        className="truncate flex-1 cursor-pointer"
+                                                        className="truncate flex-1"
                                                         style={{ color }}
-                                                        onClick={() => onNavigate?.(entity.label)}
                                                     >
                                                         {entity.label}
                                                     </span>
@@ -236,11 +270,21 @@ export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
                 )}
             </div>
 
-            {/* Add Entity Dialog */}
-            <AddEntityDialog
-                open={isAddOpen}
-                onOpenChange={setIsAddOpen}
-                onAdd={handleAddEntity}
+            {/* Entity Creator (Add/Edit) */}
+            <EntityCreator
+                open={isCreatorOpen}
+                onOpenChange={(open) => {
+                    setIsCreatorOpen(open);
+                    if (!open) setEditingEntity(null);
+                }}
+                onSave={handleSaveEntity}
+                editEntity={editingEntity ? {
+                    id: editingEntity.id,
+                    label: editingEntity.label,
+                    kind: editingEntity.kind,
+                    aliases: editingEntity.aliases || [],
+                } : undefined}
+                customKinds={customKinds}
             />
 
             {/* Flush Confirmation */}
