@@ -12,6 +12,7 @@ import { getScanCoordinator } from '../lib/Scanner/scanCoordinatorInstance';
 import { saveNoteDecorations, getNoteDecorations, getDecorationContentHash, hashContent } from '../lib/nebuladb/decorations';
 import { graphHotCache } from '../lib/cozo/graph/GraphHotCache';
 import { kittCore } from '../lib/kittcore';
+import { useDiscoveryStore } from '../lib/store/discoveryStore';
 
 // =============================================================================
 // HIGHLIGHTER API INTERFACE
@@ -402,6 +403,9 @@ class DefaultHighlighterApi implements HighlighterApi {
                     console.warn('[HighlighterApi] Dexie write failed:', err);
                 }
             }
+
+            // [Unsupervised NER] Trigger Discovery
+            this.triggerDiscoveryScan(fullText);
         });
     }
 
@@ -427,9 +431,37 @@ class DefaultHighlighterApi implements HighlighterApi {
     }
 
     /**
+     * Trigger Discovery Scan (Unsupervised NER)
+     * "The Virus" - finds new entity patterns.
+     */
+    private triggerDiscoveryScan(text: string): void {
+        // Discovery is cheap (mostly), but we shouldn't spam it.
+        // It runs via Shared Memory, so no serialization overhead.
+
+        kittCore.scanDiscovery(text)
+            .then(candidates => {
+                // Show Watching (0) AND Promoted (1) for now, until graph sync is ready
+                const newCandidates = candidates.filter(c => c.status === 0 || c.status === 1);
+                if (newCandidates.length > 0) {
+                    console.log(`[Discovery:HighlightApi] Found ${newCandidates.length} NEW candidates:`, newCandidates.map(c => c.token));
+                    // Emit to DiscoveryStore
+                    useDiscoveryStore.getState().addCandidates(newCandidates);
+                } else {
+                    if (candidates.length > 0) {
+                        console.log(`[Discovery:HighlightApi] Ignored ${candidates.length} candidates (all existing/ignored)`);
+                    }
+                }
+            })
+            .catch(err => {
+                console.warn('[HighlighterApi] Discovery scan failed:', err);
+            });
+    }
+
+    /**
      * Trigger Rust/KittCore scan for relationship extraction
      */
     private triggerRustScan(text: string, implicitSpans: DecorationSpan[]): void {
+        // ... (Existing implementation) ...
         // Convert implicit decorations to entity spans for KittCore
         const entitySpans = implicitSpans
             .filter(d => d.type === 'entity_implicit')

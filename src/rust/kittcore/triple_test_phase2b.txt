@@ -1,0 +1,434 @@
+﻿cargo :    Compiling 
+kittcore v0.1.0 (C:\Users\sh
+uga\1kittroot\1code\crepe-no
+tes\rust\kittcore)
+At line:1 char:1
++ cargo test triple 
+--release -- --nocapture 
+2>&1 | Out-File -FilePath  
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (   Co  
+  mpiling ki...\rust\kitt   
+ core):String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+warning: unused import: 
+`TextRange`
+   --> src\scanner\dialogue.
+rs:133:44
+    |
+133 |     use crate::scanner
+::chunker::{Chunker, 
+TextRange};
+    |                       
+                     
+^^^^^^^^^
+    |
+    = note: 
+`#[warn(unused_imports)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused import: 
+`TextRange`
+   --> 
+src\reality\parser.rs:909:55
+    |
+909 |     use crate::scanner
+::chunker::{Chunker, 
+ChunkKind, TextRange};
+    |                       
+                            
+    ^^^^^^^^^
+
+warning: unused import: 
+`HnswError`
+ --> src\hnsw\tests\hybrid_t
+ests.rs:5:40
+  |
+5 | use 
+crate::hnsw::index::{Hnsw, 
+Metric, HnswError};
+  |                         
+               ^^^^^^^^^
+
+warning: unused import: `cra
+te::hnsw::quantization::Scal
+arQuantized`
+ --> src\hnsw\tests\hybrid_t
+ests.rs:6:5
+  |
+6 | use crate::hnsw::quantiz
+ation::ScalarQuantized;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: 
+`result`
+   --> 
+src\scanner\syntax.rs:355:22
+    |
+355 |     fn 
+parse_matches(result: 
+JsValue) -> 
+Vec<SyntaxMatch> {
+    |                      
+^^^^^^ help: if this is 
+intentional, prefix it with 
+an underscore: `_result`
+    |
+    = note: 
+`#[warn(unused_variables)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused variable: 
+`stats`
+   --> src\scanner\relation.
+rs:279:36
+    |
+279 |         let 
+(structured_relations, 
+stats) = extractor.extract_w
+ith_stats(text, entities);
+    |                       
+             ^^^^^ help: if 
+this is intentional, prefix 
+it with an underscore: 
+`_stats`
+
+warning: value assigned to 
+`head_idx` is never read
+   --> src\scanner\chunker.r
+s:491:28
+    |
+491 |         let mut 
+head_idx = None;
+    |                       
+     ^^^^
+    |
+    = help: maybe it is 
+overwritten before being 
+read?
+    = note: `#[warn(unused_a
+ssignments)]` (part of 
+`#[warn(unused)]`) on by 
+default
+
+warning: unused variable: 
+`ng`
+   --> src\scanner\narrative
+.rs:247:13
+    |
+247 |         let ng = 
+NarrativeGraph::new();
+    |             ^^ help: 
+if this is intentional, 
+prefix it with an 
+underscore: `_ng`
+
+warning: unused variable: 
+`result`
+   --> src\scanner\narrative
+.rs:312:13
+    |
+312 |         let result = 
+ng.analyze_native("Gandalf 
+walked slowly. The wizard 
+stopped.");
+    |             ^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_result`
+
+warning: unused variable: 
+`vp_verb_text`
+   --> src\scanner\structure
+d_relation.rs:307:17
+    |
+307 |             let 
+vp_verb_text = 
+vp.head.slice(text);
+    |                 
+^^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_vp_verb_text`
+
+warning: unused variable: 
+`relations`
+   --> src\scanner\structure
+d_relation.rs:915:13
+    |
+915 |         let relations 
+= extractor.extract_structur
+ed(text, &entities);
+    |             ^^^^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_relations`
+
+warning: unused variable: 
+`projections`
+   --> 
+src\reality\engine.rs:790:14
+    |
+790 |         let 
+(projections, stats) = engin
+e.process_with_projections(t
+ext, &spans);
+    |              
+^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_projections`
+
+warning: unused variable: 
+`entity_docs`
+   --> 
+src\reality\bridge.rs:310:13
+    |
+310 |         let 
+entity_docs = 
+global.entity_documents();
+    |             
+^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_entity_docs`
+
+warning: unused variable: 
+`q`
+   --> src\hnsw\tests\hnsw_t
+ests.rs:121:9
+    |
+121 |     for q in 
+0..num_queries {
+    |         ^ help: if 
+this is intentional, prefix 
+it with an underscore: `_q`
+
+warning: function 
+`parse_matches` is never 
+used
+   --> 
+src\scanner\syntax.rs:355:8
+    |
+355 |     fn 
+parse_matches(result: 
+JsValue) -> 
+Vec<SyntaxMatch> {
+    |        ^^^^^^^^^^^^^
+    |
+    = note: 
+`#[warn(dead_code)]` (part 
+of `#[warn(unused)]`) on by 
+default
+
+warning: field 
+`semantic_weight` is never 
+read
+  --> 
+src\scanner\attacher.rs:89:5
+   |
+86 | pub struct Attacher {
+   |            -------- 
+field in this struct
+...
+89 |     semantic_weight: 
+f64,
+   |     ^^^^^^^^^^^^^^^
+
+warning: field `attributor` 
+is never read
+   --> src\scanner\narrative
+.rs:111:5
+    |
+107 | pub struct 
+NarrativeGraph {
+    |            
+-------------- field in 
+this struct
+...
+111 |     attributor: 
+DialogueAttributor,
+    |     ^^^^^^^^^^
+
+warning: field `label` is 
+never read
+   --> 
+src\reality\engine.rs:401:44
+    |
+401 |         Entity { 
+start: usize, end: usize, 
+label: String },
+    |         ------ field 
+in this variant       ^^^^^
+    |
+    = note: `TestSpan` has 
+derived impls for the 
+traits `Clone` and `Debug`, 
+but these are intentionally 
+ignored during dead code 
+analysis
+
+warning: fields `label` and 
+`kind` are never read
+ --> 
+src\reality\tests.rs:8:9
+  |
+5 | pub struct MockEntity {
+  |            ---------- 
+fields in this struct
+...
+8 |     pub label: String,
+  |         ^^^^^
+9 |     pub kind: String, 
+// "Person", "Place", etc.
+  |         ^^^^
+  |
+  = note: `MockEntity` has 
+derived impls for the 
+traits `Clone` and `Debug`, 
+but these are intentionally 
+ignored during dead code 
+analysis
+
+warning: comparison is 
+useless due to type limits
+   --> src\scanner\conductor
+.rs:368:17
+    |
+368 |         assert!(result
+.stats.timings.total_us >= 
+0);
+    |                 ^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_c
+omparisons)]` on by default
+
+warning: `kittcore` (lib 
+test) generated 20 warnings 
+(run `cargo fix --lib -p 
+kittcore --tests` to apply 
+13 suggestions)
+    Finished `release` 
+profile [optimized] 
+target(s) in 1m 24s
+     Running unittests 
+src\lib.rs (target\release\d
+eps\kittcore-79307c2f0446af9
+e.exe)
+
+running 31 tests
+test reality::projection::tests::test_triple_has_required_fields ... ok
+test scanner::projections::tests::test_relationship_graph_creates_nodes_from_triples ... ok
+test reality::tests::test_projection_triples ... ok
+test scanner::triple::tests::test_bidirectional_arrow_triple ... ok
+test scanner::triple::tests::test_case_preserved ... ok
+test scanner::triple::tests::test_empty_text ... ok
+test scanner::triple::tests::test_forward_arrow_multiword ... ok
+test scanner::triple::tests::test_forward_arrow_triple ... ok
+test scanner::triple::tests::test_basic_triple_extraction ... ok
+test scanner::triple::tests::test_backward_arrow_triple ... ok
+test scanner::syntax::tests::test_triple_lowercase_kinds ... ok
+test scanner::syntax::tests::test_triple_syntax ... ok
+test scanner::syntax::tests::test_triple_flexible_syntax ... ok
+test reality::bridge::tests::test_bridge_detects_triples ... ok
+
+thread 'scanner::triple::tes
+ts::test_malformed_triples_i
+gnored' (22900) panicked at 
+src\scanner\triple.rs:396:9:
+assertion failed: cortex.ext
+ract("[[A->B->C").is_empty()
+note: run with 
+`RUST_BACKTRACE=1` 
+environment variable to 
+display a backtrace
+test scanner::document::tests::test_scan_extracts_triples ... ok
+=== FULL DIAGNOSTIC TEST ===
+Document length: 3268 chars
+Found 30 triples:
+  1: [CHARACTER|Imu] (POSSESSES) [CHARACTER|Gunko]
+  2: [EVENT|Imu Takes Control of Gunko] (LEADS_TO) [EVENT|Supreme King Haki Burst]
+  3: [EVENT|Supreme King Haki Burst] (LEADS_TO) [EVENT|Adults Blasted Away]
+  4: [EVENT|Adults Blasted Away] (LEADS_TO) [EVENT|Giants Demonized]
+  5: [CHARACTER|Imu] (TRIGGERS) [EVENT|Imu Takes Control of Gunko]
+  6: [CHARACTER|Imu] (EMITS) [EVENT|Supreme King Haki Burst]
+  7: [CHARACTER|Imu] (CONVERTS) [EVENT|Giants Demonized]
+  8: [EVENT|Giants Demonized] (INCLUDES) [EVENT|Dorry and Brogy Turned Against Elbaph]
+  9: [EVENT|Dorry and Brogy Turned Against Elbaph] (LEADS_TO) [EVENT|Order to Kill Jarul]
+  10: [CHARACTER|Dorry] (TARGETS) [CHARACTER|Jarul]
+  11: [CHARACTER|Brogy] (TARGETS) [CHARACTER|Jarul]
+  12: [CHARACTER|Imu] (ORDERS) [EVENT|Order to Kill Jarul]
+  13: [CHARACTER|Nico Robin] (CONFRONTS) [CHARACTER|Saint Sommers]
+  14: [CHARACTER|Nico Robin] (INITIATES) [EVENT|Robin Attempts to Stop Sommers]
+  15: [CHARACTER|Scopper Gaban] (INTERRUPTS) [EVENT|Robin Attempts to Stop Sommers]
+  16: [CHARACTER|Scopper Gaban] (CAUSES) [EVENT|Gaban Slices Sommers]
+  17: [CHARACTER|Gunko] (DEFEATS) [CHARACTER|Scopper Gaban]
+  18: [CHARACTER|Scopper Gaban] (FALLS_INTO) [LOCATION|Underworld]
+  19: [EVENT|Gaban Falls to Underworld] (OCCURS_IN) [LOCATION|Underworld]
+  20: [CHARACTER|Tony Tony Chopper] (TREATS) [CHARACTER|Scopper Gaban]
+  21: [CHARACTER|Tony Tony Chopper] (CAUSES) [EVENT|Chopper Saves Gaban]
+  22: [EVENT|Chopper Saves Gaban] (FOLLOWS) [EVENT|Gaban Falls to Underworld]
+  23: [CHARACTER|Loki] (STRIKES) [LOCATION|Treasure Tree Adam]
+  24: [CHARACTER|Loki] (CAUSES) [EVENT|Loki Strikes Adam]
+  25: [EVENT|Loki Strikes Adam] (TRIGGERS) [EVENT|Lightning and Fire Outbreak]
+  26: [EVENT|Lightning and Fire Outbreak] (OCCURS_IN) [LOCATION|Sun World]
+  27: [CHARACTER|Ripley] (WARNs_ABOUT) [EVENT|Elbaph Weakness: Fire]
+  28: [CHARACTER|Ripley] (WARNs_ABOUT) [EVENT|Elbaph Weakness: Lightning]
+  29: [EVENT|Lightning and Fire Outbreak] (CORRELATES_WITH) [EVENT|Elbaph Weakness: Fire]
+  30: [EVENT|Lightning and Fire Outbreak] (CORRELATES_WITH) [EVENT|Elbaph Weakness: Lightning]
+=== END DIAGNOSTIC ===
+test scanner::triple::tests::test_multi_word_entities ... ok
+test scanner::triple::tests::test_malformed_triples_ignored ... FAILED
+test scanner::triple::tests::test_no_triples ... ok
+test scanner::triple::tests::test_multiple_triples ... ok
+test scanner::triple::tests::test_full_imu_document_diagnostic ... ok
+Found 3 triples
+  Lilith --DISCOVERS-> Ancient Facility
+  Shanks --DEFEATS-> Loki
+  Knights of God --PURSUES-> Knights Aim to Annex Elbaph
+test scanner::triple::tests::test_mixed_triple_syntaxes ... ok
+test scanner::triple::tests::test_multiple_parenthesized_triples ... ok
+Found 1 triples
+  Lilith --DISCOVERS-> Ancient Facility
+test scanner::triple::tests::test_parenthesized_triple ... ok
+Found 1 triples
+  Lilith --DISCOVERS-> Ancient Facility (Elbaph)
+test scanner::triple::tests::test_position_tracking ... ok
+test scanner::triple::tests::test_raw_text_preserved ... ok
+test scanner::triple::tests::test_parenthesized_triple_with_parens_in_label ... ok
+test scanner::triple::tests::test_whitespace_around_components ... ok
+User Document Test: Found 10 triples
+  1: Ancient Facility (Elbaph) --LOCATED_IN-> Elbaph
+  2: Lilith --DISCOVERS-> Ancient Facility (Elbaph)
+  3: Lilith --ESTABLISHES_BASE_AT-> Ancient Facility (Elbaph)
+  4: Lilith --INITIATES-> Lilith Claims Facility
+  5: Roronoa Zoro --RIVALS_WITH-> Sanji
+  6: Nami --DISCIPLINES-> Monkey D. Luffy
+  7: Usopp --ADMires-> Giant Warrior Pirates
+  8: Franky --ADMires-> Treasure Tree Adam
+  9: Brook --SUPPORTS-> Nico Robin
+  10: Jinbe --ADVISES-> Monkey D. Luffy
+test scanner::triple::tests::test_user_document_full_syntax ... ok
+test scanner::unified::tests::test_triple ... ok
+test scanner::unified::tests::test_triple_takes_priority_over_entity ... ok
+test scanner::unified::tests::test_parenthesized_triple ... ok
+
+failures:
+
+failures:
+    scanner::triple::tests::test_malformed_triples_ignored
+
+test result: FAILED. 30 passed; 1 failed; 0 ignored; 0 measured; 615 filtered out; finished in 0.03s
+
+error: test failed, to 
+rerun pass `--lib`

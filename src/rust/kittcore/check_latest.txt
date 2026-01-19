@@ -1,0 +1,1194 @@
+﻿cargo :     Checking 
+kittcore v0.1.0 (C:\U
+sers\shuga\1kittroot\
+1code\crepe-notes\rus
+t\kittcore)
+At line:1 char:1
++ cargo check 
+--features wasm 2>&1 
+| Out-File -FilePath 
+check_latest.tx ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (    Che   
+ cking ki...\rust    
+\kittcore):Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+error[E0433]: failed 
+to resolve: use of 
+unresolved module or 
+unlinked crate 
+`tract_onnx`
+ --> src\embeddings\m
+odel.rs:7:5
+  |
+7 | use tract_onnx::p
+relude::*;
+  |     ^^^^^^^^^^ 
+use of unresolved 
+module or unlinked 
+crate `tract_onnx`
+  |
+  = help: if you 
+wanted to use a 
+crate named 
+`tract_onnx`, use 
+`cargo add 
+tract_onnx` to add 
+it to your 
+`Cargo.toml`
+
+error[E0433]: failed 
+to resolve: use of 
+unresolved module or 
+unlinked crate 
+`tract_core`
+ --> src\embeddings\m
+odel.rs:8:5
+  |
+8 | use tract_core::t
+ract_data::TractResul
+t;
+  |     ^^^^^^^^^^ 
+use of unresolved 
+module or unlinked 
+crate `tract_core`
+  |
+  = help: if you 
+wanted to use a 
+crate named 
+`tract_core`, use 
+`cargo add 
+tract_core` to add 
+it to your 
+`Cargo.toml`
+
+error[E0432]: 
+unresolved import 
+`tokenizers`
+ --> src\embeddings\t
+okenize.rs:5:5
+  |
+5 | use tokenizers::T
+okenizer;
+  |     ^^^^^^^^^^ 
+use of unresolved 
+module or unlinked 
+crate `tokenizers`
+  |
+  = help: if you 
+wanted to use a 
+crate named 
+`tokenizers`, use 
+`cargo add 
+tokenizers` to add 
+it to your 
+`Cargo.toml`
+
+error: cannot find 
+macro `tvec` in this 
+scope
+   --> src\embeddings
+\model.rs:119:36
+    |
+119 |         let 
+inputs: TVec<TValue> 
+= tvec![
+    |                
+                    
+^^^^ help: a macro 
+with a similar name 
+exists: `vec`
+    |
+   --> /rustc/ded5c06
+cf21d2b93bffd5d884aa6
+e96934ee4234\library\
+alloc\src\macros.rs:4
+2:1
+    |
+    = note: 
+similarly named 
+macro `vec` defined 
+here
+
+error[E0412]: cannot 
+find type 
+`SimplePlan` in this 
+scope
+  --> src\embeddings\
+model.rs:13:19
+   |
+13 | type TractModel 
+= SimplePlan<TypedFac
+t, Box<dyn TypedOp>, 
+Graph<TypedFact, 
+Box<dyn TypedOp>>>;
+   |                 
+  ^^^^^^^^^^ not 
+found in this scope
+
+error[E0412]: cannot 
+find type 
+`TypedFact` in this 
+scope
+  --> src\embeddings\
+model.rs:13:30
+   |
+13 | type TractModel 
+= SimplePlan<TypedFac
+t, Box<dyn TypedOp>, 
+Graph<TypedFact, 
+Box<dyn TypedOp>>>;
+   |                 
+             
+^^^^^^^^^ not found 
+in this scope
+   |
+help: you might be 
+missing a type 
+parameter
+   |
+13 | type TractModel<
+TypedFact> = SimplePl
+an<TypedFact, 
+Box<dyn TypedOp>, 
+Graph<TypedFact, 
+Box<dyn TypedOp>>>;
+   |                
++++++++++++
+
+error[E0405]: cannot 
+find trait `TypedOp` 
+in this scope
+  --> src\embeddings\
+model.rs:13:49
+   |
+13 | type TractModel 
+= SimplePlan<TypedFac
+t, Box<dyn TypedOp>, 
+Graph<TypedFact, 
+Box<dyn TypedOp>>>;
+   |                 
+                     
+           ^^^^^^^ 
+not found in this 
+scope
+
+error[E0412]: cannot 
+find type `Graph` in 
+this scope
+  --> src\embeddings\
+model.rs:13:59
+   |
+13 | type TractModel 
+= SimplePlan<TypedFac
+t, Box<dyn TypedOp>, 
+Graph<TypedFact, 
+Box<dyn TypedOp>>>;
+   |                 
+                     
+                     
+^^^^^ not found in 
+this scope
+
+error[E0412]: cannot 
+find type 
+`TypedFact` in this 
+scope
+  --> src\embeddings\
+model.rs:13:65
+   |
+13 | type TractModel 
+= SimplePlan<TypedFac
+t, Box<dyn TypedOp>, 
+Graph<TypedFact, 
+Box<dyn TypedOp>>>;
+   |                 
+                     
+                     
+      ^^^^^^^^^ not 
+found in this scope
+   |
+help: you might be 
+missing a type 
+parameter
+   |
+13 | type TractModel<
+TypedFact> = SimplePl
+an<TypedFact, 
+Box<dyn TypedOp>, 
+Graph<TypedFact, 
+Box<dyn TypedOp>>>;
+   |                
++++++++++++
+
+error[E0405]: cannot 
+find trait `TypedOp` 
+in this scope
+  --> src\embeddings\
+model.rs:13:84
+   |
+13 | type TractModel 
+= SimplePlan<TypedFac
+t, Box<dyn TypedOp>, 
+Graph<TypedFact, 
+Box<dyn TypedOp>>>;
+   |                 
+                     
+                     
+                     
+    ^^^^^^^ not 
+found in this scope
+
+error[E0412]: cannot 
+find type `TVec` in 
+this scope
+   --> src\embeddings
+\model.rs:119:21
+    |
+119 |         let 
+inputs: TVec<TValue> 
+= tvec![
+    |                
+     ^^^^ help: a 
+struct with a 
+similar name exists: 
+`Vec`
+    |
+   --> /rustc/ded5c06
+cf21d2b93bffd5d884aa6
+e96934ee4234\library\
+alloc\src\vec\mod.rs:
+434:1
+    |
+    = note: 
+similarly named 
+struct `Vec` defined 
+here
+
+error[E0412]: cannot 
+find type `TValue` 
+in this scope
+   --> src\embeddings
+\model.rs:119:26
+    |
+119 |         let 
+inputs: TVec<TValue> 
+= tvec![
+    |                
+          ^^^^^^ not 
+found in this scope
+    |
+help: you might be 
+missing a type 
+parameter
+    |
+ 58 | impl<TValue> 
+EmbedModel {
+    |     ++++++++
+
+error[E0412]: cannot 
+find type `Tensor` 
+in this scope
+   --> src\embeddings
+\model.rs:158:17
+    |
+158 |     ) -> 
+Result<Tensor, 
+ModelError>
+    |                
+ ^^^^^^ not found in 
+this scope
+    |
+help: you might be 
+missing a type 
+parameter
+    |
+ 58 | impl<Tensor> 
+EmbedModel {
+    |     ++++++++
+
+warning: unused 
+import: 
+`RelationSource`
+  --> src\scanner\doc
+ument.rs:19:50
+   |
+19 |     
+RelationCortex, 
+EntitySpan, 
+UnifiedRelation, 
+RelationSource,
+   |                 
+                     
+            
+^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(un
+used_imports)]` 
+(part of 
+`#[warn(unused)]`) 
+on by default
+
+warning: unused 
+import: `ChunkResult`
+  --> src\scanner\att
+acher.rs:21:49
+   |
+21 | use crate::scann
+er::chunker::{Chunk, 
+ChunkKind, 
+ChunkResult};
+   |                 
+                     
+           
+^^^^^^^^^^^
+
+warning: unused 
+import: `ChunkResult`
+  --> src\scanner\dia
+logue.rs:10:49
+   |
+10 | use crate::scann
+er::chunker::{Chunk, 
+ChunkKind, 
+ChunkResult};
+   |                 
+                     
+           
+^^^^^^^^^^^
+
+warning: unused 
+import: 
+`NarrativeContext`
+  --> src\scanner\dia
+logue.rs:11:32
+   |
+11 | use crate::scann
+er::resolver::{Narrat
+iveContext, 
+EntityId, Resolver};
+   |                 
+               
+^^^^^^^^^^^^^^^^
+
+warning: unused 
+imports: 
+`Deserialize` and 
+`Serialize`
+  --> src\scanner\dia
+logue.rs:13:13
+   |
+13 | use 
+serde::{Deserialize, 
+Serialize};
+   |             
+^^^^^^^^^^^  
+^^^^^^^^^
+
+warning: unused 
+import: `POS`
+  --> src\scanner\str
+uctured_relation.rs:3
+5:73
+   |
+35 | use super::chunk
+er::{Chunk, 
+ChunkKind, 
+ChunkResult, 
+Chunker, TextRange, 
+POS};
+   |                 
+                     
+                     
+              ^^^
+
+warning: unused 
+import: `ChunkResult`
+   --> src\reality\pa
+rser.rs:643:49
+    |
+643 | use crate::scan
+ner::chunker::{Chunk,
+ ChunkKind, 
+ChunkResult};
+    |                
+                     
+            
+^^^^^^^^^^^
+
+warning: unused 
+imports: 
+`ProjectionStats`, 
+`project_all`, `proje
+ct_attributions`, 
+`project_quads`, and 
+`project_state_change
+s`
+  --> src\reality\eng
+ine.rs:16:22
+   |
+16 |     
+project_triples, 
+project_quads, projec
+t_attributions, proje
+ct_state_changes,
+   |                 
+     ^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^^^^^^ 
+ 
+^^^^^^^^^^^^^^^^^^^^^
+17 |     
+project_all, project_
+all_with_stats,
+   |     ^^^^^^^^^^^
+18 |     Triple, 
+QuadPlus, 
+Attribution, 
+StateChange, 
+Projection, 
+ProjectionStats,
+   |                 
+                     
+                     
+  ^^^^^^^^^^^^^^^
+
+warning: unused 
+import: `EdgeKind`
+  --> src\reality\eng
+ine.rs:20:60
+   |
+20 | use super::graph
+::{ConceptGraph, 
+ConceptNode, 
+ConceptEdge, 
+EdgeKind};
+   |                 
+                     
+                     
+ ^^^^^^^^
+
+warning: unused 
+import: 
+`ExtractedRelation`
+   --> src\reality\ap
+i.rs:100:82
+    |
+100 | use crate::scan
+ner::relation::{Relat
+ionCortex, 
+EntitySpan as 
+RelationEntitySpan, 
+ExtractedRelation};
+    |                
+                     
+                     
+                     
+   ^^^^^^^^^^^^^^^^^
+
+warning: unused 
+import: `SpanRecord`
+   --> src\reality\ap
+i.rs:101:40
+    |
+101 | use super::enti
+ty_layer::{EntityLaye
+r, SpanRecord, 
+EntityRecord};
+    |                
+                     
+   ^^^^^^^^^^
+
+warning: unused 
+import: `ConceptEdge`
+  --> src\reality\glo
+bal.rs:11:47
+   |
+11 | use super::graph
+::{ConceptGraph, 
+ConceptNode, 
+ConceptEdge};
+   |                 
+                     
+         ^^^^^^^^^^^
+
+warning: unused 
+imports: 
+`ConceptEdge` and 
+`ConceptNode`
+ --> src\reality\algo
+rithms.rs:9:34
+  |
+9 | use super::graph:
+:{ConceptGraph, 
+ConceptNode, 
+ConceptEdge};
+  |                  
+                
+^^^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused 
+import: `EdgeKind`
+ --> src\reality\temp
+oral.rs:9:60
+  |
+9 | use super::graph:
+:{ConceptGraph, 
+ConceptNode, 
+ConceptEdge, 
+EdgeKind};
+  |                  
+                     
+                     
+^^^^^^^^
+
+warning: unused 
+import: `unicode_segm
+entation::UnicodeSegm
+entation`
+ --> src\embeddings\c
+hunker.rs:6:5
+  |
+6 | use unicode_segme
+ntation::UnicodeSegme
+ntation;
+  |     ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^
+
+warning: unused 
+import: `HnswError`
+ --> 
+src\rag\index.rs:8:40
+  |
+8 | use crate::hnsw::
+index::{Hnsw, 
+Metric, HnswError};
+  |                  
+                     
+ ^^^^^^^^^
+
+warning: unused 
+imports: 
+`FieldOccurrence`, 
+`ProximityStrategy`, 
+and `ResoRankConfig`
+  --> src\rag\pipelin
+e.rs:12:39
+   |
+12 |     
+ResoRankScorer, 
+CorpusStatistics, 
+ResoRankConfig, 
+ProximityStrategy,
+   |                 
+                     
+ ^^^^^^^^^^^^^^  
+^^^^^^^^^^^^^^^^^
+13 |     
+DocumentMetadata as 
+ResoDocMeta, 
+TokenMetadata, 
+FieldOccurrence,
+   |                 
+                     
+               
+^^^^^^^^^^^^^^^
+
+warning: unused 
+import: 
+`SearchResult as 
+IndexSearchResult`
+  --> src\rag\pipelin
+e.rs:16:33
+   |
+16 | use super::index
+::{VectorIndex, 
+SearchResult as 
+IndexSearchResult};
+   |                 
+                ^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^
+
+warning: unused 
+import: `crate::hnsw:
+:node::HnswNode`
+ --> 
+src\hnsw\wasm.rs:3:5
+  |
+3 | use crate::hnsw::
+node::HnswNode;
+  |     ^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
+
+warning: unnecessary 
+parentheses around 
+assigned value
+   --> src\hnsw\binar
+y_quantization.rs:159
+:17
+    |
+159 |     let denom 
+= (mag_a.sqrt() * 
+mag_b.sqrt());
+    |                
+ ^                   
+        ^
+    |
+    = note: `#[warn(u
+nused_parens)]` 
+(part of 
+`#[warn(unused)]`) 
+on by default
+help: remove these 
+parentheses
+    |
+159 -     let denom 
+= (mag_a.sqrt() * 
+mag_b.sqrt());
+159 +     let denom 
+= mag_a.sqrt() * 
+mag_b.sqrt();
+    |
+
+warning: unused 
+imports: 
+`ConceptEdge`, 
+`ConceptNode`, and 
+`EdgeKind`
+ --> src\graphdb\stor
+age.rs:8:29
+  |
+8 | use crate::realit
+y::graph::{ConceptNod
+e, ConceptEdge, 
+EdgeKind};
+  |                  
+           
+^^^^^^^^^^^  
+^^^^^^^^^^^  ^^^^^^^^
+
+warning: unexpected 
+`cfg` condition 
+value: `console_error
+_panic_hook`
+   --> 
+src\lib.rs:141:11
+    |
+141 |     
+#[cfg(feature = "cons
+ole_error_panic_hook"
+)]
+    |           ^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
+    |
+    = note: expected 
+values for `feature` 
+are: `default`, 
+`embeddings`, 
+`native`, 
+`sqlite_wasm`, 
+`wasm`, and 
+`wee_alloc`
+    = help: consider 
+adding `console_error
+_panic_hook` as a 
+feature in 
+`Cargo.toml`
+    = note: see <http
+s://doc.rust-lang.org
+/nightly/rustc/check-
+cfg/cargo-specifics.h
+tml> for more 
+information about 
+checking conditional 
+configuration
+    = note: `#[warn(u
+nexpected_cfgs)]` on 
+by default
+
+error[E0433]: failed 
+to resolve: use of 
+unresolved module or 
+unlinked crate 
+`tract_onnx`
+  --> src\embeddings\
+model.rs:66:21
+   |
+66 |         let 
+model = 
+tract_onnx::onnx()
+   |                 
+    ^^^^^^^^^^ use 
+of unresolved module 
+or unlinked crate 
+`tract_onnx`
+   |
+   = help: if you 
+wanted to use a 
+crate named 
+`tract_onnx`, use 
+`cargo add 
+tract_onnx` to add 
+it to your 
+`Cargo.toml`
+
+error[E0282]: type 
+annotations needed
+  --> src\embeddings\
+model.rs:68:23
+   |
+68 |             
+.map_err(|e| ModelErr
+or::LoadFailed(e.to_s
+tring()))?
+   |                 
+      ^              
+           - type 
+must be known at 
+this point
+   |
+help: consider 
+giving this closure 
+parameter an 
+explicit type
+   |
+68 |             
+.map_err(|e: /* Type 
+*/| ModelError::LoadF
+ailed(e.to_string()))
+?
+   |                 
+       ++++++++++++
+
+error[E0282]: type 
+annotations needed
+  --> src\embeddings\
+model.rs:70:23
+   |
+70 |             
+.map_err(|e| ModelErr
+or::LoadFailed(e.to_s
+tring()))?
+   |                 
+      ^              
+           - type 
+must be known at 
+this point
+   |
+help: consider 
+giving this closure 
+parameter an 
+explicit type
+   |
+70 |             
+.map_err(|e: /* Type 
+*/| ModelError::LoadF
+ailed(e.to_string()))
+?
+   |                 
+       ++++++++++++
+
+error[E0282]: type 
+annotations needed
+  --> src\embeddings\
+model.rs:72:23
+   |
+72 |             
+.map_err(|e| ModelErr
+or::LoadFailed(e.to_s
+tring()))?;
+   |                 
+      ^              
+           - type 
+must be known at 
+this point
+   |
+help: consider 
+giving this closure 
+parameter an 
+explicit type
+   |
+72 |             
+.map_err(|e: /* Type 
+*/| ModelError::LoadF
+ailed(e.to_string()))
+?;
+   |                 
+       ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\embeddings
+\model.rs:126:23
+    |
+126 |             
+.map_err(|e| ModelErr
+or::InferenceFailed(e
+.to_string()))?;
+    |                
+       ^             
+                 - 
+type must be known 
+at this point
+    |
+help: consider 
+giving this closure 
+parameter an 
+explicit type
+    |
+126 |             
+.map_err(|e: /* Type 
+*/| ModelError::Infer
+enceFailed(e.to_strin
+g()))?;
+    |                
+        ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\embeddings
+\model.rs:132:23
+    |
+132 |             
+.map_err(|e| ModelErr
+or::ShapeError(e.to_s
+tring()))?;
+    |                
+       ^             
+            - type 
+must be known at 
+this point
+    |
+help: consider 
+giving this closure 
+parameter an 
+explicit type
+    |
+132 |             
+.map_err(|e: /* Type 
+*/| ModelError::Shape
+Error(e.to_string()))
+?;
+    |                
+        ++++++++++++
+
+error[E0433]: failed 
+to resolve: use of 
+undeclared type 
+`Tensor`
+   --> src\embeddings
+\model.rs:170:22
+    |
+170 |         let 
+tensor = Tensor::from
+_shape(&[batch_size, 
+seq_len], &data)
+    |                
+      ^^^^^^ use of 
+undeclared type 
+`Tensor`
+
+error[E0282]: type 
+annotations needed
+   --> src\embeddings
+\model.rs:171:23
+    |
+171 |             
+.map_err(|e| ModelErr
+or::ShapeError(e.to_s
+tring()))?;
+    |                
+       ^             
+            - type 
+must be known at 
+this point
+    |
+help: consider 
+giving this closure 
+parameter an 
+explicit type
+    |
+171 |             
+.map_err(|e: /* Type 
+*/| ModelError::Shape
+Error(e.to_string()))
+?;
+    |                
+        ++++++++++++
+
+error[E0282]: type 
+annotations needed
+  --> src\embeddings\
+tokenize.rs:26:23
+   |
+26 |             
+.map_err(|e| Tokenize
+rError::LoadFailed(e.
+to_string()))?;
+   |                 
+      ^              
+               - 
+type must be known 
+at this point
+   |
+help: consider 
+giving this closure 
+parameter an 
+explicit type
+   |
+26 |             
+.map_err(|e: /* Type 
+*/| TokenizerError::L
+oadFailed(e.to_string
+()))?;
+   |                 
+       ++++++++++++
+
+error[E0282]: type 
+annotations needed
+  --> src\embeddings\
+tokenize.rs:37:23
+   |
+37 |             
+.map_err(|e| Tokenize
+rError::EncodeFailed(
+e.to_string()))?;
+   |                 
+      ^              
+                 - 
+type must be known 
+at this point
+   |
+help: consider 
+giving this closure 
+parameter an 
+explicit type
+   |
+37 |             
+.map_err(|e: /* Type 
+*/| TokenizerError::E
+ncodeFailed(e.to_stri
+ng()))?;
+   |                 
+       ++++++++++++
+
+warning: unused 
+variable: `stats`
+   --> src\scanner\re
+lation.rs:279:36
+    |
+279 |         let (st
+ructured_relations, 
+stats) = extractor.ex
+tract_with_stats(text
+, entities);
+    |                
+                    
+^^^^^ help: if this 
+is intentional, 
+prefix it with an 
+underscore: `_stats`
+    |
+    = note: `#[warn(u
+nused_variables)]` 
+(part of 
+`#[warn(unused)]`) 
+on by default
+
+warning: value 
+assigned to 
+`head_idx` is never 
+read
+   --> src\scanner\ch
+unker.rs:491:28
+    |
+491 |         let 
+mut head_idx = None;
+    |                
+            ^^^^
+    |
+    = help: maybe it 
+is overwritten 
+before being read?
+    = note: `#[warn(u
+nused_assignments)]` 
+(part of 
+`#[warn(unused)]`) 
+on by default
+
+warning: unused 
+variable: `resolver`
+  --> src\scanner\dia
+logue.rs:74:49
+   |
+74 |     fn find_spea
+ker_in_chunks(chunks:
+ &[Chunk], resolver: 
+&mut Resolver) -> 
+Option<EntityId> {
+   |                 
+                     
+           ^^^^^^^^ 
+help: if this is 
+intentional, prefix 
+it with an 
+underscore: 
+`_resolver`
+
+warning: unused 
+variable: `quote_pos`
+  --> src\scanner\dia
+logue.rs:97:9
+   |
+97 |         
+quote_pos: 
+QuotePosition,
+   |         
+^^^^^^^^^ help: if 
+this is intentional, 
+prefix it with an 
+underscore: 
+`_quote_pos`
+
+warning: unused 
+variable: 
+`character_label`
+   --> src\scanner\pr
+ojections.rs:653:13
+    |
+653 |         let 
+character_label = cha
+racter_ref.target.to_
+lowercase();
+    |             
+^^^^^^^^^^^^^^^ 
+help: if this is 
+intentional, prefix 
+it with an 
+underscore: 
+`_character_label`
+
+warning: unused 
+variable: 
+`vp_verb_text`
+   --> src\scanner\st
+ructured_relation.rs:
+307:17
+    |
+307 |             
+let vp_verb_text = 
+vp.head.slice(text);
+    |                
+ ^^^^^^^^^^^^ help: 
+if this is 
+intentional, prefix 
+it with an 
+underscore: 
+`_vp_verb_text`
+
+warning: unused 
+variable: `agent_pp`
+   --> src\scanner\st
+ructured_relation.rs:
+552:13
+    |
+552 |         let 
+agent_pp = pattern.mo
+difiers.iter().find(|
+pp| {
+    |             
+^^^^^^^^ help: if 
+this is intentional, 
+prefix it with an 
+underscore: 
+`_agent_pp`
+
+warning: unused 
+variable: `start`
+   --> src\embeddings
+\chunker.rs:103:18
+    |
+103 |             
+let (start, end, 
+sentence) = sentences
+[sentence_idx];
+    |                
+  ^^^^^ help: if 
+this is intentional, 
+prefix it with an 
+underscore: `_start`
+
+warning: unused 
+variable: `end`
+   --> src\embeddings
+\chunker.rs:103:25
+    |
+103 |             
+let (start, end, 
+sentence) = sentences
+[sentence_idx];
+    |                
+         ^^^ help: 
+if this is 
+intentional, prefix 
+it with an 
+underscore: `_end`
+
+warning: unused 
+variable: 
+`note_count`
+   --> src\rag\pipeli
+ne.rs:186:13
+    |
+186 |         let 
+note_count = 
+notes.len();
+    |             
+^^^^^^^^^^ help: if 
+this is intentional, 
+prefix it with an 
+underscore: 
+`_note_count`
+
+warning: unused 
+variable: `id`
+   --> src\rag\raptor
+.rs:118:14
+    |
+118 |         for 
+(id, emb, _) in 
+&chunks {
+    |              
+^^ help: if this is 
+intentional, prefix 
+it with an 
+underscore: `_id`
+
+Some errors have 
+detailed 
+explanations: E0282, 
+E0405, E0412, E0432, 
+E0433.
+For more information 
+about an error, try 
+`rustc --explain 
+E0282`.
+warning: `kittcore` 
+(lib) generated 33 
+warnings
+error: could not 
+compile `kittcore` 
+(lib) due to 23 
+previous errors; 33 
+warnings emitted

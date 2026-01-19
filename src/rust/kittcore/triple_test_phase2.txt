@@ -1,0 +1,55 @@
+﻿cargo :    Compiling 
+kittcore v0.1.0 (C:\U
+sers\shuga\1kittroot\
+1code\crepe-notes\rus
+t\kittcore)
+At line:1 char:1
++ cargo test triple 
+--release -- 
+--nocapture 2>&1 | 
+Out-File -FilePath  
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~
+    + CategoryInfo   
+           : 
+NotSpecified: (   Co 
+   mpiling 
+ki...\rust\kitt    
+core):String) [], 
+Remot    eException
+    + FullyQualifiedE
+rrorId     : 
+NativeCommandError
+ 
+error: mismatched 
+closing delimiter: 
+`}`
+  --> src\scanner\tri
+ple.rs:71:40
+   |
+56 |     pub fn 
+new() -> Self {
+   |                 
+         - closing 
+delimiter possibly 
+meant for this
+...
+71 |         let 
+backward_regex = 
+Regex::new(
+   |                 
+                     
+  ^ unclosed 
+delimiter
+...
+94 |     }
+   |     ^ 
+mismatched closing 
+delimiter
+
+error: could not 
+compile `kittcore` 
+(lib test) due to 1 
+previous error

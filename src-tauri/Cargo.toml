@@ -64,7 +64,7 @@ petgraph = "0.8.3"
 fixedbitset = "0.5.7"
 
 # Phase 2: Will add kittcore as workspace member
-# kittcore = { path = "../rust/kittcore", default-features = false }
+kittcore = { path = "../src/rust/kittcore", default-features = false }
 
 [features]
 default = []

@@ -43,6 +43,10 @@ export function createGraphSchemas(): string[] {
         { name: 'relationships', script: `:create relationships { id: String => source_id: String, target_id: String, type: String, inverse_type: String?, bidirectional: Bool, confidence: Float, namespace: String?, created_at: Float, updated_at: Float }` },
         { name: 'relationship_provenance', script: `:create relationship_provenance { relationship_id: String, source: String, origin_id: String => confidence: Float, timestamp: Float, context: String? }` },
         { name: 'relationship_attributes', script: `:create relationship_attributes { relationship_id: String, key: String => value: String }` },
+        // Unsupervised NER ("Discovery Engine") candidates
+        // token: The word/phrase found
+        // status: 0=Watching (seen), 1=Promoted (user confirmed), 2=Ignored (user rejected)
+        { name: 'discovery_candidates', script: `:create discovery_candidates { token: String => kind: Int, score: Float, status: Int, last_seen: Float, first_seen: Float, count: Int }` },
     ];
 
     const allSchemas = [

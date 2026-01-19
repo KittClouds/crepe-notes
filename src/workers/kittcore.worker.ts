@@ -8,8 +8,13 @@
  * Wired up to real WASM module!
  */
 
-import init, { ScanConductor, RustImplicitScanner, InitOutput } from "../../rust/kittcore/pkg/kittcore.js";
-import wasmUrl from "../../rust/kittcore/pkg/kittcore_bg.wasm?url";
+import init, { ScanConductor, RustImplicitScanner, InitOutput } from "../rust/kittcore/pkg/kittcore.js";
+// @ts-ignore - Vite handles this
+import wasmUrl from "../rust/kittcore/pkg/kittcore_bg.wasm?url";
+import { SharedMemoryManager, WasmExports } from "../lib/wasm-shared";
+
+// Define the shape of our mixed Wasm module (bindgen exports + manual C-style exports)
+type ExtendedExports = InitOutput & WasmExports;
 
 // NOTE: Cross-doc processing (embeddings, CozoDB) happens on MAIN THREAD
 // Workers cannot share in-memory state with main thread.
@@ -36,6 +41,7 @@ type KittCoreMessage =
     | { type: 'EXTRACT_RELATIONS'; payload: { content: string; entities: EntitySpan[]; narrativeId?: string } }
     | { type: 'EXTRACT_TRIPLES'; payload: { content: string } }
     | { type: 'SCAN_TEMPORAL'; payload: { content: string } }
+    | { type: 'SCAN_DISCOVERY'; payload: { content: string } }
     | { type: 'EMBED_TEXT'; payload: { text: string } }
     | { type: 'SEARCH'; payload: { query: string; k: number } }
     | { type: 'GET_STATUS' }
@@ -88,6 +94,7 @@ type ResponseMessage =
     | { type: 'RELATIONS_RESULT'; payload: { relations: any[] } }
     | { type: 'TRIPLES_RESULT'; payload: { triples: any[] } }
     | { type: 'TEMPORAL_RESULT'; payload: { mentions: any[] } }
+    | { type: 'DISCOVERY_RESULT'; payload: { candidates: any[] } }
     | { type: 'EMBED_RESULT'; payload: { embedding: Float32Array } }
     | { type: 'SEARCH_RESULT'; payload: { results: any[] } }
     | { type: 'STATUS'; payload: WorkerStatus }
@@ -110,6 +117,8 @@ let entitiesHydrated = 0;
 // We'll use the ScanConductor from WASM
 let conductor: ScanConductor | null = null;
 let dafsaScanner: RustImplicitScanner | null = null;
+let sharedScanner: SharedMemoryManager | null = null;
+let wasm: InitOutput | null = null;
 const VERSION = '0.1.0-wasm';
 
 // ============================================================================
@@ -149,7 +158,7 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
             case 'INIT':
                 if (!initialized) {
                     // Initialize WASM (use object param to avoid deprecation warning)
-                    await init({ module_or_path: wasmUrl });
+                    wasm = await init({ module_or_path: wasmUrl });
 
                     // Create Conductor
                     conductor = new ScanConductor();
@@ -157,6 +166,11 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
 
                     // Create DAFSA Scanner (Phase 2 A/B Test)
                     dafsaScanner = new RustImplicitScanner();
+
+                    // Initialize Shared Memory Scanner
+                    // 'wasm' object is returned by init() and contains the exports
+                    // We cast to ExtendedExports because we know we added manual no_mangle exports
+                    sharedScanner = new SharedMemoryManager(wasm as unknown as ExtendedExports);
 
                     initialized = true;
                     console.log('[KittCoreWorker] WASM Initialized & Conductor Ready');
@@ -279,6 +293,28 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
                     type: 'TEMPORAL_RESULT',
                     payload: { mentions: tempResult.temporal || [] }
                 } as ResponseMessage);
+                break;
+
+            case 'SCAN_DISCOVERY':
+                if (!sharedScanner) throw new Error('Shared memory scanner not initialized');
+                try {
+                    const candidates = sharedScanner.scan(msg.payload.content);
+                    if (candidates.length > 0) {
+                        console.log(`[Discovery:Worker] Found ${candidates.length} candidates via SharedMemory`, candidates.map((c: any) => c.token));
+                    } else {
+                        console.log(`[Discovery:Worker] Scan completed, 0 candidates found`);
+                    }
+                    self.postMessage({
+                        type: 'DISCOVERY_RESULT',
+                        payload: { candidates }
+                    } as ResponseMessage);
+                } catch (err) {
+                    console.error('[KittCoreWorker] Shared scan failed:', err);
+                    self.postMessage({
+                        type: 'ERROR',
+                        payload: { message: `Shared scan failed: ${err}` }
+                    } as ResponseMessage);
+                }
                 break;
 
             case 'EMBED_TEXT':

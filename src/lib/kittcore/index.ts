@@ -96,6 +96,13 @@ export interface ScanStats {
     duration_ms: number;
 }
 
+export interface DiscoveryCandidate {
+    token: string;
+    kind: number; // 255 = None, else EntityKind
+    score: number;
+    status: number; // 0=Watching, 1=Promoted, 2=Ignored
+}
+
 export interface WorkerStatus {
     initialized: boolean;
     wasmLoaded: boolean;
@@ -284,6 +291,32 @@ export class KittCoreService {
     }
 
     /**
+     * Scan for discovery candidates (Shared Memory)
+     */
+    async scanDiscovery(content: string): Promise<DiscoveryCandidate[]> {
+        await this.ensureInitialized();
+        console.time('scanDiscovery');
+        try {
+            const result = await this.sendMessage({
+                type: 'SCAN_DISCOVERY',
+                payload: { content }
+            });
+            console.timeEnd('scanDiscovery');
+            const candidates = result.candidates || [];
+            if (candidates.length > 0) {
+                console.log(`[Discovery:Service] Received ${candidates.length} candidates from worker`, candidates.map((c: any) => c.token));
+            } else {
+                console.log(`[Discovery:Service] Received 0 candidates from worker`);
+            }
+            return candidates;
+        } catch (err) {
+            console.timeEnd('scanDiscovery');
+            console.error('[KittCore] Discovery Scan failed:', err);
+            return [];
+        }
+    }
+
+    /**
      * Get worker status
      */
     async getStatus(): Promise<WorkerStatus> {
@@ -423,6 +456,49 @@ export class KittCoreService {
         }
 
         return clusters;
+    }
+
+    /**
+     * Save confirmed candidates to CozoDB for persistence
+     */
+    async saveCandidates(candidates: DiscoveryCandidate[]): Promise<void> {
+        if (candidates.length === 0) return;
+
+        console.log(`[KittCore] Persisting ${candidates.length} candidates...`);
+
+        const rows = candidates.map(c => [
+            c.token,
+            c.kind,
+            c.score,
+            c.status,
+            Date.now(), // last_seen
+            Date.now(), // first_seen (if new)
+            1           // count (increment if exists)
+        ]);
+
+        // UPSERT logic: if token exists, update last_seen/status/score/count
+        const query = `
+            ?[token, kind, score, status, last_seen, first_seen, count] <- $rows
+
+            :put discovery_candidates { 
+                token, 
+                kind, 
+                score, 
+                status, 
+                last_seen, 
+                first_seen, 
+                count 
+            }
+        `;
+
+        try {
+            const result = cozoDb.runQuery(query, { rows });
+            if (!result.ok) {
+                console.error('[KittCore] Failed to save candidates:', result.message);
+            }
+        } catch (err) {
+            console.error('[KittCore] Error saving candidates:', err);
+        }
     }
 
 }

@@ -64,6 +64,9 @@ pub mod db;  // SQLite WASM (experimental)
 pub mod graphdb;  // Graph database layer
 pub mod narrative;  // FST-based narrative verb dictionary
 
+// Shared Memory Interface (No-Bindgen)
+pub mod shared_mem;
+
 // Public exports - Scanner (explicit to avoid incremental collision with resorank)
 pub use scanner::{
     // Core types

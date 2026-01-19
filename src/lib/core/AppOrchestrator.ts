@@ -191,6 +191,23 @@ export class AppOrchestrator {
         await entityAttributeStore.init();
         console.log('[AppOrchestrator] EntityAttributeStore initialized');
 
+        // [KittCore Integration]
+        // Hydrate WASM scanner immediately after Graph Registry is ready.
+        // This ensures the "Recall" (DAFSA) and "Deep Search" features are ready for the UI.
+        const { kittCore } = await import('../kittcore');
+
+        // Convert registry entities to KittCore format (lightweight)
+        const entities = smartGraphRegistry.getAllEntities();
+        const kittCoreEntities = entities.map(e => ({
+            id: e.id,
+            label: e.label,
+            kind: e.kind,
+            aliases: e.aliases ?? [],
+        }));
+
+        const hydratedCount = await kittCore.hydrateEntities(kittCoreEntities);
+        console.log(`[AppOrchestrator] KittCore hydrated early with ${hydratedCount} entities`);
+
         console.timeEnd('Step 2: CozoDB Core');
     }
 
@@ -223,16 +240,7 @@ export class AppOrchestrator {
                 console.log(`[AppOrchestrator] Hydrating Scanner with ${scannerEntities.length} entities...`);
                 // implicitScanner.hydrate(scannerEntities, entityVersion); // DEPRECATED
 
-                // 3. KittCore WASM scanner hydration
-                const { kittCore } = await import('../kittcore');
-                const kittCoreEntities = entities.map(e => ({
-                    id: e.id,
-                    label: e.label,
-                    kind: e.kind,
-                    aliases: e.aliases ?? [],
-                }));
-                const hydratedCount = await kittCore.hydrateEntities(kittCoreEntities);
-                console.log(`[AppOrchestrator] KittCore hydrated with ${hydratedCount} entities`);
+                // 3. KittCore WASM scanner hydration (MOVED TO PHASE 2) - Removed legacy comment
 
                 // 4. Update Cozo boot cache with fresh data for next boot
                 const relationships = smartGraphRegistry.getAllEdges();

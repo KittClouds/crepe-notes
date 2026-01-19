@@ -44,7 +44,7 @@ pub enum VerbPattern {
 }
 
 /// Semantic domain for verb categorization (internal use)
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum VerbDomain {
     Combat,
     Magic,
@@ -62,7 +62,7 @@ pub enum VerbDomain {
 }
 
 /// Verb transitivity for argument structure
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Transitivity {
     /// Requires direct object: "X killed Y"
     Transitive,
