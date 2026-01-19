@@ -35,7 +35,7 @@ embeddings = ["dep:tract-onnx", "dep:tract-core", "dep:tokenizers"]
 
 [dependencies]
 # Core dependencies (always included)
-serde = { version = "1.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive", "rc"] }
 serde_json = "1.0"
 aho-corasick = "1.1"
 daachorse = "1.0.0"

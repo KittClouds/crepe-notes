@@ -109,12 +109,11 @@ pub extern "C" fn scan_shared(text_ptr: *const u8, text_len: usize) -> *mut Scan
     DISCOVERY_ENGINE.with(|engine_cell| {
         let engine = engine_cell.borrow();
         
-        for (token, stats) in &engine.registry.stats {
-        for (token, stats) in &engine.registry.stats {
+        for (_key, stats) in &engine.registry.stats {
             // Return BOTH Watching (0) and Promoted (1) candidates
             // Filter out Ignored (2)
             if stats.status != CandidateStatus::Ignored {
-                let token_bytes = token.as_bytes();
+                let token_bytes = stats.display.as_bytes();
                 let len = token_bytes.len();
                 
                 let token_ptr = if len > 0 {
@@ -138,7 +137,6 @@ pub extern "C" fn scan_shared(text_ptr: *const u8, text_len: usize) -> *mut Scan
                     status: stats.status as u8,
                 });
             }
-        }
         }
     });
 

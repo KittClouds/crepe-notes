@@ -1,12 +1,17 @@
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 use serde::{Deserialize, Serialize};
 use super::dafsa::compiler::is_stop_word;
 use crate::resorank::math::calculate_idf;
 use super::dafsa::types::EntityKind;
+use stop_words::{get, LANGUAGE};
 
 // =============================================================================
 // Types
 // =============================================================================
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct CanonToken(pub Arc<str>);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum CandidateStatus {
@@ -20,6 +25,7 @@ pub struct CandidateStats {
     pub count: u32,
     pub status: CandidateStatus,
     pub inferred_kind: Option<EntityKind>,
+    pub display: String, // Best human form seen so far
 }
 
 impl Default for CandidateStats {
@@ -28,8 +34,42 @@ impl Default for CandidateStats {
             count: 0,
             status: CandidateStatus::Watching,
             inferred_kind: None,
+            display: String::new(),
         }
     }
+}
+
+// =============================================================================
+// Canonicalization
+// =============================================================================
+
+fn canonicalize(raw: &str) -> Option<(CanonToken, String)> {
+    // 1) Trim “edge punctuation” but keep internal '-' and '\''.
+    let trimmed = raw.trim_matches(|c: char| {
+        !(c.is_alphanumeric() || c == '\'' || c == '’' || c == '-' )
+    });
+
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    // 2) Normalize curly apostrophe -> straight apostrophe
+    let mut cleaned = trimmed.replace('’', "'");
+
+    // 3) Strip possessive trailing "'s"
+    if cleaned.len() > 2 && cleaned.to_ascii_lowercase().ends_with("'s") {
+        cleaned.truncate(cleaned.len() - 2);
+    }
+
+    // 4) Reject obvious junk
+    let has_alpha = cleaned.chars().any(|c| c.is_alphabetic());
+    if !has_alpha || cleaned.len() < 2 {
+        return None;
+    }
+
+    // Key: case-folded; Display: cleaned original-ish
+    let key = cleaned.to_ascii_lowercase();
+    Some((CanonToken(Arc::<str>::from(key)), cleaned))
 }
 
 // =============================================================================
@@ -37,17 +77,23 @@ impl Default for CandidateStats {
 // =============================================================================
 
 pub struct CandidateRegistry {
-    pub stats: HashMap<String, CandidateStats>,
+    pub stats: HashMap<CanonToken, CandidateStats>,
     pub promotion_threshold: u32,
     pub stopwords: HashSet<String>,
 }
 
 impl CandidateRegistry {
     pub fn new(promotion_threshold: u32) -> Self {
+        // Initialize with standard English stop words
+        let mut stopwords = HashSet::new();
+        for word in get(LANGUAGE::English) {
+            stopwords.insert(word);
+        }
+
         Self {
             stats: HashMap::new(),
             promotion_threshold,
-            stopwords: HashSet::new(),
+            stopwords,
         }
     }
 
@@ -56,23 +102,35 @@ impl CandidateRegistry {
         self.stopwords.insert(word.to_lowercase());
     }
 
+    /// Helper to get stats by raw token (canonicalizes internally)
+    pub fn get_stats(&self, token: &str) -> Option<&CandidateStats> {
+        canonicalize(token).and_then(|(key, _)| self.stats.get(&key))
+    }
+
     /// Process a token. Returns true if the token was promoted *this time*.
     pub fn add_token(&mut self, token: &str) -> bool {
-        let normalized = token; // Keep original case for map keys, but check lower for matching
-        let lower = token.to_lowercase();
+        let (key, display) = match canonicalize(token) {
+            Some(v) => v,
+            None => return false,
+        };
         
         // 1. Check built-in stopword list OR custom list
-        if is_stop_word(&lower) || self.stopwords.contains(&lower) {
+        if is_stop_word(&key.0) || self.stopwords.contains(&*key.0) {
             return false;
         }
 
         // 2. Update stats
-        let entry = self.stats.entry(normalized.to_string()).or_default();
+        let entry = self.stats.entry(key).or_default();
         
         // If already ignored/promoted, just increment count
         if entry.status != CandidateStatus::Watching {
             entry.count += 1;
             return false;
+        }
+
+        // Set display if empty (first time)
+        if entry.display.is_empty() {
+            entry.display = display;
         }
 
         entry.count += 1;
@@ -87,15 +145,15 @@ impl CandidateRegistry {
     }
     
     pub fn get_status(&self, token: &str) -> Option<CandidateStatus> {
-        self.stats.get(token).map(|s| s.status)
+        self.get_stats(token).map(|s| s.status)
     }
     
     pub fn get_count(&self, token: &str) -> u32 {
-        self.stats.get(token).map(|s| s.count).unwrap_or(0)
+        self.get_stats(token).map(|s| s.count).unwrap_or(0)
     }
 
     pub fn get_inferred_kind(&self, token: &str) -> Option<EntityKind> {
-        self.stats.get(token).and_then(|s| s.inferred_kind)
+        self.get_stats(token).and_then(|s| s.inferred_kind)
     }
 
     /// Calculate uniqueness score (TF-IDF style)
@@ -107,10 +165,11 @@ impl CandidateRegistry {
 
     /// Update the inferred kind for a candidate
     pub fn propose_inference(&mut self, token: &str, kind: EntityKind) {
-        if let Some(entry) = self.stats.get_mut(token) {
-            // Only update if not already set (or we could implement voting logic)
-            if entry.inferred_kind.is_none() {
-                entry.inferred_kind = Some(kind);
+        if let Some((key, _)) = canonicalize(token) {
+            if let Some(entry) = self.stats.get_mut(&key) {
+                if entry.inferred_kind.is_none() {
+                    entry.inferred_kind = Some(kind);
+                }
             }
         }
     }
@@ -207,10 +266,6 @@ mod tests {
         assert!(sanji_score > table_score);
         
         // Verify IDF component behavior
-        // IDF(1000, 10) ≈ ln(1 + (1000-10+0.5)/(10+0.5)) ≈ ln(1 + 990.5/10.5) ≈ ln(95.3) ≈ 4.5
-        // IDF(1000, 500) ≈ ln(1 + (1000-500+0.5)/(500+0.5)) ≈ ln(1 + 500.5/500.5) ≈ ln(2) ≈ 0.69
-        // Sanji score ≈ 5 * 4.5 = 22.5
-        // Table score ≈ 5 * 0.69 = 3.45
         assert!(sanji_score > 20.0);
         assert!(table_score < 5.0);
     }
@@ -229,7 +284,7 @@ mod tests {
         
         // Check inference
         // Kaido should be in registry (from step 1), and now inferred as Character
-        if let Some(stats) = engine.registry.stats.get("Kaido") {
+        if let Some(stats) = engine.registry.get_stats("Kaido") {
             assert_eq!(stats.inferred_kind, Some(EntityKind::CHARACTER));
         } else {
             panic!("Kaido not found in registry");
