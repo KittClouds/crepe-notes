@@ -2,7 +2,6 @@ import { entityColorStore } from '../store/entityColorStore';
 import { entityAttributeStore } from '../store/entityAttributeStore';
 import { smartGraphRegistry } from '../registry/SmartGraphRegistry';
 import { cozoDb } from '../cozo/db';
-import { implicitScanner } from '../Scanner/ImplicitScanner';
 import { queryClient } from '@/lib/queryClient';
 import { loadCozoBootCache, saveCozoBootCache, buildCozoBootCache } from '@/lib/storage/cozoBootCache';
 import { loadNebulaBootCache, saveNebulaBootCache, buildNebulaBootCache } from '@/lib/nebuladb/bootCache';
@@ -222,8 +221,7 @@ export class AppOrchestrator {
                 }));
 
                 console.log(`[AppOrchestrator] Hydrating Scanner with ${scannerEntities.length} entities...`);
-                const entityVersion = smartGraphRegistry.getHotCache().entityVersion;
-                implicitScanner.hydrate(scannerEntities, entityVersion);
+                // implicitScanner.hydrate(scannerEntities, entityVersion); // DEPRECATED
 
                 // 3. KittCore WASM scanner hydration
                 const { kittCore } = await import('../kittcore');

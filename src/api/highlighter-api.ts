@@ -8,7 +8,6 @@ import type { DecorationSpan, HighlighterConfig, HighlightMode } from '../lib/Sc
 import { scanDocument, getDecorationStyle, getDecorationClass } from '../lib/Scanner';
 import { highlightingStore } from '../lib/store/highlightingStore';
 import type { EntityKind } from '../lib/types/entityTypes';
-import { implicitScanner } from '../lib/Scanner/ImplicitScanner';
 import { getScanCoordinator } from '../lib/Scanner/scanCoordinatorInstance';
 import { saveNoteDecorations, getNoteDecorations, getDecorationContentHash, hashContent } from '../lib/nebuladb/decorations';
 import { graphHotCache } from '../lib/cozo/graph/GraphHotCache';
@@ -317,7 +316,7 @@ class DefaultHighlighterApi implements HighlighterApi {
     }
 
     private triggerImplicitScan(doc: ProseMirrorDoc, text?: string, _entityVersion?: number) {
-        console.log('[HighlighterApi:DIAG] triggerImplicitScan called!');
+        // console.log('[HighlighterApi:DIAG] triggerImplicitScan called!');
         const myVersion = ++this.scanVersion;
         const batch: { id: number, text: string }[] = [];
         const nodePositions = new Map<number, number>(); // Map batch ID to document position
@@ -330,7 +329,7 @@ class DefaultHighlighterApi implements HighlighterApi {
                 const id = batchIdCounter++;
                 batch.push({ id, text: node.text });
                 nodePositions.set(id, pos);
-                fullText += node.text;
+                fullText += node.text; // Concatenate for hash (matches docContent logic)
             }
         });
 
@@ -345,31 +344,28 @@ class DefaultHighlighterApi implements HighlighterApi {
         const noteIdForSave = this.currentNoteId;
         const contentHashForSave = hashContent(fullText);
 
-        // DEBUG: Log what we're sending to scanner
-        console.log(`[HighlighterApi:DIAG] Sending ${batch.length} text nodes to scanner, fullText length: ${fullText.length}`);
+        // Run scans in parallel for each node (mimicking old scanBatch)
+        // This ensures offsets remain correct per-node
+        const scanPromises = batch.map(async (item) => {
+            try {
+                const spans = await kittCore.scanImplicitRust(item.text);
+                return { id: item.id, spans };
+            } catch (e) {
+                console.warn(`[HighlighterApi] Scan failed for node ${item.id}`, e);
+                return { id: item.id, spans: [] };
+            }
+        });
 
-        implicitScanner.scanBatch(batch).then(async results => {
+        Promise.all(scanPromises).then(async (results) => {
             // Only apply if this is still the latest requested scan
             if (this.scanVersion !== myVersion) {
-                console.log('[HighlighterApi:DIAG] Stale scan version, ignoring results');
                 return;
             }
-
-            // DEBUG: Log what came back from scanner
-            console.log(`[HighlighterApi:DIAG] Scanner returned ${results.size} result entries`);
-            let totalSpans = 0;
-            for (const [id, spans] of results.entries()) {
-                totalSpans += spans.length;
-                if (spans.length > 0) {
-                    console.log(`[HighlighterApi:DIAG] Node ${id}: ${spans.length} spans`, spans.slice(0, 2));
-                }
-            }
-            console.log(`[HighlighterApi:DIAG] Total spans from scanner: ${totalSpans}`);
 
             const mergedSpans: DecorationSpan[] = [];
 
             // Reconstruct spans with correct document offsets
-            for (const [id, spans] of results.entries()) {
+            for (const { id, spans } of results) {
                 const nodeStart = nodePositions.get(id);
                 if (nodeStart !== undefined) {
                     for (const span of spans) {
@@ -382,8 +378,6 @@ class DefaultHighlighterApi implements HighlighterApi {
                 }
             }
 
-            console.log(`[HighlighterApi:DIAG] Merged spans for decoration: ${mergedSpans.length}`);
-
             this.implicitDecorations = mergedSpans;
             this.notifyListeners();
 
@@ -395,12 +389,12 @@ class DefaultHighlighterApi implements HighlighterApi {
             // Check if sentence ended (punctuation at end of new content)
             const sentenceEnded = this.detectSentenceEnd(fullText);
 
-            // Trigger Rust scanner if: entities present AND sentence just completed
+            // Trigger Rust scan (Relationships) if: entities present AND sentence just completed
             if (entityCount > 0 && sentenceEnded && hadNewEntities) {
                 this.triggerRustScan(fullText, mergedSpans);
             }
 
-            // Local-first: write to Dexie with content hash for position validation
+            // Local-first: write to Dexie
             if (noteIdForSave) {
                 try {
                     await saveNoteDecorations(noteIdForSave, mergedSpans, contentHashForSave);

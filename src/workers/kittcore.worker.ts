@@ -8,7 +8,7 @@
  * Wired up to real WASM module!
  */
 
-import init, { ScanConductor, InitOutput } from "../../rust/kittcore/pkg/kittcore.js";
+import init, { ScanConductor, RustImplicitScanner, InitOutput } from "../../rust/kittcore/pkg/kittcore.js";
 import wasmUrl from "../../rust/kittcore/pkg/kittcore_bg.wasm?url";
 
 // NOTE: Cross-doc processing (embeddings, CozoDB) happens on MAIN THREAD
@@ -32,6 +32,7 @@ type KittCoreMessage =
     | { type: 'SCAN'; payload: { content: string; entities: EntityInput[]; narrativeId?: string } }
     | { type: 'HYDRATE_ENTITIES'; payload: { entities: EntityDefinition[]; narrativeId?: string } }
     | { type: 'SCAN_IMPLICIT'; payload: { content: string; narrativeId?: string } }
+    | { type: 'SCAN_IMPLICIT_RUST'; payload: { content: string } }
     | { type: 'EXTRACT_RELATIONS'; payload: { content: string; entities: EntitySpan[]; narrativeId?: string } }
     | { type: 'EXTRACT_TRIPLES'; payload: { content: string } }
     | { type: 'SCAN_TEMPORAL'; payload: { content: string } }
@@ -83,6 +84,7 @@ type ResponseMessage =
     | { type: 'SCAN_RESULT'; payload: any }
     | { type: 'ENTITIES_HYDRATED'; payload: { count: number } }
     | { type: 'IMPLICIT_RESULT'; payload: { mentions: any[] } }
+    | { type: 'IMPLICIT_RUST_RESULT'; payload: { spans: any[] } }
     | { type: 'RELATIONS_RESULT'; payload: { relations: any[] } }
     | { type: 'TRIPLES_RESULT'; payload: { triples: any[] } }
     | { type: 'TEMPORAL_RESULT'; payload: { mentions: any[] } }
@@ -107,6 +109,7 @@ let initialized = false;
 let entitiesHydrated = 0;
 // We'll use the ScanConductor from WASM
 let conductor: ScanConductor | null = null;
+let dafsaScanner: RustImplicitScanner | null = null;
 const VERSION = '0.1.0-wasm';
 
 // ============================================================================
@@ -152,6 +155,9 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
                     conductor = new ScanConductor();
                     conductor.init();
 
+                    // Create DAFSA Scanner (Phase 2 A/B Test)
+                    dafsaScanner = new RustImplicitScanner();
+
                     initialized = true;
                     console.log('[KittCoreWorker] WASM Initialized & Conductor Ready');
                 }
@@ -195,6 +201,13 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
                 }
 
                 conductor.hydrateEntities(entitiesToHydrate);
+                if (dafsaScanner) {
+                    try {
+                        dafsaScanner.hydrate(entitiesToHydrate);
+                    } catch (err) {
+                        console.error('[KittCoreWorker] DAFSA hydration failed:', err);
+                    }
+                }
                 entitiesHydrated = entitiesToHydrate.length;
                 self.postMessage({
                     type: 'ENTITIES_HYDRATED',
@@ -229,6 +242,15 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
                 self.postMessage({
                     type: 'IMPLICIT_RESULT',
                     payload: { mentions: implicitResult.implicit || [] }
+                } as ResponseMessage);
+                break;
+
+            case 'SCAN_IMPLICIT_RUST':
+                if (!dafsaScanner) throw new Error('Rust implicit scanner not initialized');
+                const rustSpans = dafsaScanner.scan(msg.payload.content);
+                self.postMessage({
+                    type: 'IMPLICIT_RUST_RESULT',
+                    payload: { spans: rustSpans || [] }
                 } as ResponseMessage);
                 break;
 

@@ -5,13 +5,7 @@
 import { decorations, decorationMeta } from './db';
 import type { Document } from './types';
 
-// Import DecorationSpan type if available, otherwise define minimal interface
-export interface DecorationSpan {
-    type: string;
-    from: number;
-    to: number;
-    [key: string]: any;
-}
+import type { DecorationSpan } from '@/lib/Scanner/types';
 
 /**
  * djb2 hash - fast, good distribution for strings

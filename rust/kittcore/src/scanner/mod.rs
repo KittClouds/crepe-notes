@@ -33,6 +33,9 @@ pub use triple::*;
 pub use change::*;
 pub use document::*;
 pub use conductor::*;
+pub mod dafsa;
+pub mod implicit_dafsa; // Bridge for WASM
+
 
 
 

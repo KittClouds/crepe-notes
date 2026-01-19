@@ -236,6 +236,18 @@ export class KittCoreService {
     }
 
     /**
+     * Scan for implicit entity mentions using Rust DAFSA (A/B Test)
+     */
+    async scanImplicitRust(content: string): Promise<any[]> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'SCAN_IMPLICIT_RUST',
+            payload: { content }
+        });
+        return result.spans;
+    }
+
+    /**
      * Extract relationships between entities
      */
     async extractRelations(content: string, entities: EntitySpan[]): Promise<ExtractedRelation[]> {

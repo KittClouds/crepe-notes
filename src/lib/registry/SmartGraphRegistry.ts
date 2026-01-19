@@ -3,8 +3,9 @@
 // V4: Direct CozoDB integration with GraphHotCache
 
 import type { EntityKind } from '@/lib/types/entityTypes';
-import { implicitScanner } from '../Scanner/ImplicitScanner';
-import { scheduleRecompile } from '../Scanner/dictionary-service';
+import { kittCore } from '@/lib/kittcore';
+// import { implicitScanner } from '../Scanner/ImplicitScanner'; // DEPRECATED
+// import { scheduleRecompile } from '../Scanner/dictionary-service'; // DEPRECATED
 import { cozoGraphRegistry, type CozoEntity, type CozoRelationship, type RelationshipProvenance } from '@/lib/cozo/graph/GraphRegistry';
 import type { GraphHotCache } from '@/lib/cozo/graph/GraphHotCache';
 
@@ -164,12 +165,12 @@ export class SmartGraphRegistryFacade {
         });
 
         // Update implicit scanner with all entities (includes version for skip-if-unchanged)
-        const allEntities = this.getAllEntities();
-        const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
-        implicitScanner.hydrate(allEntities.map(this.toScannerEntity), entityVersion);
+        // const allEntities = this.getAllEntities();
+        // const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
+        // implicitScanner.hydrate(allEntities.map(this.toScannerEntity), entityVersion);
 
         // Schedule dictionary recompilation (debounced)
-        scheduleRecompile(allEntities);
+        // scheduleRecompile(allEntities);
 
         return {
             entity: this.toRegisteredEntity(entity),
@@ -216,9 +217,9 @@ export class SmartGraphRegistryFacade {
 
         // Single hydration at end (not per-entity)
         if (entities.length > 0) {
-            const allEntities = this.getAllEntities();
-            const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
-            implicitScanner.hydrate(allEntities.map(this.toScannerEntity), entityVersion);
+            // const allEntities = this.getAllEntities();
+            // const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
+            // implicitScanner.hydrate(allEntities.map(this.toScannerEntity), entityVersion);
         }
 
         return results;
@@ -228,8 +229,8 @@ export class SmartGraphRegistryFacade {
         const result = cozoGraphRegistry.deleteEntity(id);
         if (result) {
             // Schedule dictionary recompilation
-            const allEntities = this.getAllEntities();
-            scheduleRecompile(allEntities);
+            // const allEntities = this.getAllEntities();
+            // scheduleRecompile(allEntities);
         }
         return result;
     }
@@ -255,13 +256,13 @@ export class SmartGraphRegistryFacade {
 
         if (updated) {
             // Re-hydrate scanner with updated entity list
-            const allEntities = cozoGraphRegistry.getAllEntities();
-            const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
-            const scannerEntities = allEntities.map(e => this.toScannerEntity(this.toRegisteredEntity(e)));
-            implicitScanner.hydrate(scannerEntities, entityVersion);
+            // const allEntities = cozoGraphRegistry.getAllEntities();
+            // const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
+            // const scannerEntities = allEntities.map(e => this.toScannerEntity(this.toRegisteredEntity(e)));
+            // implicitScanner.hydrate(scannerEntities, entityVersion);
 
             // Schedule dictionary recompilation
-            scheduleRecompile(this.getAllEntities());
+            // scheduleRecompile(this.getAllEntities());
 
             return this.toRegisteredEntity(updated);
         }
@@ -271,11 +272,11 @@ export class SmartGraphRegistryFacade {
     async clearAll(): Promise<number> {
         const count = cozoGraphRegistry.getAllEntities().length;
         await cozoGraphRegistry.clear();
-        const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
-        implicitScanner.hydrate([], entityVersion);
+        // const entityVersion = cozoGraphRegistry.getHotCache().entityVersion;
+        // implicitScanner.hydrate([], entityVersion);
 
         // Schedule dictionary recompilation (empty)
-        scheduleRecompile([]);
+        // scheduleRecompile([]);
 
         return count;
     }
