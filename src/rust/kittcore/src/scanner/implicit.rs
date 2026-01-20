@@ -21,6 +21,8 @@ pub struct EntityDefinition {
     pub label: String,
     pub kind: String,
     pub aliases: Vec<String>,
+    #[serde(rename = "narrativeId", default)]
+    pub narrative_id: Option<String>,
 }
 
 /// A detected implicit entity mention
@@ -417,6 +419,7 @@ mod tests {
             label: label.to_string(),
             kind: kind.to_string(),
             aliases: aliases.into_iter().map(|s| s.to_string()).collect(),
+            narrative_id: None,
         }
     }
 

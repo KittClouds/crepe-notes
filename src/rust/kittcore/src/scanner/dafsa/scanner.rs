@@ -4,6 +4,37 @@ use std::collections::{HashMap, BTreeMap};
 use fst::Map;
 use super::types::{DecorationSpan, EntityInfo};
 use super::compiler::{CompiledDictionary, DictError, normalize_raw, is_stop_word, TOK_SEP, MAX_PHRASE_TOKENS};
+use std::sync::Arc;
+use std::cell::RefCell;
+
+// Global Thread-Local Access for Shared Memory Discovery
+thread_local! {
+    static GLOBAL_RUNTIME_DICTIONARY: RefCell<Option<Arc<RuntimeDictionary>>> = RefCell::new(None);
+}
+
+pub fn set_global_dictionary(dict: Arc<RuntimeDictionary>) {
+    GLOBAL_RUNTIME_DICTIONARY.with(|cell| {
+        *cell.borrow_mut() = Some(dict);
+    });
+}
+
+pub fn is_known_entity(token: &str) -> bool {
+    GLOBAL_RUNTIME_DICTIONARY.with(|cell| {
+        if let Some(dict) = cell.borrow().as_ref() {
+            // Check if token matches any known entity label or alias exactly (case-insensitive via normalization)
+            // 1. Check direct map lookup (normalized)
+            let normalized = normalize_raw(token);
+            if dict.map.contains_key(normalized.as_bytes()) {
+                return true;
+            }
+            // 2. Check unique token index (for single-word aliases)
+            if dict.unique_token_to_id.contains_key(token) {
+                return true;
+            }
+        }
+        false
+    })
+}
 
 pub struct RuntimeDictionary {
     map: Map<Vec<u8>>,
@@ -220,13 +251,14 @@ fn strip_possessive(tok: &str) -> &str {
 }
 
 pub struct ScannerCore {
-    dict: RuntimeDictionary,
+    dict: Arc<RuntimeDictionary>,
 }
 
 impl ScannerCore {
-    pub fn new(dict: RuntimeDictionary) -> Self { Self { dict } }
+    pub fn new(dict: Arc<RuntimeDictionary>) -> Self { Self { dict } }
 
-    pub fn scan(&self, text: &str) -> Vec<DecorationSpan> {
+
+    pub fn scan(&self, text: &str, allowed_narrative_id: Option<&str>) -> Vec<DecorationSpan> {
         let toks = tokenize_with_offsets(text);
         if toks.is_empty() { return vec![]; }
 
@@ -236,6 +268,15 @@ impl ScannerCore {
 
         let mut matches: Vec<M> = Vec::new();
         let mut matched_positions = std::collections::HashSet::new();
+
+        // Helper to filter entities by scope
+        let filter_bucket = |bucket: &[EntityInfo]| -> Vec<EntityInfo> {
+            bucket.iter().filter(|e| {
+                // Allow if Global (None) OR (Scope matches Allowed)
+                e.narrative_id.is_none() || 
+                (allowed_narrative_id.is_some() && e.narrative_id.as_deref() == allowed_narrative_id)
+            }).cloned().collect()
+        };
 
         for i in 0..toks.len() {
             let mut key = String::new();
@@ -259,16 +300,22 @@ impl ScannerCore {
 
                 // Check exact match
                 if let Some(bucket) = self.dict.bucket_for_key(&key) {
-                    matches.push(M { from: toks[i].start, to: toks[j].end, bucket: bucket.to_vec() });
-                    matched_positions.insert((toks[i].start, toks[j].end)); // Naive exclusion logic
-                    found_exact = true;
+                    let filtered = filter_bucket(bucket);
+                    if !filtered.is_empty() {
+                        matches.push(M { from: toks[i].start, to: toks[j].end, bucket: filtered });
+                        matched_positions.insert((toks[i].start, toks[j].end));
+                        found_exact = true;
+                    }
                 } 
                 // Check stripped match (if different)
                 else if key_stripped != key {
                     if let Some(bucket) = self.dict.bucket_for_key(&key_stripped) {
-                        matches.push(M { from: toks[i].start, to: toks[j].end, bucket: bucket.to_vec() });
-                        matched_positions.insert((toks[i].start, toks[j].end));
-                        found_exact = true;
+                         let filtered = filter_bucket(bucket);
+                         if !filtered.is_empty() {
+                            matches.push(M { from: toks[i].start, to: toks[j].end, bucket: filtered });
+                            matched_positions.insert((toks[i].start, toks[j].end));
+                            found_exact = true;
+                         }
                     }
                 }
             }
@@ -277,11 +324,14 @@ impl ScannerCore {
             if !found_exact {
                  let t = &toks[i];
                  let stripped = strip_possessive(&t.t);
-                 // Only verify if not already part of a longer match starting here? 
-                 // Actually A/B parity just checks if we haven't matched this exact position.
                  if !matched_positions.contains(&(t.start, t.end)) {
                      if let Some(info) = self.dict.fuzzy_match_token(&t.t, stripped) {
-                         matches.push(M { from: t.start, to: t.end, bucket: vec![info] });
+                         // Fuzzy match returns single info, stick in vec and filter
+                         let bucket = vec![info];
+                         let filtered = filter_bucket(&bucket);
+                         if !filtered.is_empty() {
+                             matches.push(M { from: t.start, to: t.end, bucket: filtered });
+                         }
                      }
                  }
             }
@@ -313,6 +363,7 @@ impl ScannerCore {
                     kind: e.kind,
                     resolved: true,
                     entity_id: Some(e.id.clone()),
+                    narrative_id: e.narrative_id.clone(),
                     candidate_ids: None,
                     candidate_labels: None,
                 });
@@ -326,6 +377,7 @@ impl ScannerCore {
                     kind: m.bucket[0].kind, // First candidate's kind as fallback
                     resolved: false,
                     entity_id: None,
+                    narrative_id: None, // Ambiguous match, no single narrative
                     candidate_ids: Some(m.bucket.iter().map(|e| e.id.clone()).collect()),
                     candidate_labels: Some(m.bucket.iter().map(|e| e.label.clone()).collect()),
                 });
@@ -358,7 +410,7 @@ fn merge_spans(spans: Vec<DecorationSpan>, text: &str) -> Vec<DecorationSpan> {
         // Prevent merging identical tokens (e.g. "Luffy Luffy") unless they are very short (e.g. "D" in "Monkey D. Luffy")
         let is_repetition = next.matched_text == current.matched_text && next.matched_text.len() > 2;
         
-        if next.from > current.to + 3 || is_repetition {
+        if next.from > current.to + 5 || is_repetition {
             out.push(current);
             current = next;
             continue;
@@ -400,6 +452,7 @@ mod tests {
     use super::*;
     use crate::scanner::dafsa::compiler::compile_dictionary;
     use crate::scanner::dafsa::types::{RegisteredEntity, EntityKind};
+    use std::sync::Arc;
 
     #[test]
     fn test_fuzzy_matching() {
@@ -409,27 +462,29 @@ mod tests {
                 label: "Monkey D. Luffy".to_string(),
                 aliases: vec![],
                 kind: EntityKind::CHARACTER,
+                narrative_id: None,
             },
             RegisteredEntity {
                 id: "e2".to_string(),
                 label: "Roronoa Zoro".to_string(),
                 aliases: vec![],
                 kind: EntityKind::CHARACTER,
+                narrative_id: None,
             }
         ];
 
         let compiled = compile_dictionary(1, 100, &entities).unwrap();
         let dict = RuntimeDictionary::load(compiled).unwrap();
-        let scanner = ScannerCore::new(dict);
+        let scanner = ScannerCore::new(Arc::new(dict));
 
         // Exact match
-        let spans = scanner.scan("Monkey D. Luffy is here.");
+        let spans = scanner.scan("Monkey D. Luffy is here.", None);
         assert_eq!(spans.len(), 1);
         assert_eq!(spans[0].matched_text, "Monkey D. Luffy");
 
         // Fuzzy match (typo in unique token "Luffy" -> "Luffu")
         // "Luffy" df=1, should be in unique_token index.
-        let spans = scanner.scan("Monkey D. Luffu is here.");
+        let spans = scanner.scan("Monkey D. Luffu is here.", None);
         assert_eq!(spans.len(), 1, "Should fuzzy match 'Luffu' to 'Luffy'");
         assert_eq!(spans[0].label, "Monkey D. Luffy");
         // matched_text should be the full spanned text
@@ -437,8 +492,59 @@ mod tests {
 
         // Single token anchor match: "Zoro" is likely an anchor.
         // Scan "Zoroo" (typo)
-        let spans = scanner.scan("I see Zoroo.");
+        let spans = scanner.scan("I see Zoroo.", None);
         assert_eq!(spans.len(), 1, "Should fuzzy match 'Zoroo' to 'Zoro'");
         assert_eq!(spans[0].label, "Roronoa Zoro");
+    }
+
+    #[test]
+    fn test_scope_filtering() {
+        let entities = vec![
+            RegisteredEntity {
+                id: "global1".to_string(),
+                label: "Global Hero".to_string(),
+                aliases: vec![],
+                kind: EntityKind::CHARACTER,
+                narrative_id: None,
+            },
+            RegisteredEntity {
+                id: "n1_char".to_string(),
+                label: "Narrative One Hero".to_string(),
+                aliases: vec![],
+                kind: EntityKind::CHARACTER,
+                narrative_id: Some("narrative_1".to_string()),
+            },
+            RegisteredEntity {
+                id: "n2_char".to_string(),
+                label: "Narrative Two Hero".to_string(),
+                aliases: vec![],
+                kind: EntityKind::CHARACTER,
+                narrative_id: Some("narrative_2".to_string()),
+            },
+        ];
+
+        let compiled = compile_dictionary(1, 100, &entities).unwrap();
+        let dict = RuntimeDictionary::load(compiled).unwrap();
+        let scanner = ScannerCore::new(Arc::new(dict));
+
+        let text = "Global Hero met Narrative One Hero and Narrative Two Hero.";
+
+        // 1. Scan with NO scope (Global only)
+        let spans_global = scanner.scan(text, None);
+        assert!(spans_global.iter().any(|s| s.label == "Global Hero"));
+        assert!(!spans_global.iter().any(|s| s.label == "Narrative One Hero"));
+        assert!(!spans_global.iter().any(|s| s.label == "Narrative Two Hero"));
+
+        // 2. Scan with Narrative 1
+        let spans_n1 = scanner.scan(text, Some("narrative_1"));
+        assert!(spans_n1.iter().any(|s| s.label == "Global Hero")); // Global should show
+        assert!(spans_n1.iter().any(|s| s.label == "Narrative One Hero")); // N1 should show
+        assert!(!spans_n1.iter().any(|s| s.label == "Narrative Two Hero")); // N2 should NOT show
+
+        // 3. Scan with Narrative 2
+        let spans_n2 = scanner.scan(text, Some("narrative_2"));
+        assert!(spans_n2.iter().any(|s| s.label == "Global Hero"));
+        assert!(!spans_n2.iter().any(|s| s.label == "Narrative One Hero"));
+        assert!(spans_n2.iter().any(|s| s.label == "Narrative Two Hero"));
     }
 }

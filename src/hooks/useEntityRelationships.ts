@@ -4,7 +4,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { EntityKind } from '@/lib/types/entityTypes';
-import { smartGraphRegistry } from '@/lib/registry/SmartGraphRegistry';
+import { smartGraphRegistry } from '@/lib/registry';
 import { useRelationshipTypes } from './useRelationshipTypes';
 
 // Types matching legacy RelationshipTypesTab expectations

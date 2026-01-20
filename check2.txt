@@ -1,0 +1,796 @@
+﻿cargo :     Checking 
+kittcore v0.1.0 (C:\Users\sh
+uga\1kittroot\1code\crepe-no
+tes\src\rust\kittcore)
+At line:1 char:1
++ cargo check --target 
+wasm32-unknown-unknown 2>&1 
+| Out-File -FilePath ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (    C  
+  hecking ki...\rust\kitt   
+ core):String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+warning: unused imports: 
+`EvidenceSpan` and 
+`ProjectedRelation`
+  --> src\scanner\relation.r
+s:51:53
+   |
+51 | use crate::reality::evi
+dence_graph::{EvidenceGraph,
+ ProjectedRelation, 
+EvidenceSpan, 
+EvidenceSource};
+   |                        
+                            
+ ^^^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^
+   |
+   = note: 
+`#[warn(unused_imports)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused imports: 
+`CompiledDictionary` and 
+`DecorationSpan`
+ --> src\scanner\implicit_da
+fsa.rs:1:20
+  |
+1 | use super::dafsa::{Compi
+ledDictionary, 
+RuntimeDictionary, 
+ScannerCore, 
+compile_dictionary, 
+DecorationSpan};
+  |                    
+^^^^^^^^^^^^^^^^^^          
+                            
+                
+^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`Deserialize` and 
+`Serialize`
+ --> src\scanner\implicit_da
+fsa.rs:5:13
+  |
+5 | use serde::{Serialize, 
+Deserialize};
+  |             ^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused imports: 
+`ConceptEdge` and 
+`ConceptNode`
+ --> src\reality\algorithms.
+rs:9:34
+  |
+9 | use super::graph::{Conce
+ptGraph, ConceptNode, 
+ConceptEdge};
+  |                         
+         ^^^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: 
+`HashSet`
+  --> src\reality\evidence_g
+raph.rs:22:33
+   |
+22 | use 
+std::collections::{HashMap, 
+HashSet};
+   |                        
+         ^^^^^^^
+
+warning: unused imports: 
+`ConceptEdge` and 
+`ConceptNode`
+  --> src\reality\evidence_g
+raph.rs:25:34
+   |
+25 | use super::graph::{Conc
+eptGraph, ConceptNode, 
+ConceptEdge};
+   |                        
+          ^^^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: 
+`CozoError`
+ --> 
+src\db\cozo_shared.rs:9:40
+  |
+9 | use crate::db::cozo_grap
+h::{CozoGraph, CozoError};
+  |                         
+               ^^^^^^^^^
+
+warning: unused import: 
+`std::mem`
+ --> src\shared_mem.rs:2:5
+  |
+2 | use std::mem;
+  |     ^^^^^^^^
+
+warning: unused imports: 
+`CandidateStats` and 
+`CanonToken`
+ --> src\shared_mem.rs:6:50
+  |
+6 | use crate::scanner::disc
+overy::{DiscoveryEngine, 
+CandidateStats, 
+CandidateStatus, 
+canonicalize, CanonToken};
+  |                         
+                         
+^^^^^^^^^^^^^^              
+                   
+^^^^^^^^^^
+
+warning: unused import: `cra
+te::scanner::dafsa::types::E
+ntityKind`
+ --> src\shared_mem.rs:7:5
+  |
+7 | use crate::scanner::dafs
+a::types::EntityKind;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched 
+types
+   --> src\db\cozo_registry.
+rs:127:47
+    |
+127 |                     
+let entity = 
+parse_entity(&result[0]);
+    |                       
+           ------------ 
+^^^^^^^^^^ expected 
+`&HashMap<String, Value>`, 
+found `&BTreeMap<String, 
+Value>`
+    |                       
+           |
+    |                       
+           arguments to 
+this function are incorrect
+    |
+    = note: expected 
+reference `&HashMap<std::str
+ing::String, Value>`
+               found 
+reference `&BTreeMap<std::st
+ring::String, Value>`
+note: function defined here
+   --> 
+src\db\cozo_registry.rs:60:4
+    |
+ 60 | fn parse_entity(row: 
+&HashMap<String, 
+JsonValue>) -> EntityRecord 
+{
+    |    ^^^^^^^^^^^^ ------
+--------------------------
+
+error[E0308]: mismatched 
+types
+   --> src\db\cozo_registry.
+rs:156:47
+    |
+156 |                     
+let entity = 
+parse_entity(&result[0]);
+    |                       
+           ------------ 
+^^^^^^^^^^ expected 
+`&HashMap<String, Value>`, 
+found `&BTreeMap<String, 
+Value>`
+    |                       
+           |
+    |                       
+           arguments to 
+this function are incorrect
+    |
+    = note: expected 
+reference `&HashMap<std::str
+ing::String, Value>`
+               found 
+reference `&BTreeMap<std::st
+ring::String, Value>`
+note: function defined here
+   --> 
+src\db\cozo_registry.rs:60:4
+    |
+ 60 | fn parse_entity(row: 
+&HashMap<String, 
+JsonValue>) -> EntityRecord 
+{
+    |    ^^^^^^^^^^^^ ------
+--------------------------
+
+error[E0631]: type mismatch 
+in function arguments
+   --> src\db\cozo_registry.
+rs:179:26
+    |
+ 60 | fn parse_entity(row: 
+&HashMap<String, 
+JsonValue>) -> EntityRecord 
+{
+    | ----------------------
+----------------------------
+--------------- found 
+signature defined here
+...
+179 |                     
+.map(parse_entity)
+    |                      
+--- ^^^^^^^^^^^^ expected 
+due to this
+    |                      |
+    |                      
+required by a bound 
+introduced by this call
+    |
+    = note: expected 
+function signature `fn(&BTre
+eMap<std::string::String, 
+Value>) -> _`
+               found 
+function signature `fn(&Hash
+Map<std::string::String, 
+Value>) -> _`
+note: required by a bound 
+in `map`
+   --> /rustc/ded5c06cf21d2b
+93bffd5d884aa6e96934ee4234/l
+ibrary/core/src/iter/traits/
+iterator.rs:773:5
+help: consider wrapping the 
+function in a closure
+    |
+179 |                     
+.map(|arg0: &BTreeMap<std::s
+tring::String, Value>| 
+parse_entity(/* &HashMap<std
+::string::String, Value> 
+*/))
+    |                       
+   +++++++++++++++++++++++++
+++++++++++++++++++++        
+     +++++++++++++++++++++++
++++++++++++++++++++++
+
+error[E0599]: the method 
+`collect` exists for struct 
+`Map<Iter<'_, 
+BTreeMap<String, Value>>, 
+fn(&...) -> ... 
+{parse_entity}>`, but its 
+trait bounds were not 
+satisfied
+   --> src\db\cozo_registry.
+rs:180:22
+    |
+178 |                   let 
+entities: Vec<EntityRecord> 
+= result.iter()
+    |  _____________________
+____________________________
+__-
+179 | |                     
+.map(parse_entity)
+180 | |                     
+.collect();
+    | |                     
+-^^^^^^^ method cannot be 
+called due to unsatisfied 
+trait bounds
+    | 
+|_____________________|
+    |
+    |
+    = note: the following 
+trait bounds were not 
+satisfied:
+            `<for<'a> 
+fn(&'a HashMap<std::string::
+String, Value>) -> 
+cozo_registry::EntityRecord 
+{parse_entity} as FnOnce<(&B
+TreeMap<std::string::String,
+ Value>,)>>::Output = _`
+            which is 
+required by `std::iter::Map<
+std::slice::Iter<'_, BTreeMa
+p<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+cozo_registry::EntityRecord 
+{parse_entity}>: 
+std::iter::Iterator`
+            `for<'a> fn(&'a 
+HashMap<std::string::String,
+ Value>) -> 
+cozo_registry::EntityRecord 
+{parse_entity}: FnMut<(&BTre
+eMap<std::string::String, 
+Value>,)>`
+            which is 
+required by `std::iter::Map<
+std::slice::Iter<'_, BTreeMa
+p<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+cozo_registry::EntityRecord 
+{parse_entity}>: 
+std::iter::Iterator`
+            `std::iter::Map<
+std::slice::Iter<'_, BTreeMa
+p<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+cozo_registry::EntityRecord 
+{parse_entity}>: 
+std::iter::Iterator`
+            which is 
+required by `&mut std::iter:
+:Map<std::slice::Iter<'_, BT
+reeMap<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+cozo_registry::EntityRecord 
+{parse_entity}>: 
+std::iter::Iterator`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\crepe-notes\s
+rc\rust\kittcore\target\wasm
+32-unknown-unknown\debug\dep
+s\kittcore-cc05e29ce9a62d8c.
+long-type-170414325054962667
+68.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0631]: type mismatch 
+in function arguments
+   --> src\db\cozo_registry.
+rs:256:26
+    |
+ 69 | fn 
+parse_relationship(row: 
+&HashMap<String, 
+JsonValue>) -> 
+RelationshipRecord {
+    | ----------------------
+----------------------------
+--------------------------- 
+found signature defined here
+...
+256 |                     
+.map(parse_relationship)
+    |                      
+--- ^^^^^^^^^^^^^^^^^^ 
+expected due to this
+    |                      |
+    |                      
+required by a bound 
+introduced by this call
+    |
+    = note: expected 
+function signature `fn(&BTre
+eMap<std::string::String, 
+Value>) -> _`
+               found 
+function signature `fn(&Hash
+Map<std::string::String, 
+Value>) -> _`
+note: required by a bound 
+in `map`
+   --> /rustc/ded5c06cf21d2b
+93bffd5d884aa6e96934ee4234/l
+ibrary/core/src/iter/traits/
+iterator.rs:773:5
+help: consider wrapping the 
+function in a closure
+    |
+256 |                     
+.map(|arg0: &BTreeMap<std::s
+tring::String, Value>| 
+parse_relationship(/* &HashM
+ap<std::string::String, 
+Value> */))
+    |                       
+   +++++++++++++++++++++++++
+++++++++++++++++++++        
+           +++++++++++++++++
++++++++++++++++++++++++++++
+
+error[E0599]: the method 
+`collect` exists for struct 
+`Map<Iter<'_, 
+BTreeMap<String, Value>>, 
+...>`, but its trait bounds 
+were not satisfied
+   --> src\db\cozo_registry.
+rs:257:22
+    |
+255 |                   let 
+relationships: 
+Vec<RelationshipRecord> = 
+result.iter()
+    |  _____________________
+____________________________
+_____________-
+256 | |                     
+.map(parse_relationship)
+257 | |                     
+.collect();
+    | |                     
+-^^^^^^^ method cannot be 
+called on `Map<Iter<'_, 
+BTreeMap<String, Value>>, 
+...>` due to unsatisfied 
+trait bounds
+    | 
+|_____________________|
+    |
+    |
+    = note: the following 
+trait bounds were not 
+satisfied:
+            `<for<'a> 
+fn(&'a HashMap<std::string::
+String, Value>) -> 
+RelationshipRecord 
+{parse_relationship} as FnOn
+ce<(&BTreeMap<std::string::S
+tring, Value>,)>>::Output = 
+_`
+            which is 
+required by `std::iter::Map<
+std::slice::Iter<'_, BTreeMa
+p<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+RelationshipRecord 
+{parse_relationship}>: 
+std::iter::Iterator`
+            `for<'a> fn(&'a 
+HashMap<std::string::String,
+ Value>) -> 
+RelationshipRecord 
+{parse_relationship}: FnMut<
+(&BTreeMap<std::string::Stri
+ng, Value>,)>`
+            which is 
+required by `std::iter::Map<
+std::slice::Iter<'_, BTreeMa
+p<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+RelationshipRecord 
+{parse_relationship}>: 
+std::iter::Iterator`
+            `std::iter::Map<
+std::slice::Iter<'_, BTreeMa
+p<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+RelationshipRecord 
+{parse_relationship}>: 
+std::iter::Iterator`
+            which is 
+required by `&mut std::iter:
+:Map<std::slice::Iter<'_, BT
+reeMap<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+RelationshipRecord 
+{parse_relationship}>: 
+std::iter::Iterator`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\crepe-notes\s
+rc\rust\kittcore\target\wasm
+32-unknown-unknown\debug\dep
+s\kittcore-cc05e29ce9a62d8c.
+long-type-101981121599861334
+12.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+error[E0631]: type mismatch 
+in function arguments
+   --> src\db\cozo_registry.
+rs:280:26
+    |
+ 69 | fn 
+parse_relationship(row: 
+&HashMap<String, 
+JsonValue>) -> 
+RelationshipRecord {
+    | ----------------------
+----------------------------
+--------------------------- 
+found signature defined here
+...
+280 |                     
+.map(parse_relationship)
+    |                      
+--- ^^^^^^^^^^^^^^^^^^ 
+expected due to this
+    |                      |
+    |                      
+required by a bound 
+introduced by this call
+    |
+    = note: expected 
+function signature `fn(&BTre
+eMap<std::string::String, 
+Value>) -> _`
+               found 
+function signature `fn(&Hash
+Map<std::string::String, 
+Value>) -> _`
+note: required by a bound 
+in `map`
+   --> /rustc/ded5c06cf21d2b
+93bffd5d884aa6e96934ee4234/l
+ibrary/core/src/iter/traits/
+iterator.rs:773:5
+help: consider wrapping the 
+function in a closure
+    |
+280 |                     
+.map(|arg0: &BTreeMap<std::s
+tring::String, Value>| 
+parse_relationship(/* &HashM
+ap<std::string::String, 
+Value> */))
+    |                       
+   +++++++++++++++++++++++++
+++++++++++++++++++++        
+           +++++++++++++++++
++++++++++++++++++++++++++++
+
+error[E0599]: the method 
+`collect` exists for struct 
+`Map<Iter<'_, 
+BTreeMap<String, Value>>, 
+...>`, but its trait bounds 
+were not satisfied
+   --> src\db\cozo_registry.
+rs:281:22
+    |
+279 |                   let 
+relationships: 
+Vec<RelationshipRecord> = 
+result.iter()
+    |  _____________________
+____________________________
+_____________-
+280 | |                     
+.map(parse_relationship)
+281 | |                     
+.collect();
+    | |                     
+-^^^^^^^ method cannot be 
+called on `Map<Iter<'_, 
+BTreeMap<String, Value>>, 
+...>` due to unsatisfied 
+trait bounds
+    | 
+|_____________________|
+    |
+    |
+    = note: the following 
+trait bounds were not 
+satisfied:
+            `<for<'a> 
+fn(&'a HashMap<std::string::
+String, Value>) -> 
+RelationshipRecord 
+{parse_relationship} as FnOn
+ce<(&BTreeMap<std::string::S
+tring, Value>,)>>::Output = 
+_`
+            which is 
+required by `std::iter::Map<
+std::slice::Iter<'_, BTreeMa
+p<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+RelationshipRecord 
+{parse_relationship}>: 
+std::iter::Iterator`
+            `for<'a> fn(&'a 
+HashMap<std::string::String,
+ Value>) -> 
+RelationshipRecord 
+{parse_relationship}: FnMut<
+(&BTreeMap<std::string::Stri
+ng, Value>,)>`
+            which is 
+required by `std::iter::Map<
+std::slice::Iter<'_, BTreeMa
+p<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+RelationshipRecord 
+{parse_relationship}>: 
+std::iter::Iterator`
+            `std::iter::Map<
+std::slice::Iter<'_, BTreeMa
+p<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+RelationshipRecord 
+{parse_relationship}>: 
+std::iter::Iterator`
+            which is 
+required by `&mut std::iter:
+:Map<std::slice::Iter<'_, BT
+reeMap<std::string::String, 
+Value>>, for<'a> fn(&'a Hash
+Map<std::string::String, 
+Value>) -> 
+RelationshipRecord 
+{parse_relationship}>: 
+std::iter::Iterator`
+    = note: the full name 
+for the type has been 
+written to 'C:\Users\shuga\1
+kittroot\1code\crepe-notes\s
+rc\rust\kittcore\target\wasm
+32-unknown-unknown\debug\dep
+s\kittcore-cc05e29ce9a62d8c.
+long-type-131549312879646407
+89.txt'
+    = note: consider using 
+`--verbose` to print the 
+full type name to the 
+console
+
+warning: unused variable: 
+`focus_entities`
+   --> src\scanner\conductor
+.rs:288:41
+    |
+288 |     pub fn compute_sma
+rt_context(&self, 
+focus_entities: 
+Vec<String>) -> JsValue {
+    |                       
+                  
+^^^^^^^^^^^^^^ help: if 
+this is intentional, prefix 
+it with an underscore: 
+`_focus_entities`
+    |
+    = note: 
+`#[warn(unused_variables)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: value assigned to 
+`head_idx` is never read
+   --> src\scanner\chunker.r
+s:491:28
+    |
+491 |         let mut 
+head_idx = None;
+    |                       
+     ^^^^
+    |
+    = help: maybe it is 
+overwritten before being 
+read?
+    = note: `#[warn(unused_a
+ssignments)]` (part of 
+`#[warn(unused)]`) on by 
+default
+
+warning: unused variable: 
+`token_lower`
+  --> src\scanner\dafsa\scan
+ner.rs:68:13
+   |
+68 |         let 
+token_lower = 
+token.to_lowercase(); // 
+Anchor keys are normalized 
+(lowercase)
+   |             
+^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_token_lower`
+
+warning: unused variable: 
+`e`
+   --> 
+src\reality\api.rs:660:85
+    |
+660 |         let edges: 
+Vec<ExportedEdge> = context_
+subgraph.graph().edge_weight
+s().map(|e| {
+    |                       
+                            
+                            
+      ^ help: if this is 
+intentional, prefix it with 
+an underscore: `_e`
+
+warning: unused variable: 
+`edges`
+   --> 
+src\reality\api.rs:660:13
+    |
+660 |         let edges: 
+Vec<ExportedEdge> = context_
+subgraph.graph().edge_weight
+s().map(|e| {
+    |             ^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_edges`
+
+warning: unused variable: 
+`timestamp`
+   --> 
+src\db\cozo_graph.rs:317:13
+    |
+317 |         let timestamp 
+= js_sys::Date::now(); // 
+Note: js_sys dependency 
+might be needed, or use a 
+placeholder
+    |             ^^^^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_timestamp`
+
+Some errors have detailed 
+explanations: E0308, E0599, 
+E0631.
+For more information about 
+an error, try `rustc 
+--explain E0308`.
+warning: `kittcore` (lib) 
+generated 16 warnings
+error: could not compile 
+`kittcore` (lib) due to 8 
+previous errors; 16 
+warnings emitted

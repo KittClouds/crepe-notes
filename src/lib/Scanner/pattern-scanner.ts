@@ -3,7 +3,7 @@
 // V3: Clean mental model - [KIND|Label] for entities, [[ref]] for entity refs, <<note>> for notes
 
 import type { DecorationSpan, EntityKind, SpanType } from './types';
-import { smartGraphRegistry } from '../registry/SmartGraphRegistry';
+import { smartGraphRegistry } from '@/lib/registry';
 
 // =============================================================================
 // CLEAN PATTERNS

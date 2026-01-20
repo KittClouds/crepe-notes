@@ -1,7 +1,13 @@
 use rowan::{GreenNode, GreenNodeBuilder};
 use super::syntax::SyntaxKind;
 #[cfg(test)]
-use super::tests::MockEntity;
+#[derive(Debug, Clone)]
+pub struct MockEntity {
+    pub start: usize,
+    pub end: usize,
+    pub label: String,
+    pub kind: String,
+}
 
 // =============================================================================
 // SemanticSpan Trait
@@ -906,7 +912,7 @@ fn zip_range_enhanced<S: SemanticSpan>(
 mod enhanced_parser_tests {
     use super::*;
     use super::super::syntax::RealityLanguage;
-    use crate::scanner::chunker::{Chunker, ChunkKind, TextRange};
+    use crate::scanner::chunker::{Chunker, ChunkKind};
 
     // Helper to create mock entity
     fn mock_entity(start: usize, end: usize) -> MockEntity {

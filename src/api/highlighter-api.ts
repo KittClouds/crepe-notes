@@ -13,6 +13,8 @@ import { saveNoteDecorations, getNoteDecorations, getDecorationContentHash, hash
 import { graphHotCache } from '../lib/cozo/graph/GraphHotCache';
 import { kittCore } from '../lib/kittcore';
 import { useDiscoveryStore } from '../lib/store/discoveryStore';
+import { appOrchestrator } from '../lib/core/AppOrchestrator';
+
 
 // =============================================================================
 // HIGHLIGHTER API INTERFACE
@@ -44,7 +46,7 @@ export interface HighlighterApi {
     subscribe(callback: () => void): () => void;
 
     /** Set current note ID for scan coordinator integration */
-    setNoteId(noteId: string): void;
+    setNoteId(noteId: string, narrativeId?: string): void;
 
     /** Handle keystroke for scan coordinator punctuation trigger */
     onKeystroke(char: string, cursorPos: number, contextText: string): void;
@@ -79,6 +81,7 @@ class DefaultHighlighterApi implements HighlighterApi {
     private isScanning = false;
     private scanVersion = 0;
     private currentNoteId: string = '';
+    private currentNarrativeId?: string;
     private prewarmCache: Map<string, DecorationSpan[] | null> = new Map();
 
     // Smart scan tracking
@@ -90,9 +93,10 @@ class DefaultHighlighterApi implements HighlighterApi {
     private lastSentenceEndPos = 0;    // Track last punctuation position
 
     /** Set the current note ID for scan coordinator */
-    setNoteId(noteId: string): void {
+    setNoteId(noteId: string, narrativeId?: string): void {
         const prevNoteId = this.currentNoteId;
         this.currentNoteId = noteId;
+        this.currentNarrativeId = narrativeId;
 
         // Reset smart scan state when switching notes
         if (noteId && noteId !== prevNoteId) {
@@ -349,13 +353,20 @@ class DefaultHighlighterApi implements HighlighterApi {
         // This ensures offsets remain correct per-node
         const scanPromises = batch.map(async (item) => {
             try {
-                const spans = await kittCore.scanImplicitRust(item.text);
+                // Pass narrativeId to Rust scanner for scope isolation
+                console.log(`[HighlighterApi:TRACE] Calling scanImplicitRust for node ${item.id}, textLen=${item.text.length}, narrativeId=${this.currentNarrativeId ?? 'none'}`);
+                const spans = await kittCore.scanImplicitRust(item.text, this.currentNarrativeId);
+                console.log(`[HighlighterApi:TRACE] scanImplicitRust returned ${spans?.length ?? 0} spans for node ${item.id}`);
+                if (spans && spans.length > 0) {
+                    console.log('[HighlighterApi:TRACE] Sample spans:', spans.slice(0, 3));
+                }
                 return { id: item.id, spans };
             } catch (e) {
                 console.warn(`[HighlighterApi] Scan failed for node ${item.id}`, e);
                 return { id: item.id, spans: [] };
             }
         });
+
 
         Promise.all(scanPromises).then(async (results) => {
             // Only apply if this is still the latest requested scan
@@ -433,12 +444,21 @@ class DefaultHighlighterApi implements HighlighterApi {
     /**
      * Trigger Discovery Scan (Unsupervised NER)
      * "The Virus" - finds new entity patterns.
+     * DEFERRED: Only runs after app is ready (not during boot sequence)
      */
     private triggerDiscoveryScan(text: string): void {
+        // Skip discovery during boot - defer until app is ready
+        if (appOrchestrator.getState() !== 'ready') {
+            // Schedule for after boot
+            setTimeout(() => this.triggerDiscoveryScan(text), 500);
+            return;
+        }
+
         // Discovery is cheap (mostly), but we shouldn't spam it.
         // It runs via Shared Memory, so no serialization overhead.
 
         kittCore.scanDiscovery(text)
+
             .then(candidates => {
                 // Show Watching (0) AND Promoted (1) for now, until graph sync is ready
                 const newCandidates = candidates.filter(c => c.status === 0 || c.status === 1);

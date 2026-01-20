@@ -23,7 +23,9 @@ wasm = [
     "dep:web-sys",
     "dep:instant",
     "dep:getrandom02",
+    "dep:getrandom02",
     "dep:getrandom",
+    # "sqlite_wasm", # Disabled temporarily due to Windows build issues
 ]
 # Native target (Tauri) - no WASM deps, standard Rust
 native = []
@@ -44,6 +46,7 @@ chrono = "0.4.42"
 rowan = "0.16.1"
 unicode-segmentation = "1.10"
 rustworkx-core = "0.17"
+petgraph = "0.6"
 lasso = { version = "0.7", features = ["multi-threaded"] }
 ndarray = "0.16"
 fst = "0.4"                  # FST for narrative verb dictionary
@@ -75,11 +78,17 @@ tokenizers = { version = "0.19", default-features = false, features = ["unstable
 # Requires LLVM/Clang installed for C→WASM compilation
 sqlite-wasm-rs = { version = "0.5", optional = true }
 sqlite-wasm-vfs = { version = "0.1", optional = true }
+# CozoDB (Rust-native graph DB for WASM)
+# Only using wasm feature - in-memory mode only (no storage backends = no C compilation!)
+cozo = { version = "0.7", default-features = false, features = ["wasm"] }
+opfs-project = "0.2"
+
 dawgdic = "0.1.2"
 thiserror = "2.0.18"
 stop-words = "=0.5.0"
 
 [dev-dependencies]
+
 wasm-bindgen-test = "0.3"
 
 [profile.release]

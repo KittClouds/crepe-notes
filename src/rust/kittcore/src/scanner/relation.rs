@@ -1085,9 +1085,9 @@ Shanks defeated Imu in a legendary battle.
         // Create ImplicitCortex with MOL entities
         let mut implicit_cortex = ImplicitCortex::new();
         implicit_cortex.hydrate(vec![
-            EntityDefinition { id: "char_alanic".to_string(), label: "Alanic".to_string(), kind: "CHARACTER".to_string(), aliases: vec![] },
-            EntityDefinition { id: "char_zorian".to_string(), label: "Zorian".to_string(), kind: "CHARACTER".to_string(), aliases: vec![] },
-            EntityDefinition { id: "char_xvim".to_string(), label: "Xvim".to_string(), kind: "CHARACTER".to_string(), aliases: vec![] },
+            EntityDefinition { id: "char_alanic".to_string(), label: "Alanic".to_string(), kind: "CHARACTER".to_string(), aliases: vec![], narrative_id: None },
+            EntityDefinition { id: "char_zorian".to_string(), label: "Zorian".to_string(), kind: "CHARACTER".to_string(), aliases: vec![], narrative_id: None },
+            EntityDefinition { id: "char_xvim".to_string(), label: "Xvim".to_string(), kind: "CHARACTER".to_string(), aliases: vec![], narrative_id: None },
         ]);
         implicit_cortex.build().unwrap();
 

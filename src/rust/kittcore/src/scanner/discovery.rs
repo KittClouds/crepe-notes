@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use super::dafsa::compiler::is_stop_word;
 use crate::resorank::math::calculate_idf;
 use super::dafsa::types::EntityKind;
+use crate::scanner::graph::CooccurrenceGraph;
 use stop_words::{get, LANGUAGE};
 
 // =============================================================================
@@ -43,7 +44,7 @@ impl Default for CandidateStats {
 // Canonicalization
 // =============================================================================
 
-fn canonicalize(raw: &str) -> Option<(CanonToken, String)> {
+pub fn canonicalize(raw: &str) -> Option<(CanonToken, String)> {
     // 1) Trim “edge punctuation” but keep internal '-' and '\''.
     let trimmed = raw.trim_matches(|c: char| {
         !(c.is_alphanumeric() || c == '\'' || c == '’' || c == '-' )
@@ -80,6 +81,7 @@ pub struct CandidateRegistry {
     pub stats: HashMap<CanonToken, CandidateStats>,
     pub promotion_threshold: u32,
     pub stopwords: HashSet<String>,
+    pub graph: CooccurrenceGraph,
 }
 
 impl CandidateRegistry {
@@ -94,8 +96,13 @@ impl CandidateRegistry {
             stats: HashMap::new(),
             promotion_threshold,
             stopwords,
+            graph: CooccurrenceGraph::new(),
         }
     }
+    
+    // ...
+
+    // ... methods moved below ...
 
     /// Add a custom stopword to be ignored
     pub fn add_stopword(&mut self, word: &str) {
@@ -156,6 +163,11 @@ impl CandidateRegistry {
         self.get_stats(token).and_then(|s| s.inferred_kind)
     }
 
+    /// Get graph degree centrality (number of connected known entities/candidates)
+    pub fn get_centrality_score(&self, token: &str) -> usize {
+        canonicalize(token).map(|(key, _)| self.graph.get_degree(&key)).unwrap_or(0)
+    }
+
     /// Calculate uniqueness score (TF-IDF style)
     /// High score = Strong candidate (Rare word appearing frequently locally)
     pub fn calculate_candidate_score(term_freq: u32, doc_freq: usize, total_docs: usize) -> f32 {
@@ -170,6 +182,18 @@ impl CandidateRegistry {
                 if entry.inferred_kind.is_none() {
                     entry.inferred_kind = Some(kind);
                 }
+            }
+        }
+    }
+
+    /// Record a co-occurrence between two tokens (Graph Edge)
+    pub fn record_cooccurrence(&mut self, source: &str, target: &str) {
+        if let (Some((k1, _)), Some((k2, _))) = (canonicalize(source), canonicalize(target)) {
+            // Only add edge if both are at least "Watching" or one is "Promoted"
+            // Actually, graph can just store raw co-occurrences.
+            // But we prefer to only graph things that passed the "stop-word" check.
+            if !self.stopwords.contains(&*k1.0) && !self.stopwords.contains(&*k2.0) {
+                 self.graph.add_edge(&k1, &k2);
             }
         }
     }
@@ -493,6 +517,10 @@ impl DiscoveryEngine {
                              // 3. Observe the potential relation
                              // Logic inside observe_relation will validate the verb
                              self.observe_relation(source_kind, verb_token, target_token);
+
+                             // 4. Record Co-occurrence for Graph Centrality
+                             // We record it even if the verb is unknown, as long as Source is Promoted.
+                             self.registry.record_cooccurrence(source_token, target_token);
                         }
                     }
                 }

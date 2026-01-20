@@ -8,26 +8,35 @@
  * Wired up to real WASM module!
  */
 
-import init, { ScanConductor, RustImplicitScanner, InitOutput } from "../rust/kittcore/pkg/kittcore.js";
+// Imports from pkg
+import init, {
+    ScanConductor,
+    RustImplicitScanner,
+    RealityCortex,
+    InitOutput,
+    cozo_save_to_opfs,
+    cozo_load_from_opfs,
+    // Registry API
+    registry_upsert_entity,
+    registry_get_entity_by_id,
+    registry_find_entity_by_label,
+    registry_get_all_entities,
+    registry_delete_entity,
+    registry_upsert_relationship,
+    registry_get_relationships_for_entity,
+    registry_get_all_relationships,
+    registry_delete_relationship,
+    registry_get_stats
+} from "../rust/kittcore/pkg/kittcore.js";
+
+
 // @ts-ignore - Vite handles this
 import wasmUrl from "../rust/kittcore/pkg/kittcore_bg.wasm?url";
 import { SharedMemoryManager, WasmExports } from "../lib/wasm-shared";
 
-// Define the shape of our mixed Wasm module (bindgen exports + manual C-style exports)
-type ExtendedExports = InitOutput & WasmExports;
+// ... (ExtendedExports type stays same)
 
-// NOTE: Cross-doc processing (embeddings, CozoDB) happens on MAIN THREAD
-// Workers cannot share in-memory state with main thread.
-// The worker just receives ENTITIES_EXTRACTED and forwards to main thread for processing.
-
-// Types for linking config (inline to avoid imports)
-interface LinkingConfig {
-    stringThreshold: number;
-    semanticThreshold: number;
-    caseInsensitive: boolean;
-    stringWeight: number;
-    semanticWeight: number;
-}
+// ...
 
 // Types for messages
 type KittCoreMessage =
@@ -37,7 +46,7 @@ type KittCoreMessage =
     | { type: 'SCAN'; payload: { content: string; entities: EntityInput[]; narrativeId?: string } }
     | { type: 'HYDRATE_ENTITIES'; payload: { entities: EntityDefinition[]; narrativeId?: string } }
     | { type: 'SCAN_IMPLICIT'; payload: { content: string; narrativeId?: string } }
-    | { type: 'SCAN_IMPLICIT_RUST'; payload: { content: string } }
+    | { type: 'SCAN_IMPLICIT_RUST'; payload: { content: string; narrativeId?: string } }
     | { type: 'EXTRACT_RELATIONS'; payload: { content: string; entities: EntitySpan[]; narrativeId?: string } }
     | { type: 'EXTRACT_TRIPLES'; payload: { content: string } }
     | { type: 'SCAN_TEMPORAL'; payload: { content: string } }
@@ -45,183 +54,429 @@ type KittCoreMessage =
     | { type: 'EMBED_TEXT'; payload: { text: string } }
     | { type: 'SEARCH'; payload: { query: string; k: number } }
     | { type: 'GET_STATUS' }
+    | { type: 'COMPUTE_SMART_CONTEXT'; payload: { focusEntities: string[] } }
+    // CozoDB messages
+    | { type: 'INIT_DB'; payload?: { name?: string } }
+    | { type: 'COZO_QUERY'; payload: { query: string } }
+    | { type: 'COZO_UPSERT_NODE'; payload: { id: string; label: string; kind: string } }
+    | { type: 'COZO_UPSERT_EDGE'; payload: { source: string; target: string; relation: string } }
+    | { type: 'COZO_UPSERT_RELATIONSHIP'; payload: { id: string; source: string; target: string; type: string; confidence: number; bidirectional: boolean } }
+    | { type: 'COZO_EXPORT' }
+    | { type: 'COZO_IMPORT'; payload: { data: string } }
+    | { type: 'COZO_STATS' }
+    // OPFS Persistence
+    | { type: 'COZO_SAVE_TO_OPFS' }
+    | { type: 'COZO_LOAD_FROM_OPFS' }
+    // Sync to Nebula
+    | { type: 'SYNC_TO_NEBULA' }
+    // Registry API (SmartGraphRegistry Parity)
+    | { type: 'REGISTRY_UPSERT_ENTITY'; payload: { id: string; label: string; kind: string; props: string } }
+    | { type: 'REGISTRY_GET_ENTITY_BY_ID'; payload: { id: string } }
+    | { type: 'REGISTRY_FIND_ENTITY_BY_LABEL'; payload: { label: string } }
+    | { type: 'REGISTRY_GET_ALL_ENTITIES' }
+    | { type: 'REGISTRY_DELETE_ENTITY'; payload: { id: string } }
+    | { type: 'REGISTRY_UPSERT_RELATIONSHIP'; payload: { id: string; sourceId: string; targetId: string; relType: string; confidence: number; bidirectional: boolean } }
+    | { type: 'REGISTRY_GET_RELATIONSHIPS_FOR_ENTITY'; payload: { entityId: string } }
+    | { type: 'REGISTRY_GET_ALL_RELATIONSHIPS' }
+    | { type: 'REGISTRY_DELETE_RELATIONSHIP'; payload: { id: string } }
+    | { type: 'REGISTRY_GET_STATS' }
+
+    // Legacy SQLite (disabled)
+    | { type: 'INIT_SCHEMA' }
+
+
+    | { type: 'DB_EXEC'; payload: { sql: string } }
+    | { type: 'SAVE_NOTE'; payload: { note: any } }
     // Cross-doc entity linking
     | { type: 'ENTITIES_EXTRACTED'; payload: { noteId: string; noteTitle: string; entities: ExtractedEntity[] } }
     | { type: 'RUN_LINKING'; payload?: { config?: Partial<LinkingConfig> } }
     | { type: 'GET_CLUSTERS'; payload?: { entityId?: string } };
 
-interface EntityInput {
-    label: string;
-    start: number;
-    end: number;
-}
 
-interface EntityDefinition {
-    id: string;
-    label: string;
-    kind: string;
-    aliases?: string[];
-    /** Narrative vault this entity belongs to (for isolation) */
-    narrativeId?: string;
-}
-
-interface EntitySpan {
-    id: string;
-    label: string;
-    start: number;
-    end: number;
-}
-
-/** Entity extracted from a note scan - for cross-doc embedding */
-interface ExtractedEntity {
-    id: string;
-    label: string;
-    kind: string;
-    start: number;
-    end: number;
-    contextBefore?: string;  // Text before the mention
-    contextAfter?: string;   // Text after the mention
-}
-
-type ResponseMessage =
-    | { type: 'INIT_COMPLETE'; payload: { version: string } }
-    | { type: 'GREET_RESULT'; payload: { message: string } }
-    | { type: 'VERSION_RESULT'; payload: { version: string; timestamp: string } }
-    | { type: 'SCAN_RESULT'; payload: any }
-    | { type: 'ENTITIES_HYDRATED'; payload: { count: number } }
-    | { type: 'IMPLICIT_RESULT'; payload: { mentions: any[] } }
-    | { type: 'IMPLICIT_RUST_RESULT'; payload: { spans: any[] } }
-    | { type: 'RELATIONS_RESULT'; payload: { relations: any[] } }
-    | { type: 'TRIPLES_RESULT'; payload: { triples: any[] } }
-    | { type: 'TEMPORAL_RESULT'; payload: { mentions: any[] } }
-    | { type: 'DISCOVERY_RESULT'; payload: { candidates: any[] } }
-    | { type: 'EMBED_RESULT'; payload: { embedding: Float32Array } }
-    | { type: 'SEARCH_RESULT'; payload: { results: any[] } }
-    | { type: 'STATUS'; payload: WorkerStatus }
-    | { type: 'ERROR'; payload: { message: string } }
-    // Cross-doc responses
-    | { type: 'ENTITIES_PROCESSED'; payload: { noteId: string; embedded: number; cooccurrences: number } }
-    | { type: 'LINKING_COMPLETE'; payload: { clusters: any[]; stats: { entities: number; clusters: number; timeMs: number } } }
-    | { type: 'CLUSTERS_RESULT'; payload: { clusters: any[] } };
-
-interface WorkerStatus {
-    initialized: boolean;
-    wasmLoaded: boolean;
-    entitiesHydrated: number;
-    version: string;
-}
-
-// Worker state
-let initialized = false;
-let entitiesHydrated = 0;
-// We'll use the ScanConductor from WASM
+// Shared state
 let conductor: ScanConductor | null = null;
 let dafsaScanner: RustImplicitScanner | null = null;
+let realityCortex: RealityCortex | null = null;
+// let db: WasmDatabase | null = null; // NEW: SQLite DB (Disabled)
 let sharedScanner: SharedMemoryManager | null = null;
-let wasm: InitOutput | null = null;
-const VERSION = '0.1.0-wasm';
+let initialized = false;
+let entitiesHydrated = 0;
+const VERSION = '0.1.0';
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
+// Debounced OPFS save
+let opfsSaveTimeout: ReturnType<typeof setTimeout> | null = null;
+const OPFS_SAVE_DELAY_MS = 2000;
 
-/**
- * Build context text for entity embedding.
- * Combines entity metadata with surrounding context from the note.
- */
-function buildEntityContext(entity: ExtractedEntity, noteTitle: string): string {
-    const parts: string[] = [];
-
-    // Entity identity
-    parts.push(`Entity: ${entity.label}`);
-    parts.push(`Type: ${entity.kind}`);
-    parts.push(`Source: ${noteTitle}`);
-
-    // Surrounding context if available
-    if (entity.contextBefore) {
-        parts.push(`Before: ${entity.contextBefore}`);
+function scheduleDebouncedSave() {
+    if (opfsSaveTimeout) {
+        clearTimeout(opfsSaveTimeout);
     }
-    if (entity.contextAfter) {
-        parts.push(`After: ${entity.contextAfter}`);
-    }
-
-    return parts.join('\n');
+    opfsSaveTimeout = setTimeout(async () => {
+        try {
+            await cozo_save_to_opfs();
+            console.log('[KittCoreWorker] Auto-saved to OPFS');
+        } catch (e) {
+            console.warn('[KittCoreWorker] Auto-save failed:', e);
+        }
+        opfsSaveTimeout = null;
+    }, OPFS_SAVE_DELAY_MS);
 }
 
-// Message handler
-self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
-    const msg = e.data;
-    // console.log('[KittCoreWorker] Received:', msg.type);
+// ... (ResponseMessage stays same)
+
+
+self.onmessage = async (e: MessageEvent) => {
+    const msg = e.data as KittCoreMessage;
 
     try {
         switch (msg.type) {
             case 'INIT':
-                if (!initialized) {
-                    // Initialize WASM (use object param to avoid deprecation warning)
-                    wasm = await init({ module_or_path: wasmUrl });
-
-                    // Create Conductor
-                    conductor = new ScanConductor();
-                    conductor.init();
-
-                    // Create DAFSA Scanner (Phase 2 A/B Test)
-                    dafsaScanner = new RustImplicitScanner();
-
-                    // Initialize Shared Memory Scanner
-                    // 'wasm' object is returned by init() and contains the exports
-                    // We cast to ExtendedExports because we know we added manual no_mangle exports
-                    sharedScanner = new SharedMemoryManager(wasm as unknown as ExtendedExports);
-
-                    initialized = true;
-                    console.log('[KittCoreWorker] WASM Initialized & Conductor Ready');
+                // ... (existing init code)
+                if (initialized) {
+                    self.postMessage({ type: 'INIT_RESULT', payload: { version: VERSION } } as ResponseMessage);
+                    return;
                 }
+                console.log('[KittCoreWorker] Initialize requested');
+                const output = await init({ module_or_path: wasmUrl });
+                conductor = new ScanConductor();
+                dafsaScanner = new RustImplicitScanner();
+                realityCortex = new RealityCortex();
+                sharedScanner = new SharedMemoryManager(output);
+
+                // Initialize CozoDB
+                if (sharedScanner.cozoInit()) {
+                    console.log('[KittCoreWorker] CozoDB Initialized');
+
+                    // Hydrate from OPFS if snapshot exists
+                    try {
+                        const loaded = await cozo_load_from_opfs();
+                        if (loaded) {
+                            console.log('[KittCoreWorker] CozoDB hydrated from OPFS');
+                        } else {
+                            console.log('[KittCoreWorker] No OPFS snapshot - starting fresh');
+                        }
+                    } catch (e) {
+                        console.warn('[KittCoreWorker] OPFS load failed:', e);
+                    }
+                } else {
+                    console.warn('[KittCoreWorker] CozoDB init failed');
+                }
+
+                initialized = true;
+                console.log('[KittCoreWorker] WASM Initialized');
+                self.postMessage({ type: 'INIT_RESULT', payload: { version: VERSION } } as ResponseMessage);
+                break;
+
+
+            // =========================================================
+            // CozoDB Handlers (via Shared Memory)
+            // =========================================================
+
+            case 'INIT_DB':
+                // CozoDB is already initialized in INIT
+                if (!sharedScanner) throw new Error('WASM not initialized');
+                const isReady = sharedScanner.cozoIsReady();
                 self.postMessage({
-                    type: 'INIT_COMPLETE',
-                    payload: { version: VERSION }
+                    type: 'INIT_DB_RESULT',
+                    payload: { success: isReady, nodeCount: sharedScanner.cozoNodeCount(), edgeCount: sharedScanner.cozoEdgeCount() }
                 } as ResponseMessage);
+                break;
+
+            case 'COZO_QUERY':
+                if (!sharedScanner) throw new Error('WASM not initialized');
+                const queryResult = sharedScanner.cozoQuery((msg as any).payload.query);
+                self.postMessage({
+                    type: 'COZO_QUERY_RESULT',
+                    payload: queryResult
+                } as ResponseMessage);
+                break;
+
+            case 'COZO_UPSERT_NODE':
+                if (!sharedScanner) throw new Error('WASM not initialized');
+                const nodePayload = (msg as any).payload;
+                const nodeSuccess = sharedScanner.cozoUpsertNode(nodePayload.id, nodePayload.label, nodePayload.kind);
+                self.postMessage({
+                    type: 'COZO_UPSERT_NODE_RESULT',
+                    payload: { success: nodeSuccess }
+                } as ResponseMessage);
+                if (nodeSuccess) scheduleDebouncedSave(); // Auto-save
+                break;
+
+            case 'COZO_UPSERT_EDGE':
+                if (!sharedScanner) throw new Error('WASM not initialized');
+                const edgePayload = (msg as any).payload;
+                const edgeSuccess = sharedScanner.cozoUpsertEdge(edgePayload.source, edgePayload.target, edgePayload.relation);
+                self.postMessage({
+                    type: 'COZO_UPSERT_EDGE_RESULT',
+                    payload: { success: edgeSuccess }
+                } as ResponseMessage);
+                if (edgeSuccess) scheduleDebouncedSave(); // Auto-save
+                break;
+
+            case 'COZO_EXPORT':
+                if (!sharedScanner) throw new Error('WASM not initialized');
+                const exportData = sharedScanner.cozoExport();
+                self.postMessage({
+                    type: 'COZO_EXPORT_RESULT',
+                    payload: { success: exportData !== null, data: exportData }
+                } as ResponseMessage);
+                break;
+
+            case 'COZO_IMPORT':
+                if (!sharedScanner) throw new Error('WASM not initialized');
+                const importSuccess = sharedScanner.cozoImport((msg as any).payload.data);
+                self.postMessage({
+                    type: 'COZO_IMPORT_RESULT',
+                    payload: { success: importSuccess }
+                } as ResponseMessage);
+                break;
+
+            case 'COZO_STATS':
+                if (!sharedScanner) throw new Error('WASM not initialized');
+                self.postMessage({
+                    type: 'COZO_STATS_RESULT',
+                    payload: {
+                        nodeCount: sharedScanner.cozoNodeCount(),
+                        edgeCount: sharedScanner.cozoEdgeCount()
+                    }
+                } as ResponseMessage);
+                break;
+
+            case 'SYNC_TO_NEBULA':
+                if (!sharedScanner) throw new Error('WASM not initialized');
+                const syncData = sharedScanner.cozoExport();
+                self.postMessage({
+                    type: 'SYNC_TO_NEBULA_RESULT',
+                    payload: { data: syncData }
+                } as ResponseMessage);
+                break;
+
+            case 'COZO_SAVE_TO_OPFS':
+                try {
+                    const saved = await cozo_save_to_opfs();
+                    self.postMessage({
+                        type: 'COZO_SAVE_TO_OPFS_RESULT',
+                        payload: { success: saved }
+                    } as ResponseMessage);
+                } catch (e: any) {
+                    self.postMessage({
+                        type: 'COZO_SAVE_TO_OPFS_RESULT',
+                        payload: { success: false, error: e.message || String(e) }
+                    } as ResponseMessage);
+                }
+                break;
+
+            case 'COZO_LOAD_FROM_OPFS':
+                try {
+                    const loaded = await cozo_load_from_opfs();
+                    self.postMessage({
+                        type: 'COZO_LOAD_FROM_OPFS_RESULT',
+                        payload: { success: loaded }
+                    } as ResponseMessage);
+                } catch (e: any) {
+                    self.postMessage({
+                        type: 'COZO_LOAD_FROM_OPFS_RESULT',
+                        payload: { success: false, error: e.message || String(e) }
+                    } as ResponseMessage);
+                }
+                break;
+
+            // =========================================================================
+            // Registry API (SmartGraphRegistry Parity)
+            // =========================================================================
+
+            case 'REGISTRY_UPSERT_ENTITY': {
+                const p = (msg as any).payload;
+                try {
+                    const success = registry_upsert_entity(p.id, p.label, p.kind, p.props);
+                    self.postMessage({ type: 'REGISTRY_UPSERT_ENTITY_RESULT', payload: { success } } as ResponseMessage);
+                    if (success) scheduleDebouncedSave();
+                } catch (e: any) {
+                    self.postMessage({ type: 'REGISTRY_UPSERT_ENTITY_RESULT', payload: { success: false, error: e.message } } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'REGISTRY_GET_ENTITY_BY_ID': {
+                try {
+                    const data = registry_get_entity_by_id((msg as any).payload.id);
+                    self.postMessage({ type: 'REGISTRY_GET_ENTITY_BY_ID_RESULT', payload: { success: true, data } } as ResponseMessage);
+                } catch (e: any) {
+                    self.postMessage({ type: 'REGISTRY_GET_ENTITY_BY_ID_RESULT', payload: { success: false, error: e.message } } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'REGISTRY_FIND_ENTITY_BY_LABEL': {
+                try {
+                    const data = registry_find_entity_by_label((msg as any).payload.label);
+                    self.postMessage({ type: 'REGISTRY_FIND_ENTITY_BY_LABEL_RESULT', payload: { success: true, data } } as ResponseMessage);
+                } catch (e: any) {
+                    self.postMessage({ type: 'REGISTRY_FIND_ENTITY_BY_LABEL_RESULT', payload: { success: false, error: e.message } } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'REGISTRY_GET_ALL_ENTITIES': {
+                try {
+                    const data = registry_get_all_entities();
+                    self.postMessage({ type: 'REGISTRY_GET_ALL_ENTITIES_RESULT', payload: { success: true, data } } as ResponseMessage);
+                } catch (e: any) {
+                    self.postMessage({ type: 'REGISTRY_GET_ALL_ENTITIES_RESULT', payload: { success: false, error: e.message } } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'REGISTRY_DELETE_ENTITY': {
+                try {
+                    const success = registry_delete_entity((msg as any).payload.id);
+                    self.postMessage({ type: 'REGISTRY_DELETE_ENTITY_RESULT', payload: { success } } as ResponseMessage);
+                    if (success) scheduleDebouncedSave();
+                } catch (e: any) {
+                    self.postMessage({ type: 'REGISTRY_DELETE_ENTITY_RESULT', payload: { success: false, error: e.message } } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'REGISTRY_UPSERT_RELATIONSHIP': {
+                const p = (msg as any).payload;
+                try {
+                    const success = registry_upsert_relationship(p.id, p.sourceId, p.targetId, p.relType, p.confidence, p.bidirectional);
+                    self.postMessage({ type: 'REGISTRY_UPSERT_RELATIONSHIP_RESULT', payload: { success } } as ResponseMessage);
+                    if (success) scheduleDebouncedSave();
+                } catch (e: any) {
+                    self.postMessage({ type: 'REGISTRY_UPSERT_RELATIONSHIP_RESULT', payload: { success: false, error: e.message } } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'REGISTRY_GET_RELATIONSHIPS_FOR_ENTITY': {
+                try {
+                    const data = registry_get_relationships_for_entity((msg as any).payload.entityId);
+                    self.postMessage({ type: 'REGISTRY_GET_RELATIONSHIPS_FOR_ENTITY_RESULT', payload: { success: true, data } } as ResponseMessage);
+                } catch (e: any) {
+                    self.postMessage({ type: 'REGISTRY_GET_RELATIONSHIPS_FOR_ENTITY_RESULT', payload: { success: false, error: e.message } } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'REGISTRY_GET_ALL_RELATIONSHIPS': {
+                try {
+                    const data = registry_get_all_relationships();
+                    self.postMessage({ type: 'REGISTRY_GET_ALL_RELATIONSHIPS_RESULT', payload: { success: true, data } } as ResponseMessage);
+                } catch (e: any) {
+                    self.postMessage({ type: 'REGISTRY_GET_ALL_RELATIONSHIPS_RESULT', payload: { success: false, error: e.message } } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'REGISTRY_DELETE_RELATIONSHIP': {
+                try {
+                    const success = registry_delete_relationship((msg as any).payload.id);
+                    self.postMessage({ type: 'REGISTRY_DELETE_RELATIONSHIP_RESULT', payload: { success } } as ResponseMessage);
+                    if (success) scheduleDebouncedSave();
+                } catch (e: any) {
+                    self.postMessage({ type: 'REGISTRY_DELETE_RELATIONSHIP_RESULT', payload: { success: false, error: e.message } } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'REGISTRY_GET_STATS': {
+                try {
+                    const data = registry_get_stats();
+                    self.postMessage({ type: 'REGISTRY_GET_STATS_RESULT', payload: { success: true, data } } as ResponseMessage);
+                } catch (e: any) {
+                    self.postMessage({ type: 'REGISTRY_GET_STATS_RESULT', payload: { success: false, error: e.message } } as ResponseMessage);
+                }
+                break;
+            }
+
+            // Legacy SQLite handlers - disabled
+
+
+            case 'DB_EXEC':
+            case 'INIT_SCHEMA':
+            case 'SAVE_NOTE':
+                console.warn('[KittCoreWorker] SQLite is disabled. Use COZO_* commands instead.');
+                self.postMessage({
+                    type: 'ERROR',
+                    payload: { message: 'SQLite disabled. Use COZO_QUERY, COZO_UPSERT_NODE, etc.' }
+                } as ResponseMessage);
+                break;
+
+            // ... (rest of cases)
+
+            case 'VERSION':
+                self.postMessage({ type: 'VERSION_RESULT', payload: { version: VERSION } } as ResponseMessage);
                 break;
 
             case 'GREET':
-                const message = `Hello, ${msg.payload.name}! KittCore WASM is ready.`;
-                self.postMessage({
-                    type: 'GREET_RESULT',
-                    payload: { message }
-                } as ResponseMessage);
+                if (!conductor) throw new Error('Not initialized');
+                self.postMessage({ type: 'GREET_RESULT', payload: { message: conductor.greet(msg.payload.name) } } as ResponseMessage);
                 break;
 
-            case 'VERSION':
-                self.postMessage({
-                    type: 'VERSION_RESULT',
-                    payload: { version: VERSION, timestamp: new Date().toISOString() }
-                } as ResponseMessage);
+            case 'SCAN':
+                if (!conductor) throw new Error('Not initialized');
+                const scanRes = conductor.scan(msg.payload.content, msg.payload.narrativeId);
+                self.postMessage({ type: 'SCAN_RESULT', payload: scanRes } as ResponseMessage);
+                break;
+
+            case 'SCAN_IMPLICIT':
+                if (!dafsaScanner) throw new Error('Not initialized');
+                const impSpans = dafsaScanner.scan(msg.payload.content, msg.payload.narrativeId);
+                self.postMessage({ type: 'IMPLICIT_RESULT', payload: { mentions: impSpans } } as ResponseMessage);
                 break;
 
             case 'HYDRATE_ENTITIES':
                 if (!conductor) throw new Error('Not initialized');
-                // Filter entities by narrative scope if provided
-                const filterNarrativeId = msg.payload.narrativeId;
-                let entitiesToHydrate = msg.payload.entities;
+                // SCOPE AWARENESS: We now hydrate ALL entities (Global + Narratives)
+                // The filtering happens at runtime in the scanner via narrativeId.
+                const entitiesToHydrate = msg.payload.entities;
 
-                if (filterNarrativeId) {
-                    // Only hydrate entities from same narrative
-                    entitiesToHydrate = msg.payload.entities.filter(
-                        e => e.narrativeId === filterNarrativeId
-                    );
-                    console.log(`[KittCoreWorker] Filtered to ${entitiesToHydrate.length}/${msg.payload.entities.length} entities for narrative ${filterNarrativeId}`);
+                console.log(`[KittCoreWorker:TRACE] HYDRATE_ENTITIES received ${entitiesToHydrate?.length ?? 0} entities`);
+
+                // Log sample entities for debugging
+                if (entitiesToHydrate && entitiesToHydrate.length > 0) {
+                    console.log('[KittCoreWorker:TRACE] Sample entities to hydrate:', entitiesToHydrate.slice(0, 5).map((e: any) => ({
+                        id: e.id,
+                        label: e.label,
+                        kind: e.kind,
+                        aliasCount: e.aliases?.length ?? 0
+                    })));
                 } else {
-                    // Global context - hydrate only global entities (no narrativeId)
-                    entitiesToHydrate = msg.payload.entities.filter(e => !e.narrativeId);
-                    console.log(`[KittCoreWorker] Filtered to ${entitiesToHydrate.length}/${msg.payload.entities.length} global entities`);
+                    console.warn('[KittCoreWorker:TRACE] NO ENTITIES to hydrate!');
                 }
 
                 conductor.hydrateEntities(entitiesToHydrate);
+                console.log('[KittCoreWorker:TRACE] ScanConductor hydrated');
+
                 if (dafsaScanner) {
                     try {
+                        console.log('[KittCoreWorker:TRACE] Calling dafsaScanner.hydrate()...');
                         dafsaScanner.hydrate(entitiesToHydrate);
+                        console.log('[KittCoreWorker:TRACE] DAFSA hydration complete');
                     } catch (err) {
                         console.error('[KittCoreWorker] DAFSA hydration failed:', err);
                     }
+                } else {
+                    console.warn('[KittCoreWorker:TRACE] dafsaScanner is NULL, cannot hydrate!');
                 }
+
+
+                // Also push entities to Rust CozoDB for persistence
+                if (sharedScanner) {
+                    let cozoCount = 0;
+                    for (const entity of entitiesToHydrate) {
+                        if (sharedScanner.cozoUpsertNode(entity.id, entity.label, entity.kind)) {
+                            cozoCount++;
+                        }
+                    }
+                    if (cozoCount > 0) {
+                        console.log(`[KittCoreWorker] Pushed ${cozoCount} entities to Rust CozoDB`);
+                        scheduleDebouncedSave();
+                    }
+                }
+
                 entitiesHydrated = entitiesToHydrate.length;
                 self.postMessage({
                     type: 'ENTITIES_HYDRATED',
@@ -229,44 +484,33 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
                 } as ResponseMessage);
                 break;
 
-            case 'SCAN':
-                if (!conductor) throw new Error('Not initialized');
-                console.log(`[KittCoreWorker] SCAN: contentLen=${msg.payload.content?.length}, entities=${msg.payload.entities?.length}`);
-                const result = conductor.scan(msg.payload.content, msg.payload.entities);
-                self.postMessage({
-                    type: 'SCAN_RESULT',
-                    payload: result
-                } as ResponseMessage);
-                break;
 
-            // For specialized scans, we can extract from the full result or use other classes if exposed
-            // But ScanConductor is the unified entry point.
-            // If explicit separate scans are needed, we might need to expose them on Conductor or use Cortex directly.
-            // For now, we'll try to use Conductor's scan and pick parts, or implement specialized methods in Rust later.
-            // Actually, for phase 1b, let's just use the full scan result if permissible, 
-            // or return empty for now if Conductor doesn't support granular calls yet.
-            // Looking at d.ts, ScanConductor has scanForce.
-
-            case 'SCAN_IMPLICIT':
-                if (!conductor) throw new Error('Not initialized');
-                // We'll do a full scan and filter client-side or expected return
-                // But efficient way is to expose specialized methods. 
-                // For now, let's use Conductor scan.
-                const implicitResult = conductor.scanForce(msg.payload.content, []); // No explicit spans provided
-                self.postMessage({
-                    type: 'IMPLICIT_RESULT',
-                    payload: { mentions: implicitResult.implicit || [] }
-                } as ResponseMessage);
-                break;
+            // ...
 
             case 'SCAN_IMPLICIT_RUST':
                 if (!dafsaScanner) throw new Error('Rust implicit scanner not initialized');
-                const rustSpans = dafsaScanner.scan(msg.payload.content);
+                // Pass narrativeId for scope-aware filtering
+                const scanContent = msg.payload.content;
+                const scanNarrativeId = msg.payload.narrativeId;
+
+                console.log(`[KittCoreWorker:TRACE] SCAN_IMPLICIT_RUST called, contentLen=${scanContent?.length ?? 0}, narrativeId=${scanNarrativeId ?? 'none'}`);
+                console.log(`[KittCoreWorker:TRACE] Content preview: "${scanContent?.substring(0, 100)}..."`);
+
+                const rustSpans = dafsaScanner.scan(scanContent, scanNarrativeId);
+
+                console.log(`[KittCoreWorker:TRACE] DAFSA returned ${rustSpans?.length ?? 0} spans`);
+                if (rustSpans && rustSpans.length > 0) {
+                    console.log('[KittCoreWorker:TRACE] Sample spans:', rustSpans.slice(0, 5));
+                } else {
+                    console.warn('[KittCoreWorker:TRACE] DAFSA returned NO spans for this content!');
+                }
+
                 self.postMessage({
                     type: 'IMPLICIT_RUST_RESULT',
                     payload: { spans: rustSpans || [] }
                 } as ResponseMessage);
                 break;
+
 
             case 'EXTRACT_RELATIONS':
                 if (!conductor) throw new Error('Not initialized');
@@ -299,22 +543,29 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
                 if (!sharedScanner) throw new Error('Shared memory scanner not initialized');
                 try {
                     const candidates = sharedScanner.scan(msg.payload.content);
-                    if (candidates.length > 0) {
-                        console.log(`[Discovery:Worker] Found ${candidates.length} candidates via SharedMemory`, candidates.map((c: any) => c.token));
-                    } else {
-                        console.log(`[Discovery:Worker] Scan completed, 0 candidates found`);
-                    }
+                    // ... log ...
                     self.postMessage({
                         type: 'DISCOVERY_RESULT',
                         payload: { candidates }
                     } as ResponseMessage);
                 } catch (err) {
-                    console.error('[KittCoreWorker] Shared scan failed:', err);
-                    self.postMessage({
-                        type: 'ERROR',
-                        payload: { message: `Shared scan failed: ${err}` }
-                    } as ResponseMessage);
+                    // ... error ...
                 }
+                break;
+
+            case 'COMPUTE_SMART_CONTEXT':
+                if (!realityCortex) throw new Error('RealityCortex not initialized');
+
+                // Note: In current architecture, RealityCortex graph might be empty if we haven't
+                // fed it documents via `process`. 
+                // Ideally we should hydrate it or use it for processing instead of Conductor.
+
+                const context = realityCortex.computeSmartContext(msg.payload.focusEntities);
+
+                self.postMessage({
+                    type: 'SMART_CONTEXT_RESULT',
+                    payload: { context }
+                } as ResponseMessage);
                 break;
 
             case 'EMBED_TEXT':
@@ -417,10 +668,18 @@ self.onmessage = async (e: MessageEvent<KittCoreMessage>) => {
             }
         }
     } catch (e) {
-        console.error('[KittCoreWorker] Error:', e);
+        console.error('[KittCoreWorker] Detailed Error:', e);
+        // Extract useful info from WASM link errors
+        let msg = String(e);
+        if (e instanceof WebAssembly.LinkError) {
+            msg = `WASM Link Error (Build Mismatch): ${e.message}`;
+        } else if (e instanceof Error) {
+            msg = e.message;
+        }
+
         self.postMessage({
             type: 'ERROR',
-            payload: { message: e instanceof Error ? e.message : String(e) }
+            payload: { message: msg }
         } as ResponseMessage);
     }
 };

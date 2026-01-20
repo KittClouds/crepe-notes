@@ -21,6 +21,9 @@ import { kittCore } from '../../lib/kittcore';
 // Performance instrumentation
 import { markNoteSwitchEnd } from '../../lib/utils/notePerf';
 
+// Narrative Registry for scope resolution
+import { narrativeRegistry } from '../../lib/narrative';
+
 // Custom selection toolbar plugin
 import { selectionTooltip, createSelectionToolbarView } from '../../editor/plugins/toolbar';
 
@@ -341,7 +344,9 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
   useEffect(() => {
     if (noteId) {
       const api = getHighlighterApi();
-      api.setNoteId(noteId);
+      // Resolve narrative scope (if any)
+      const narrativeRoot = narrativeRegistry.getNarrativeRoot(noteId);
+      api.setNoteId(noteId, narrativeRoot?.id);
     }
   }, [noteId]);
 

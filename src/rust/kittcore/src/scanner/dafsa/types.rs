@@ -20,6 +20,8 @@ pub struct RegisteredEntity {
     pub kind: EntityKind,
     #[serde(default)]
     pub aliases: Vec<String>,
+    #[serde(default)]
+    pub narrative_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -27,6 +29,7 @@ pub struct EntityInfo {
     pub id: String,
     pub label: String,
     pub kind: EntityKind,
+    pub narrative_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -43,6 +46,8 @@ pub struct DecorationSpan {
     pub resolved: bool,
     #[serde(rename = "entityId")]
     pub entity_id: Option<String>,
+    #[serde(rename = "narrativeId")]
+    pub narrative_id: Option<String>,
 
     #[serde(rename = "candidateIds")]
     pub candidate_ids: Option<Vec<String>>,

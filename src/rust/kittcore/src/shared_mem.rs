@@ -1,8 +1,9 @@
 use std::alloc::{alloc, dealloc, Layout};
 use std::mem;
 use std::slice;
+use std::collections::HashSet;
 
-use crate::scanner::discovery::{DiscoveryEngine, CandidateStats, CandidateStatus};
+use crate::scanner::discovery::{DiscoveryEngine, CandidateStats, CandidateStatus, canonicalize, CanonToken};
 use crate::scanner::dafsa::types::EntityKind;
 
 // =============================================================================
@@ -89,11 +90,24 @@ pub extern "C" fn scan_shared(text_ptr: *const u8, text_len: usize) -> *mut Scan
         static DISCOVERY_ENGINE: std::cell::RefCell<DiscoveryEngine> = std::cell::RefCell::new(DiscoveryEngine::new(3));
     }
 
+    // Track which keys are present in THIS document
+    let mut active_keys = HashSet::new();
+
     DISCOVERY_ENGINE.with(|engine_cell| {
         let mut engine = engine_cell.borrow_mut();
 
         // 1. Harvester (Observe Tokens)
         for word in text.split_whitespace() {
+            // Track presence
+            if let Some((key, _)) = canonicalize(word) {
+                active_keys.insert(key);
+            }
+
+            // NEW CHECK
+            if crate::scanner::dafsa::is_known_entity(word) {
+                continue;
+            }
+
             if word.chars().next().map_or(false, |c| c.is_uppercase()) {
                 engine.observe_token(word);
             }
@@ -103,39 +117,47 @@ pub extern "C" fn scan_shared(text_ptr: *const u8, text_len: usize) -> *mut Scan
         engine.scan_text_for_relations(text);
     });
     
-    // 3. Pack Results (Read from persistent engine)
-    let mut packed_candidates = Vec::new();
+    // 3. Pack Results (Read from persistent engine, filtered by active_keys)
+    let mut packed_candidates = Vec::with_capacity(active_keys.len());
     
     DISCOVERY_ENGINE.with(|engine_cell| {
         let engine = engine_cell.borrow();
         
-        for (_key, stats) in &engine.registry.stats {
-            // Return BOTH Watching (0) and Promoted (1) candidates
-            // Filter out Ignored (2)
-            if stats.status != CandidateStatus::Ignored {
-                let token_bytes = stats.display.as_bytes();
-                let len = token_bytes.len();
-                
-                let token_ptr = if len > 0 {
-                    // Use alignment 8 to match alloc_u8
-                    let token_layout = Layout::from_size_align(len, 8).unwrap();
-                    let ptr = unsafe { alloc(token_layout) };
-                    unsafe {
-                        std::ptr::copy_nonoverlapping(token_bytes.as_ptr(), ptr, len);
-                    }
-                    ptr
-                } else {
-                    std::ptr::null_mut()
-                };
+        for key in active_keys {
+            if let Some(stats) = engine.registry.stats.get(&key) {
+                // Return BOTH Watching (0) and Promoted (1) candidates
+                // Filter out Ignored (2)
+                if stats.status != CandidateStatus::Ignored {
+                    let token_bytes = stats.display.as_bytes();
+                    let len = token_bytes.len();
+                    
+                    let token_ptr = if len > 0 {
+                        // Use alignment 8 to match alloc_u8
+                        let token_layout = Layout::from_size_align(len, 8).unwrap();
+                        let ptr = unsafe { alloc(token_layout) };
+                        unsafe {
+                            std::ptr::copy_nonoverlapping(token_bytes.as_ptr(), ptr, len);
+                        }
+                        ptr
+                    } else {
+                        std::ptr::null_mut()
+                    };
 
-                packed_candidates.push(CandidatePacked {
-                    start: 0, 
-                    token_ptr,
-                    token_len: token_bytes.len() as u32,
-                    kind: stats.inferred_kind.map(|k| k as u8).unwrap_or(255), // 255 = None
-                    score: 0.0,
-                    status: stats.status as u8,
-                });
+                    // Score = Frequency + (Centrality * 5.0)
+                    // High centrality (connected to known entities) boosts score significantly.
+                    let centrality = engine.registry.graph.get_degree(&key);
+                    // let centrality = 0;
+                    let score = (stats.count as f32) + (centrality as f32 * 5.0);
+
+                    packed_candidates.push(CandidatePacked {
+                        start: 0, 
+                        token_ptr,
+                        token_len: token_bytes.len() as u32,
+                        kind: stats.inferred_kind.map(|k| k as u8).unwrap_or(255), // 255 = None
+                        score,
+                        status: stats.status as u8,
+                    });
+                }
             }
         }
     });
@@ -186,6 +208,61 @@ pub extern "C" fn free_result_deep(header_ptr: *mut ScanResultHeader) {
                 header.candidate_count as usize,
                 header.candidate_capacity as usize // Use captured capacity
             );
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::scanner::dafsa::{compile_dictionary, RuntimeDictionary, RegisteredEntity, EntityKind, set_global_dictionary};
+    use std::sync::Arc;
+    use std::slice;
+
+    #[test]
+    fn test_scan_shared_integrates_global_dict() {
+        // 1. Setup Global Dictionary with "Luffy"
+        let entities = vec![
+            RegisteredEntity {
+                id: "e1".to_string(),
+                label: "Luffy".to_string(),
+                kind: EntityKind::CHARACTER,
+                aliases: vec![],
+                narrative_id: None,
+            }
+        ];
+        let compiled = compile_dictionary(1, 0, &entities).unwrap();
+        let dict = RuntimeDictionary::load(compiled).unwrap();
+        set_global_dictionary(Arc::new(dict));
+
+        // 2. Scan text containing "Luffy" and "Zoro" (new)
+        let text = "Luffy vs Zoro";
+        let ptr = scan_shared(text.as_ptr(), text.len());
+        
+        assert!(!ptr.is_null(), "Result ptr should not be null");
+
+        unsafe {
+            let header = &*ptr;
+            println!("Got {} candidates", header.candidate_count);
+            
+            let slice = slice::from_raw_parts(header.candidates_ptr, header.candidate_count as usize);
+            let mut found_zoro = false;
+            let mut found_luffy = false;
+
+            for c in slice {
+                let token_slice = slice::from_raw_parts(c.token_ptr, c.token_len as usize);
+                let token = std::str::from_utf8(token_slice).unwrap();
+                println!("Candidate: {}", token);
+                
+                if token == "Zoro" { found_zoro = true; }
+                if token == "Luffy" { found_luffy = true; }
+            }
+            
+            // Clean up
+            free_result_deep(ptr);
+
+            assert!(found_zoro, "Zoro should be a candidate (Watching)");
+            assert!(!found_luffy, "Luffy should NOT be a candidate (Known Entity)");
         }
     }
 }

@@ -59,8 +59,7 @@ pub mod embeddings;
 #[cfg(feature = "embeddings")]
 pub mod rag;
 pub mod hnsw;
-#[cfg(feature = "sqlite_wasm")]
-pub mod db;  // SQLite WASM (experimental)
+pub mod db;  // Database layer (CozoGraph always available, SQLite gated)
 pub mod graphdb;  // Graph database layer
 pub mod narrative;  // FST-based narrative verb dictionary
 
@@ -129,6 +128,10 @@ pub use rag::{
     VectorIndex, SearchResult as VectorSearchResult,
 };
 
+
+// Public exports - CozoGraph (always available)
+pub use db::{CozoGraph, CozoError};
+
 // Public exports - SQLite WASM (experimental)
 #[cfg(feature = "sqlite_wasm")]
 pub use db::WasmDatabase;
@@ -145,7 +148,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 /// Initialize panic hook for better error messages in browser console
 #[cfg_attr(feature = "wasm", wasm_bindgen(start))]
-pub fn main() {
+pub fn start() {
     #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
     console_error_panic_hook::set_once();
 }

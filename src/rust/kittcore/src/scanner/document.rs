@@ -580,6 +580,7 @@ mod tests {
             label: label.to_string(),
             kind: kind.to_string(),
             aliases: vec![],
+            narrative_id: None,
         }
     }
 

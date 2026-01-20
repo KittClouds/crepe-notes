@@ -267,6 +267,35 @@ impl ScanConductor {
 
         Some(result)
     }
+
+    /// Compute Smart Context (PCST) for a set of focus entities
+    ///
+    /// This requires a fresh RealityCortex instance populated with the current graph state.
+    /// Since ScanConductor is stateless regarding the global graph, this method primarily
+    /// serves as a bridge. However, without a persistent graph in ScanConductor,
+    /// we can only compute context from *what we know*.
+    ///
+    /// For now, we will expose this as a method that creates a temporary RealityCortex,
+    /// populates it with known entities (hydrated_entities), and runs PCST.
+    /// 
+    /// NOTE: In a real app, RealityCortex should probably be persistent or passed in.
+    /// But given the constraints, we'll try to use the RealityCortex API directly if possible.
+    ///
+    /// ACTUALLY: The worker should probably just use RealityCortex directly if we want persistent graph.
+    /// But if the graph is in CozoDB, maybe we don't have a persistent memory graph?
+    ///
+    /// Let's assume for now that we want to expose it here.
+    pub fn compute_smart_context(&self, focus_entities: Vec<String>) -> JsValue {
+        // Create a temporary RealityCortex to run the algo
+        // This is inefficient but functional for stateless PCST if the graph is built on fly.
+        // BUT PCST needs a graph structure.
+        // If ScanConductor doesn't have the graph, this won't work well.
+        
+        // BETTER APPROACH: The worker should maintain a RealityCortex instance.
+        // ScanConductor is for *Scanning*. RealityCortex is for *Thinking*.
+        // I will update the worker to instantiate RealityCortex as well.
+        JsValue::NULL
+    }
 }
 
 // =============================================================================
@@ -419,6 +448,7 @@ mod tests {
             label: label.to_string(),
             kind: kind.to_string(),
             aliases: vec![],
+            narrative_id: None,
         }
     }
 

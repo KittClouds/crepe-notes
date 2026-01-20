@@ -1,0 +1,1342 @@
+﻿cargo :     Checking 
+kittcore v0.1.0 (C:\Users\sh
+uga\1kittroot\1code\crepe-no
+tes\src\rust\kittcore)
+At line:1 char:1
++ cargo check --target 
+wasm32-unknown-unknown 2>&1 
+| Out-File -FilePath ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (    C  
+  hecking ki...\rust\kitt   
+ core):String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+error[E0603]: constant 
+`COZO_DB` is private
+  --> src\db\cozo_registry.r
+s:10:29
+   |
+10 | use crate::db::cozo_sha
+red::COZO_DB;
+   |                        
+     ^^^^^^^ private 
+constant
+   |
+note: the constant 
+`COZO_DB` is defined here
+  --> 
+src\db\cozo_shared.rs:15:1
+   |
+15 | / thread_local! {
+16 | |     static COZO_DB: 
+RefCell<Option<CozoGraph>> 
+= RefCell::new(None);
+17 | | }
+   | |_^
+   = note: this error 
+originates in the macro `$cr
+ate::thread::local_impl::thr
+ead_local_process_attrs` 
+which comes from the 
+expansion of the macro 
+`thread_local` (in Nightly 
+builds, run with -Z 
+macro-backtrace for more 
+info)
+
+warning: unused imports: 
+`EvidenceSpan` and 
+`ProjectedRelation`
+  --> src\scanner\relation.r
+s:51:53
+   |
+51 | use crate::reality::evi
+dence_graph::{EvidenceGraph,
+ ProjectedRelation, 
+EvidenceSpan, 
+EvidenceSource};
+   |                        
+                            
+ ^^^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^
+   |
+   = note: 
+`#[warn(unused_imports)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused imports: 
+`CompiledDictionary` and 
+`DecorationSpan`
+ --> src\scanner\implicit_da
+fsa.rs:1:20
+  |
+1 | use super::dafsa::{Compi
+ledDictionary, 
+RuntimeDictionary, 
+ScannerCore, 
+compile_dictionary, 
+DecorationSpan};
+  |                    
+^^^^^^^^^^^^^^^^^^          
+                            
+                
+^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`Deserialize` and 
+`Serialize`
+ --> src\scanner\implicit_da
+fsa.rs:5:13
+  |
+5 | use serde::{Serialize, 
+Deserialize};
+  |             ^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused imports: 
+`ConceptEdge` and 
+`ConceptNode`
+ --> src\reality\algorithms.
+rs:9:34
+  |
+9 | use super::graph::{Conce
+ptGraph, ConceptNode, 
+ConceptEdge};
+  |                         
+         ^^^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: 
+`HashSet`
+  --> src\reality\evidence_g
+raph.rs:22:33
+   |
+22 | use 
+std::collections::{HashMap, 
+HashSet};
+   |                        
+         ^^^^^^^
+
+warning: unused imports: 
+`ConceptEdge` and 
+`ConceptNode`
+  --> src\reality\evidence_g
+raph.rs:25:34
+   |
+25 | use super::graph::{Conc
+eptGraph, ConceptNode, 
+ConceptEdge};
+   |                        
+          ^^^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: 
+`CozoError`
+ --> 
+src\db\cozo_shared.rs:9:40
+  |
+9 | use crate::db::cozo_grap
+h::{CozoGraph, CozoError};
+  |                         
+               ^^^^^^^^^
+
+warning: unused import: 
+`std::mem`
+ --> src\shared_mem.rs:2:5
+  |
+2 | use std::mem;
+  |     ^^^^^^^^
+
+warning: unused imports: 
+`CandidateStats` and 
+`CanonToken`
+ --> src\shared_mem.rs:6:50
+  |
+6 | use crate::scanner::disc
+overy::{DiscoveryEngine, 
+CandidateStats, 
+CandidateStatus, 
+canonicalize, CanonToken};
+  |                         
+                         
+^^^^^^^^^^^^^^              
+                   
+^^^^^^^^^^
+
+warning: unused import: `cra
+te::scanner::dafsa::types::E
+ntityKind`
+ --> src\shared_mem.rs:7:5
+  |
+7 | use crate::scanner::dafs
+a::types::EntityKind;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
+
+error[E0282]: type 
+annotations needed
+  --> src\db\cozo_registry.r
+s:49:19
+   |
+49 |     
+COZO_DB.with(|cell| {
+   |                   ^^^^
+50 |         let db_opt = 
+cell.borrow();
+   |                      
+---- type must be known at 
+this point
+   |
+help: consider giving this 
+closure parameter an 
+explicit type
+   |
+49 |     
+COZO_DB.with(|cell: /* Type 
+*/| {
+   |                       
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+  --> src\db\cozo_registry.r
+s:54:17
+   |
+54 |                 
+graph.upsert_node(id, 
+label, kind, props)
+   |                 ^^^^^ 
+cannot infer type
+
+error[E0282]: type 
+annotations needed
+  --> src\db\cozo_registry.r
+s:70:19
+   |
+70 |     
+COZO_DB.with(|cell| {
+   |                   ^^^^
+71 |         let db_opt = 
+cell.borrow();
+   |                      
+---- type must be known at 
+this point
+   |
+help: consider giving this 
+closure parameter an 
+explicit type
+   |
+70 |     
+COZO_DB.with(|cell: /* Type 
+*/| {
+   |                       
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+  --> src\db\cozo_registry.r
+s:75:30
+   |
+75 |                 let 
+result = graph.query(&query)
+   |                        
+      ^^^^^ cannot infer 
+type
+
+error[E0282]: type 
+annotations needed
+  --> src\db\cozo_registry.r
+s:83:53
+   |
+83 |                        
+ id: 
+row.get("id").and_then(|v| v
+.as_str()).unwrap_or("").to_
+string(),
+   |                        
+                            
+ ^  - type must be known at 
+this point
+   |
+help: consider giving this 
+closure parameter an 
+explicit type
+   |
+83 |                        
+ id: 
+row.get("id").and_then(|v: 
+/* Type */| v.as_str()).unwr
+ap_or("").to_string(),
+   |                        
+                            
+  ++++++++++++
+
+error[E0282]: type 
+annotations needed
+  --> src\db\cozo_registry.r
+s:84:59
+   |
+84 |                        
+ label: row.get("label").and
+_then(|v| v.as_str()).unwrap
+_or("").to_string(),
+   |                        
+                            
+       ^  - type must be 
+known at this point
+   |
+help: consider giving this 
+closure parameter an 
+explicit type
+   |
+84 |                        
+ label: row.get("label").and
+_then(|v: /* Type */| v.as_s
+tr()).unwrap_or("").to_strin
+g(),
+   |                        
+                            
+        ++++++++++++
+
+error[E0282]: type 
+annotations needed
+  --> src\db\cozo_registry.r
+s:85:57
+   |
+85 |                        
+ kind: row.get("kind").and_t
+hen(|v| v.as_str()).unwrap_o
+r("").to_string(),
+   |                        
+                            
+     ^  - type must be 
+known at this point
+   |
+help: consider giving this 
+closure parameter an 
+explicit type
+   |
+85 |                        
+ kind: row.get("kind").and_t
+hen(|v: /* Type */| v.as_str
+()).unwrap_or("").to_string(
+),
+   |                        
+                            
+      ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:105:19
+    |
+105 |     
+COZO_DB.with(|cell| {
+    |                   ^^^^
+106 |         let db_opt = 
+cell.borrow();
+    |                      
+---- type must be known at 
+this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+105 |     
+COZO_DB.with(|cell: /* Type 
+*/| {
+    |                       
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:110:30
+    |
+110 |                 let 
+result = graph.query(&query)
+    |                       
+       ^^^^^ cannot infer 
+type
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:118:53
+    |
+118 |                       
+  id: 
+row.get("id").and_then(|v| v
+.as_str()).unwrap_or("").to_
+string(),
+    |                       
+                            
+  ^  - type must be known 
+at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+118 |                       
+  id: 
+row.get("id").and_then(|v: 
+/* Type */| v.as_str()).unwr
+ap_or("").to_string(),
+    |                       
+                            
+   ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:119:59
+    |
+119 |                       
+  label: row.get("label").an
+d_then(|v| v.as_str()).unwra
+p_or("").to_string(),
+    |                       
+                            
+        ^  - type must be 
+known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+119 |                       
+  label: row.get("label").an
+d_then(|v: /* Type */| v.as_
+str()).unwrap_or("").to_stri
+ng(),
+    |                       
+                            
+         ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:120:57
+    |
+120 |                       
+  kind: row.get("kind").and_
+then(|v| v.as_str()).unwrap_
+or("").to_string(),
+    |                       
+                            
+      ^  - type must be 
+known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+120 |                       
+  kind: row.get("kind").and_
+then(|v: /* Type */| v.as_st
+r()).unwrap_or("").to_string
+(),
+    |                       
+                            
+       ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:136:19
+    |
+136 |     
+COZO_DB.with(|cell| {
+    |                   ^^^^
+137 |         let db_opt = 
+cell.borrow();
+    |                      
+---- type must be known at 
+this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+136 |     
+COZO_DB.with(|cell: /* Type 
+*/| {
+    |                       
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:141:30
+    |
+141 |                 let 
+result = graph.query(query)
+    |                       
+       ^^^^^ cannot infer 
+type
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:144:70
+    |
+144 |                 let 
+entities: Vec<EntityRecord> 
+= result.iter().map(|row| {
+    |                       
+                            
+                   ^^^
+145 |                     
+EntityRecord {
+146 |                       
+  id: 
+row.get("id").and_then(|v| v
+.as_str()).unwrap_or("").to_
+string(),
+    |                       
+      --- type must be 
+known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+144 |                 let 
+entities: Vec<EntityRecord> 
+= result.iter().map(|row: 
+/* Type */| {
+    |                       
+                            
+                      
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:146:53
+    |
+146 |                       
+  id: 
+row.get("id").and_then(|v| v
+.as_str()).unwrap_or("").to_
+string(),
+    |                       
+                            
+  ^  - type must be known 
+at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+146 |                       
+  id: 
+row.get("id").and_then(|v: 
+/* Type */| v.as_str()).unwr
+ap_or("").to_string(),
+    |                       
+                            
+   ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:147:59
+    |
+147 |                       
+  label: row.get("label").an
+d_then(|v| v.as_str()).unwra
+p_or("").to_string(),
+    |                       
+                            
+        ^  - type must be 
+known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+147 |                       
+  label: row.get("label").an
+d_then(|v: /* Type */| v.as_
+str()).unwrap_or("").to_stri
+ng(),
+    |                       
+                            
+         ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:148:57
+    |
+148 |                       
+  kind: row.get("kind").and_
+then(|v| v.as_str()).unwrap_
+or("").to_string(),
+    |                       
+                            
+      ^  - type must be 
+known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+148 |                       
+  kind: row.get("kind").and_
+then(|v: /* Type */| v.as_st
+r()).unwrap_or("").to_string
+(),
+    |                       
+                            
+       ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:168:19
+    |
+168 |     
+COZO_DB.with(|cell| {
+    |                   ^^^^
+169 |         let db_opt = 
+cell.borrow();
+    |                      
+---- type must be known at 
+this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+168 |     
+COZO_DB.with(|cell: /* Type 
+*/| {
+    |                       
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:173:17
+    |
+173 |                 
+graph.query(&query)
+    |                 ^^^^^ 
+cannot infer type
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:195:19
+    |
+195 |     
+COZO_DB.with(|cell| {
+    |                   ^^^^
+196 |         let db_opt = 
+cell.borrow();
+    |                      
+---- type must be known at 
+this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+195 |     
+COZO_DB.with(|cell: /* Type 
+*/| {
+    |                       
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:200:17
+    |
+200 |                 graph.
+upsert_relationship(id, 
+source_id, target_id, 
+rel_type, confidence, 
+bidirectional)
+    |                 ^^^^^ 
+cannot infer type
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:218:19
+    |
+218 |     
+COZO_DB.with(|cell| {
+    |                   ^^^^
+219 |         let db_opt = 
+cell.borrow();
+    |                      
+---- type must be known at 
+this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+218 |     
+COZO_DB.with(|cell: /* Type 
+*/| {
+    |                       
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:223:30
+    |
+223 |                 let 
+result = graph.query(&query)
+    |                       
+       ^^^^^ cannot infer 
+type
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:226:81
+    |
+226 |                 let 
+relationships: 
+Vec<RelationshipRecord> = 
+result.iter().map(|row| {
+    |                       
+                            
+                            
+  ^^^
+227 |                     
+RelationshipRecord {
+228 |                       
+  id: 
+row.get("id").and_then(|v| v
+.as_str()).unwrap_or("").to_
+string(),
+    |                       
+      --- type must be 
+known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+226 |                 let 
+relationships: 
+Vec<RelationshipRecord> = 
+result.iter().map(|row: /* 
+Type */| {
+    |                       
+                            
+                            
+     ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:228:53
+    |
+228 |                       
+  id: 
+row.get("id").and_then(|v| v
+.as_str()).unwrap_or("").to_
+string(),
+    |                       
+                            
+  ^  - type must be known 
+at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+228 |                       
+  id: 
+row.get("id").and_then(|v: 
+/* Type */| v.as_str()).unwr
+ap_or("").to_string(),
+    |                       
+                            
+   ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:229:67
+    |
+229 |                       
+  source_id: row.get("source
+_id").and_then(|v| v.as_str(
+)).unwrap_or("").to_string()
+,
+    |                       
+                            
+                ^  - type 
+must be known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+229 |                       
+  source_id: row.get("source
+_id").and_then(|v: /* Type 
+*/| v.as_str()).unwrap_or(""
+).to_string(),
+    |                       
+                            
+                 
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:230:67
+    |
+230 |                       
+  target_id: row.get("target
+_id").and_then(|v| v.as_str(
+)).unwrap_or("").to_string()
+,
+    |                       
+                            
+                ^  - type 
+must be known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+230 |                       
+  target_id: row.get("target
+_id").and_then(|v: /* Type 
+*/| v.as_str()).unwrap_or(""
+).to_string(),
+    |                       
+                            
+                 
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:231:61
+    |
+231 |                       
+  rel_type: row.get("type").
+and_then(|v| v.as_str()).unw
+rap_or("").to_string(),
+    |                       
+                            
+          ^  - type must be 
+known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+231 |                       
+  rel_type: row.get("type").
+and_then(|v: /* Type */| v.a
+s_str()).unwrap_or("").to_st
+ring(),
+    |                       
+                            
+           ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:232:69
+    |
+232 |                       
+  confidence: row.get("confi
+dence").and_then(|v| 
+v.as_f64()).unwrap_or(1.0),
+    |                       
+                            
+                  ^  - type 
+must be known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+232 |                       
+  confidence: row.get("confi
+dence").and_then(|v: /* 
+Type */| 
+v.as_f64()).unwrap_or(1.0),
+    |                       
+                            
+                   
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:233:75
+    |
+233 |                       
+  bidirectional: row.get("bi
+directional").and_then(|v| v
+.as_bool()).unwrap_or(false)
+,
+    |                       
+                            
+                        ^  
+- type must be known at 
+this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+233 |                       
+  bidirectional: row.get("bi
+directional").and_then(|v: 
+/* Type */| v.as_bool()).unw
+rap_or(false),
+    |                       
+                            
+                         
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:249:19
+    |
+249 |     
+COZO_DB.with(|cell| {
+    |                   ^^^^
+250 |         let db_opt = 
+cell.borrow();
+    |                      
+---- type must be known at 
+this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+249 |     
+COZO_DB.with(|cell: /* Type 
+*/| {
+    |                       
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:254:30
+    |
+254 |                 let 
+result = graph.query(query)
+    |                       
+       ^^^^^ cannot infer 
+type
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:257:81
+    |
+257 |                 let 
+relationships: 
+Vec<RelationshipRecord> = 
+result.iter().map(|row| {
+    |                       
+                            
+                            
+  ^^^
+258 |                     
+RelationshipRecord {
+259 |                       
+  id: 
+row.get("id").and_then(|v| v
+.as_str()).unwrap_or("").to_
+string(),
+    |                       
+      --- type must be 
+known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+257 |                 let 
+relationships: 
+Vec<RelationshipRecord> = 
+result.iter().map(|row: /* 
+Type */| {
+    |                       
+                            
+                            
+     ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:259:53
+    |
+259 |                       
+  id: 
+row.get("id").and_then(|v| v
+.as_str()).unwrap_or("").to_
+string(),
+    |                       
+                            
+  ^  - type must be known 
+at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+259 |                       
+  id: 
+row.get("id").and_then(|v: 
+/* Type */| v.as_str()).unwr
+ap_or("").to_string(),
+    |                       
+                            
+   ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:260:67
+    |
+260 |                       
+  source_id: row.get("source
+_id").and_then(|v| v.as_str(
+)).unwrap_or("").to_string()
+,
+    |                       
+                            
+                ^  - type 
+must be known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+260 |                       
+  source_id: row.get("source
+_id").and_then(|v: /* Type 
+*/| v.as_str()).unwrap_or(""
+).to_string(),
+    |                       
+                            
+                 
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:261:67
+    |
+261 |                       
+  target_id: row.get("target
+_id").and_then(|v| v.as_str(
+)).unwrap_or("").to_string()
+,
+    |                       
+                            
+                ^  - type 
+must be known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+261 |                       
+  target_id: row.get("target
+_id").and_then(|v: /* Type 
+*/| v.as_str()).unwrap_or(""
+).to_string(),
+    |                       
+                            
+                 
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:262:61
+    |
+262 |                       
+  rel_type: row.get("type").
+and_then(|v| v.as_str()).unw
+rap_or("").to_string(),
+    |                       
+                            
+          ^  - type must be 
+known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+262 |                       
+  rel_type: row.get("type").
+and_then(|v: /* Type */| v.a
+s_str()).unwrap_or("").to_st
+ring(),
+    |                       
+                            
+           ++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:263:69
+    |
+263 |                       
+  confidence: row.get("confi
+dence").and_then(|v| 
+v.as_f64()).unwrap_or(1.0),
+    |                       
+                            
+                  ^  - type 
+must be known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+263 |                       
+  confidence: row.get("confi
+dence").and_then(|v: /* 
+Type */| 
+v.as_f64()).unwrap_or(1.0),
+    |                       
+                            
+                   
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:264:75
+    |
+264 |                       
+  bidirectional: row.get("bi
+directional").and_then(|v| v
+.as_bool()).unwrap_or(false)
+,
+    |                       
+                            
+                        ^  
+- type must be known at 
+this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+264 |                       
+  bidirectional: row.get("bi
+directional").and_then(|v: 
+/* Type */| v.as_bool()).unw
+rap_or(false),
+    |                       
+                            
+                         
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:283:19
+    |
+283 |     
+COZO_DB.with(|cell| {
+    |                   ^^^^
+284 |         let db_opt = 
+cell.borrow();
+    |                      
+---- type must be known at 
+this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+283 |     
+COZO_DB.with(|cell: /* Type 
+*/| {
+    |                       
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:288:17
+    |
+288 |                 
+graph.query(&query)
+    |                 ^^^^^ 
+cannot infer type
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:308:19
+    |
+308 |     
+COZO_DB.with(|cell| {
+    |                   ^^^^
+309 |         let db_opt = 
+cell.borrow();
+    |                      
+---- type must be known at 
+this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type
+    |
+308 |     
+COZO_DB.with(|cell: /* Type 
+*/| {
+    |                       
+++++++++++++
+
+error[E0282]: type 
+annotations needed
+   --> src\db\cozo_registry.
+rs:313:36
+    |
+313 |                 let 
+entity_count = graph.node_co
+unt().unwrap_or(0);
+    |                       
+             ^^^^^ cannot 
+infer type
+
+warning: unused variable: 
+`focus_entities`
+   --> src\scanner\conductor
+.rs:288:41
+    |
+288 |     pub fn compute_sma
+rt_context(&self, 
+focus_entities: 
+Vec<String>) -> JsValue {
+    |                       
+                  
+^^^^^^^^^^^^^^ help: if 
+this is intentional, prefix 
+it with an underscore: 
+`_focus_entities`
+    |
+    = note: 
+`#[warn(unused_variables)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: value assigned to 
+`head_idx` is never read
+   --> src\scanner\chunker.r
+s:491:28
+    |
+491 |         let mut 
+head_idx = None;
+    |                       
+     ^^^^
+    |
+    = help: maybe it is 
+overwritten before being 
+read?
+    = note: `#[warn(unused_a
+ssignments)]` (part of 
+`#[warn(unused)]`) on by 
+default
+
+warning: unused variable: 
+`token_lower`
+  --> src\scanner\dafsa\scan
+ner.rs:68:13
+   |
+68 |         let 
+token_lower = 
+token.to_lowercase(); // 
+Anchor keys are normalized 
+(lowercase)
+   |             
+^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_token_lower`
+
+warning: unused variable: 
+`e`
+   --> 
+src\reality\api.rs:660:85
+    |
+660 |         let edges: 
+Vec<ExportedEdge> = context_
+subgraph.graph().edge_weight
+s().map(|e| {
+    |                       
+                            
+                            
+      ^ help: if this is 
+intentional, prefix it with 
+an underscore: `_e`
+
+warning: unused variable: 
+`edges`
+   --> 
+src\reality\api.rs:660:13
+    |
+660 |         let edges: 
+Vec<ExportedEdge> = context_
+subgraph.graph().edge_weight
+s().map(|e| {
+    |             ^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_edges`
+
+warning: unused variable: 
+`timestamp`
+   --> 
+src\db\cozo_graph.rs:317:13
+    |
+317 |         let timestamp 
+= js_sys::Date::now(); // 
+Note: js_sys dependency 
+might be needed, or use a 
+placeholder
+    |             ^^^^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_timestamp`
+
+Some errors have detailed 
+explanations: E0282, E0603.
+For more information about 
+an error, try `rustc 
+--explain E0282`.
+warning: `kittcore` (lib) 
+generated 16 warnings
+error: could not compile 
+`kittcore` (lib) due to 45 
+previous errors; 16 
+warnings emitted

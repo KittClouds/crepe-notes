@@ -22,6 +22,8 @@ pub mod relation_filter;      // NEW: Sidecar filter for relationship tuning
 pub mod verb_morphology;      // NEW: Unified VerbLexicon with morphology + semantics
 pub mod relation_schema;      // NEW: Type-safe relation schemas with validation
 pub mod discovery;            // NEW: Unsupervised NER Discovery Engine
+pub mod graph;                // NEW: Phase 4 - Graph Centrality Backbone
+
 
 
 // Note: core::* removed to avoid ambiguous ScanResult/ScanStats re-export with document::*

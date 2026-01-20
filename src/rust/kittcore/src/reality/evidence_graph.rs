@@ -15,11 +15,14 @@
 //!                                          [Project Relations]
 //! ```
 
-use rustworkx_core::petgraph::graph::{DiGraph, NodeIndex};
+use rustworkx_core::petgraph::graph::{DiGraph, NodeIndex, UnGraph};
 use rustworkx_core::petgraph::visit::EdgeRef;
 use rustworkx_core::petgraph::Direction;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+
+use super::pcst::{PcstInstance, IpcstSolver, PcsfSolution, Cost};
+use super::graph::{ConceptGraph, ConceptNode, ConceptEdge};
 
 // =============================================================================
 // Types
@@ -141,6 +144,11 @@ impl EvidenceGraph {
         }
     }
 
+    /// Get reference to underlying graph
+    pub fn graph(&self) -> &DiGraph<EvidenceNode, EvidenceEdge> {
+        &self.graph
+    }
+
     /// Add an entity node
     pub fn add_entity(
         &mut self,
@@ -161,6 +169,20 @@ impl EvidenceGraph {
         });
         self.entity_index.insert(id, idx);
         idx
+    }
+
+    /// Get node index for an entity ID (Testing Helper)
+    pub fn get_node_index(&self, id: &str) -> Option<NodeIndex> {
+        self.entity_index.get(id).copied()
+    }
+
+    /// Add a direct relation between entities (Testing Helper)
+    pub fn add_direct_relation(&mut self, source: NodeIndex, target: NodeIndex, relation: &str, confidence: f32) {
+        self.graph.add_edge(source, target, EvidenceEdge::Relation {
+            relation_type: relation.to_string(),
+            confidence,
+            via_vp: None,
+        });
     }
 
     /// Add a mention node
@@ -580,6 +602,16 @@ impl EvidenceGraph {
             edge_count: self.graph.edge_count(),
         }
     }
+
+    /// Get total node count (entities + mentions + VPs)
+    pub fn node_count(&self) -> usize {
+        self.graph.node_count()
+    }
+
+    /// Get total edge count
+    pub fn edge_count(&self) -> usize {
+        self.graph.edge_count()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -588,6 +620,177 @@ pub struct EvidenceGraphStats {
     pub mention_count: usize,
     pub vp_count: usize,
     pub edge_count: usize,
+}
+
+// =============================================================================
+// Conversions
+// =============================================================================
+
+impl From<&ConceptGraph> for EvidenceGraph {
+    fn from(source: &ConceptGraph) -> Self {
+        let mut eg = EvidenceGraph::new();
+        
+        // 1. Copy Nodes
+        for node in source.nodes() {
+            eg.add_entity(
+                node.id.clone(),
+                node.label.clone(),
+                node.kind.clone(),
+                vec![], // Aliases not currently in ConceptNode
+            );
+        }
+        
+        // 2. Copy Edges
+        for (src, tgt, edge) in source.edges() {
+            if let (Some(src_idx), Some(tgt_idx)) = (
+                eg.get_node_index(&src.id),
+                eg.get_node_index(&tgt.id)
+            ) {
+                // Determine confidence/weight
+                // ConceptEdge has weight 0.0-1.0 (where 1.0 is high cost? no, high strength)
+                // EvidenceGraph uses confidence 0.0-1.0 (high strength)
+                let confidence = edge.weight as f32; // f64 -> f32
+                
+                eg.add_direct_relation(src_idx, tgt_idx, &edge.relation, confidence);
+            }
+        }
+        
+        eg
+    }
+}
+
+    // =========================================================================
+    // Phase 4: PCST / Smart Context
+    // =========================================================================
+
+impl EvidenceGraph {
+
+    /// Compute optimal Steiner Subgraph connecting query entities
+    ///
+    /// Uses PCST to find a subgraph that connects the requested entities with high-confidence
+    /// paths, effectively pruning irrelevant or low-confidence connections.
+    pub fn compute_steiner_subgraph(&self, query_ids: &[&str]) -> EvidenceGraph {
+        // 1. Setup Prizes (High value for query nodes)
+        let mut prizes = HashMap::new();
+        for &id in query_ids {
+            if let Some(idx) = self.entity_index.get(id) {
+                prizes.insert(*idx, 100.0);
+            }
+        }
+
+        // 2. Convert to PCST Instance
+        let (instance, node_map) = self.to_pcst_instance(&prizes);
+
+        // 3. Solve PCST
+        let solver = IpcstSolver::default();
+        let solution = solver.solve(&instance);
+
+        // 4. Project Solution back to Evidence Graph
+        self.from_solution(&solution, &node_map)
+    }
+
+    /// Convert EvidenceGraph to PCST Instance (Undirected, Cost = 1 - Confidence)
+    fn to_pcst_instance(&self, prizes: &HashMap<NodeIndex, f64>) -> (PcstInstance, Vec<NodeIndex>) {
+        let mut graph = UnGraph::<(), Cost>::default();
+        let mut node_map = Vec::new();
+        let mut penalties = Vec::new();
+
+        // 1. Add Nodes
+        // We iterate in index order to ensure mapping is trivial (i -> NodeIndex(i))
+        // but we keep a map just in case petgraph indices drift (unlikely here)
+        for i in 0..self.graph.node_count() {
+            let idx = NodeIndex::new(i);
+            node_map.push(idx);
+            
+            // Add node to PCST graph
+            graph.add_node(());
+
+            // Set penalty (prize)
+            let prize = prizes.get(&idx).copied().unwrap_or(0.0);
+            penalties.push(prize);
+        }
+
+        // 2. Add Edges
+        // Iterate over all edges in the EvidenceGraph
+        for edge in self.graph.edge_references() {
+            let u = edge.source().index();
+            let v = edge.target().index();
+            
+            // Calculate cost from confidence
+            // High confidence (0.9) -> Low Cost (0.1)
+            let confidence = match edge.weight() {
+                EvidenceEdge::Coreference { confidence } => *confidence,
+                EvidenceEdge::Relation { confidence, .. } => *confidence,
+                // Structural edges have moderate cost
+                EvidenceEdge::SubjectOf | EvidenceEdge::ObjectOf => 0.8, 
+            };
+            
+            let cost = (1.0 - confidence).max(0.01) as f64; // Ensure non-zero cost
+
+            // Check if edge already exists (min cost wins)
+            if let Some(edge_idx) = graph.find_edge(NodeIndex::new(u), NodeIndex::new(v)) {
+                let current_weight = graph.edge_weight(edge_idx).unwrap();
+                if cost < *current_weight {
+                    graph.update_edge(NodeIndex::new(u), NodeIndex::new(v), cost);
+                }
+            } else {
+                graph.add_edge(NodeIndex::new(u), NodeIndex::new(v), cost);
+            }
+        }
+
+        (PcstInstance::new(graph, penalties), node_map)
+    }
+
+    /// Reconstruct EvidenceGraph from PCST Solution
+    fn from_solution(&self, solution: &PcsfSolution, _original_map: &[NodeIndex]) -> EvidenceGraph {
+        let mut new_eg = EvidenceGraph::new();
+        let mut mapping = HashMap::new(); // Old NodeIndex -> New NodeIndex
+
+        // 1. Copy Selected Nodes
+        for old_idx in &solution.nodes {
+            let old_idx_usize = old_idx.index(); // Since we used 1:1 mapping
+            let original_node_idx = NodeIndex::new(old_idx_usize);
+
+            // Clone node data
+            let weight = self.graph[original_node_idx].clone();
+            
+            // Add to new graph
+            let new_idx = new_eg.graph.add_node(weight.clone());
+            mapping.insert(original_node_idx, new_idx);
+
+            // Update indices
+            match weight {
+                EvidenceNode::Entity { id, .. } => {
+                    new_eg.entity_index.insert(id, new_idx);
+                }
+                EvidenceNode::Mention { .. } => {
+                    new_eg.mentions.push(new_idx);
+                }
+                EvidenceNode::VerbPhrase { .. } => {
+                    new_eg.verb_phrases.push(new_idx);
+                }
+            }
+        }
+
+        // 2. Copy Edges (Directed) between selected nodes
+        // We check all original edges to see if both endpoints are in the solution
+        for edge in self.graph.edge_references() {
+            let source = edge.source();
+            let target = edge.target();
+
+            if let (Some(&new_source), Some(&new_target)) = (mapping.get(&source), mapping.get(&target)) {
+                // Determine if this exact edge was "selected" by PCST?
+                // PCST is undirected. If u-v is in solution, we should probably keep all u->v and v->u edges.
+                // The solution object has `edges: Vec<(NodeIndex, NodeIndex)>` representing the tree skeleton.
+                
+                // Flexible approach: If both nodes are in the solution, we keep the edge.
+                // This preserves semantic directionality even if the tree only walked one way.
+                new_eg.graph.add_edge(new_source, new_target, edge.weight().clone());
+            }
+        }
+
+        new_eg
+    }
 }
 
 // =============================================================================

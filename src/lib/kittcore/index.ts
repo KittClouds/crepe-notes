@@ -245,11 +245,11 @@ export class KittCoreService {
     /**
      * Scan for implicit entity mentions using Rust DAFSA (A/B Test)
      */
-    async scanImplicitRust(content: string): Promise<any[]> {
+    async scanImplicitRust(content: string, narrativeId?: string): Promise<any[]> {
         await this.ensureInitialized();
         const result = await this.sendMessage({
             type: 'SCAN_IMPLICIT_RUST',
-            payload: { content }
+            payload: { content, narrativeId }
         });
         return result.spans;
     }
@@ -344,7 +344,293 @@ export class KittCoreService {
         return await this.sendMessage({ type: 'VERSION' });
     }
 
+    /**
+     * Compute Smart Context (PCST) for a set of focus entities
+     */
+    async computeSmartContext(focusEntities: string[]): Promise<any> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'COMPUTE_SMART_CONTEXT',
+            payload: { focusEntities }
+        });
+        return result.context;
+    }
+
+    /**
+     * Initialize SQLite DB in Worker (OPFS)
+     */
+    async initDb(name: string): Promise<void> {
+        await this.ensureInitialized();
+        await this.sendMessage({
+            type: 'INIT_DB',
+            payload: { name }
+        });
+    }
+
+    /**
+     * Execute SQL in Worker DB
+     */
+    async dbExec(sql: string): Promise<void> {
+        await this.ensureInitialized();
+        await this.sendMessage({
+            type: 'DB_EXEC',
+            payload: { sql }
+        });
+    }
+
+    /**
+     * Initialize DB Schema
+     */
+    async initSchema(): Promise<void> {
+        await this.ensureInitialized();
+        await this.sendMessage({ type: 'INIT_SCHEMA' });
+    }
+
+    /**
+     * Save a note to SQLite
+     */
+    async saveNote(note: any): Promise<void> {
+        await this.ensureInitialized();
+        await this.sendMessage({
+            type: 'SAVE_NOTE',
+            payload: { note }
+        });
+    }
+
+    /**
+     * Export Rust CozoDB to JSON string
+     */
+    async cozoExport(): Promise<string | null> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({ type: 'COZO_EXPORT' });
+        return result.data;
+    }
+
+    /**
+     * Import JSON string into Rust CozoDB
+     */
+    async cozoImport(data: string): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'COZO_IMPORT',
+            payload: { data }
+        });
+        return result.success;
+    }
+
+    /**
+     * Execute arbitrary Datalog query on Rust CozoDB
+     */
+    async cozoQuery(query: string): Promise<any> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'COZO_QUERY',
+            payload: { query }
+        });
+        return result;
+    }
+
+    /**
+     * Upsert Node to Rust CozoDB
+     */
+    async cozoUpsertNode(id: string, label: string, kind: string): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'COZO_UPSERT_NODE',
+            payload: { id, label, kind }
+        });
+        return result.success;
+    }
+
+    /**
+     * Upsert Relationship to Rust CozoDB
+     */
+    async cozoUpsertRelationship(
+        id: string,
+        source: string,
+        target: string,
+        type: string,
+        confidence = 1.0,
+        bidirectional = false
+    ): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'COZO_UPSERT_RELATIONSHIP',
+            payload: { id, source, target, type, confidence, bidirectional }
+        });
+        return result.success;
+    }
+
+    /**
+     * Upsert Edge to Rust CozoDB (Deprecated: uses implicit relationship ID)
+     */
+    async cozoUpsertEdge(source: string, target: string, relation: string): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'COZO_UPSERT_EDGE',
+            payload: { source, target, relation }
+        });
+        return result.success;
+    }
+
+
+    /**
+     * Sync Rust CozoDB state to NebulaDB (One-way projection)
+     */
+    async syncToNebula(): Promise<string | null> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({ type: 'SYNC_TO_NEBULA' });
+        return result.data;
+    }
+
+    /**
+     * Save Rust CozoDB to OPFS for persistence
+     */
+    async cozoSaveToOpfs(): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({ type: 'COZO_SAVE_TO_OPFS' });
+        return result.success;
+    }
+
+    /**
+     * Load Rust CozoDB from OPFS snapshot
+     */
+    async cozoLoadFromOpfs(): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({ type: 'COZO_LOAD_FROM_OPFS' });
+        return result.success;
+    }
+
+    // =========================================================================
+    // Registry API (SmartGraphRegistry Parity)
+    // =========================================================================
+
+    /**
+     * Upsert entity to Rust CozoDB
+     */
+    async registryUpsertEntity(
+        id: string,
+        label: string,
+        kind: string,
+        props: Record<string, unknown> = {}
+    ): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'REGISTRY_UPSERT_ENTITY',
+            payload: { id, label, kind, props: JSON.stringify(props) }
+        });
+        return result.success;
+    }
+
+    /**
+     * Get entity by ID from Rust CozoDB
+     */
+    async registryGetEntityById(id: string): Promise<unknown | null> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'REGISTRY_GET_ENTITY_BY_ID',
+            payload: { id }
+        });
+        return result.data;
+    }
+
+    /**
+     * Find entity by label from Rust CozoDB
+     */
+    async registryFindEntityByLabel(label: string): Promise<unknown | null> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'REGISTRY_FIND_ENTITY_BY_LABEL',
+            payload: { label }
+        });
+        return result.data;
+    }
+
+    /**
+     * Get all entities from Rust CozoDB
+     */
+    async registryGetAllEntities(): Promise<unknown[]> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({ type: 'REGISTRY_GET_ALL_ENTITIES' });
+        return result.data ?? [];
+    }
+
+    /**
+     * Delete entity from Rust CozoDB
+     */
+    async registryDeleteEntity(id: string): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'REGISTRY_DELETE_ENTITY',
+            payload: { id }
+        });
+        return result.success;
+    }
+
+    /**
+     * Upsert relationship to Rust CozoDB
+     */
+    async registryUpsertRelationship(
+        id: string,
+        sourceId: string,
+        targetId: string,
+        relType: string,
+        confidence = 1.0,
+        bidirectional = false
+    ): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'REGISTRY_UPSERT_RELATIONSHIP',
+            payload: { id, sourceId, targetId, relType, confidence, bidirectional }
+        });
+        return result.success;
+    }
+
+    /**
+     * Get relationships for entity from Rust CozoDB
+     */
+    async registryGetRelationshipsForEntity(entityId: string): Promise<unknown[]> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'REGISTRY_GET_RELATIONSHIPS_FOR_ENTITY',
+            payload: { entityId }
+        });
+        return result.data ?? [];
+    }
+
+    /**
+     * Get all relationships from Rust CozoDB
+     */
+    async registryGetAllRelationships(): Promise<unknown[]> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({ type: 'REGISTRY_GET_ALL_RELATIONSHIPS' });
+        return result.data ?? [];
+    }
+
+    /**
+     * Delete relationship from Rust CozoDB
+     */
+    async registryDeleteRelationship(id: string): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'REGISTRY_DELETE_RELATIONSHIP',
+            payload: { id }
+        });
+        return result.success;
+    }
+
+    /**
+     * Get registry stats from Rust CozoDB
+     */
+    async registryGetStats(): Promise<{ entity_count: number; relationship_count: number }> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({ type: 'REGISTRY_GET_STATS' });
+        return result.data ?? { entity_count: 0, relationship_count: 0 };
+    }
+
     private async ensureInitialized(): Promise<void> {
+
+
         if (!this.initPromise) {
             await this.init();
         } else {

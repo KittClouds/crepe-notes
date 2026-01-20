@@ -614,6 +614,107 @@ impl RealityCortex {
 }
 
 // =============================================================================
+// Phase 4: PCST / Smart Context
+// =============================================================================
+
+#[wasm_bindgen]
+impl RealityCortex {
+    /// Compute Smart Context for a set of focus entities
+    ///
+    /// Uses PCST (Prize-Collecting Steiner Tree) to find the most relevant subgraph
+    /// that connects the focus entities.
+    ///
+    /// # Arguments
+    /// * `focus_entities` - Array of Entity IDs to focus on
+    /// 
+    /// # Returns
+    /// An exported graph containing the smart context (nodes + edges)
+    #[wasm_bindgen(js_name = computeSmartContext)]
+    pub fn compute_smart_context(&self, focus_entities: JsValue) -> Result<JsValue, JsValue> {
+        // 1. Parse Input
+        let focus_ids: Vec<String> = serde_wasm_bindgen::from_value(focus_entities)?;
+        let focus_refs: Vec<&str> = focus_ids.iter().map(|s| s.as_str()).collect();
+
+        // 2. Convert ConceptGraph -> EvidenceGraph
+        // This is a zero-copy(ish) conversion that acts as a view model
+        let graph = self.engine.graph();
+        let evidence_graph = crate::reality::evidence_graph::EvidenceGraph::from(graph);
+
+        // 3. Run PCST Algorithm
+        let context_subgraph = evidence_graph.compute_steiner_subgraph(&focus_refs);
+
+        // 4. Export Result (Convert back to basic graph struct for JS)
+        let nodes: Vec<ExportedNode> = context_subgraph.graph().node_weights().map(|n| {
+             match n {
+                 crate::reality::evidence_graph::EvidenceNode::Entity { id, label, kind, .. } => {
+                     ExportedNode {
+                         id: id.clone(),
+                         label: label.clone(),
+                         kind: kind.clone(),
+                     }
+                 },
+                 _ => ExportedNode { id: "unknown".into(), label: "unknown".into(), kind: "unknown".into() }
+             }
+        }).filter(|n| n.id != "unknown").collect();
+
+        let edges: Vec<ExportedEdge> = context_subgraph.graph().edge_weights().map(|e| {
+             // We need source/target IDs. Petgraph's edge_weights() doesn't give endpoints.
+             // We have to iterate indices.
+             ExportedEdge {
+                 source_id: "TODO".into(), // Need to fix this implementation detail
+                 target_id: "TODO".into(),
+                 relation: "TODO".into(),
+                 weight: 0.0
+             }
+        }).collect();
+        
+        // Proper Edge Extraction:
+        let mut export_edges = Vec::new();
+        for idx in context_subgraph.graph().edge_indices() {
+             if let Some((src_idx, tgt_idx)) = context_subgraph.graph().edge_endpoints(idx) {
+                 if let (Some(src), Some(tgt), Some(edge)) = (
+                     context_subgraph.graph().node_weight(src_idx),
+                     context_subgraph.graph().node_weight(tgt_idx),
+                     context_subgraph.graph().edge_weight(idx)
+                 ) {
+                     // Extract Node IDs
+                     let src_id = match src {
+                         crate::reality::evidence_graph::EvidenceNode::Entity { id, .. } => id.clone(),
+                         _ => continue
+                     };
+                     let tgt_id = match tgt {
+                         crate::reality::evidence_graph::EvidenceNode::Entity { id, .. } => id.clone(),
+                         _ => continue
+                     };
+                     
+                     // Extract Edge Data
+                     let (relation, weight) = match edge {
+                         crate::reality::evidence_graph::EvidenceEdge::Relation { relation_type, confidence, .. } => (relation_type.clone(), *confidence as f64),
+                         crate::reality::evidence_graph::EvidenceEdge::Coreference { confidence } => ("COREFERENCE".to_string(), *confidence as f64),
+                         _ => ("UNKNOWN".to_string(), 0.1)
+                     };
+
+                     export_edges.push(ExportedEdge {
+                         source_id: src_id,
+                         target_id: tgt_id,
+                         relation,
+                         weight
+                     });
+                 }
+             }
+        }
+
+        // Return ad-hoc object with nodes/edges
+        let result = serde_json::json!({
+            "nodes": nodes,
+            "edges": export_edges
+        });
+
+        Ok(serde_wasm_bindgen::to_value(&result)?)
+    }
+}
+
+// =============================================================================
 // MetadataLayer WASM Exports (Phase 3)
 // =============================================================================
 

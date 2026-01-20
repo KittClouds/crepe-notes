@@ -127,7 +127,12 @@ pub fn compile_dictionary(
     let mut key_to_bucket: BTreeMap<String, Vec<EntityInfo>> = BTreeMap::new();
 
     for e in entities {
-        let info = EntityInfo { id: e.id.clone(), label: e.label.clone(), kind: e.kind };
+        let info = EntityInfo { 
+            id: e.id.clone(), 
+            label: e.label.clone(), 
+            kind: e.kind,
+            narrative_id: e.narrative_id.clone()
+        };
 
         let mut surfaces: Vec<String> = Vec::with_capacity(1 + e.aliases.len() + 4);
         surfaces.push(e.label.clone());
@@ -192,12 +197,14 @@ pub fn compile_dictionary(
     let mut anchor_to_ids = BTreeMap::new();
     for e in entities {
         if let Some(toks) = entity_tokens_map.get(&e.id) {
-            let mut unique_toks: Vec<&String> = toks.iter().collect::<std::collections::HashSet<_>>().into_iter().collect();
+            let mut unique_toks: Vec<&String> = toks.iter()
+                .filter(|t| t.len() >= 3)
+                .collect::<std::collections::HashSet<_>>().into_iter().collect();
             // Sort by DF (rarest first)
             unique_toks.sort_by_key(|t| token_df.get(*t).unwrap_or(&9999));
             
-            // Pick top 2 anchors
-            for anchor in unique_toks.iter().take(2) {
+            // Pick top 3 anchors (increased from 2 for reliability)
+            for anchor in unique_toks.iter().take(3) {
                 anchor_to_ids.entry((*anchor).clone()).or_insert_with(Vec::new).push(e.id.clone());
             }
         }

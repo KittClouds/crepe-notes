@@ -1,21 +1,30 @@
 import { entityColorStore } from '../store/entityColorStore';
 import { entityAttributeStore } from '../store/entityAttributeStore';
-import { smartGraphRegistry } from '../registry/SmartGraphRegistry';
+import { smartGraphRegistry } from '../registry'; // Uses Rust or TS based on USE_RUST_BACKEND flag
 import { cozoDb } from '../cozo/db';
 import { queryClient } from '@/lib/queryClient';
 import { loadCozoBootCache, saveCozoBootCache, buildCozoBootCache } from '@/lib/storage/cozoBootCache';
 import { loadNebulaBootCache, saveNebulaBootCache, buildNebulaBootCache } from '@/lib/nebuladb/bootCache';
+import { loadRustCozoBootCache, saveRustCozoBootCache } from '@/lib/storage/rustCozoBootCache';
 import { noteKeys } from '@/hooks/useNotes';
 import { folderKeys } from '@/hooks/useFolders';
 import { syncOrchestrator } from '@/lib/nebuladb/sync';
 import { nebulaDb, notes, decorations } from '@/lib/nebuladb/db';
 import { graphHotCache } from '@/lib/cozo/graph/GraphHotCache';
+import { kittCore } from '../kittcore';
+
+// Feature flag: When true, skips TS CozoDB initialization (Rust handles it)
+const USE_RUST_COZO_BACKEND = true;
 
 export class AppOrchestrator {
     private static instance: AppOrchestrator;
     private state: 'idle' | 'booting' | 'ready' | 'error' = 'idle';
 
     private listeners = new Set<(state: string) => void>();
+
+    // Early KittCore init promise
+    private kittCoreInitPromise: Promise<string> | null = null;
+    private rustCozoPreloaded = false;
 
     // Singleton access
     static getInstance(): AppOrchestrator {
@@ -135,68 +144,96 @@ export class AppOrchestrator {
             graphHotCache.warmFromBootCache(cozoCache.entities);
         }
 
+        // 3. Rust Cozo Boot Cache (for optimistic display)
+        const rustCache = loadRustCozoBootCache();
+        if (rustCache && rustCache.nodeCount > 0) {
+            console.log(`[AppOrchestrator] Fast Boot: Rust Cozo cache has ${rustCache.nodeCount} nodes`);
+            this.rustCozoPreloaded = true;
+        }
+
+        // 4. Start KittCore early (non-blocking)!
+        this.kittCoreInitPromise = kittCore.init();
+        console.log('[AppOrchestrator] Fast Boot: KittCore init started (non-blocking)');
+
         console.timeEnd('Step 0.5: FastBoot');
     }
 
     /**
-     * Phase 1: NebulaDB (Fast OPFS Hydration)
-     * - Connect to OPFS and load collections
-     * - Refresh QueryClient with live notes data
-     * - Note: Folders are in CozoDB, they get loaded in Phase 2
-     * - This should be ~50-100ms
+
+     * Phase 1: NebulaDB (Fast Connection)
+     * - Connect to NebulaDB (Memory Adapter setup)
+     * - NO Hydration here (wait for Cozo)
+     * - This should be <5ms
      */
     private async phase1_NebulaDB() {
         console.time('Step 1: NebulaDB');
-        console.log('Step 1: NebulaDB OPFS Hydration...');
+        console.log('Step 1: NebulaDB Connection...');
 
-        // Connect nebulaDb (loads from OPFS)
+        // Connect nebulaDb (Memory only now)
         await nebulaDb.connect();
-
-        // Refresh QueryClient with live OPFS notes
-        // Note: Folders come from CozoDB, not NebulaDB
-        const liveNotes = await notes.find({ status: 'active' });
-
-        if (liveNotes.length > 0) {
-            console.log(`[AppOrchestrator] NebulaDB: Refreshing QueryClient with ${liveNotes.length} notes`);
-            queryClient.setQueryData(noteKeys.all, liveNotes as any[]);
-        }
 
         console.timeEnd('Step 1: NebulaDB');
     }
 
     /**
-     * Phase 2: CozoDB Core (Blocking)
+     * Phase 2: CozoDB Core + Hydration (Blocking Persistence)
      * - Database (CozoDB - WASM should be preloaded)
      * - Registry (Graph)
      * - EntityAttributeStore
+     * - NebulaDB Hydration (Now that Cozo is ready)
      */
     private async phase2_CozoCore() {
         console.time('Step 2: CozoDB Core');
         console.log('Step 2: Initializing CozoDB Core Data Layer...');
 
+        // [KittCore Integration] - MUST complete BEFORE registry init
+        // This ensures OPFS entities are loaded so warmCache() sees them
+        if (this.kittCoreInitPromise) {
+            await this.kittCoreInitPromise;
+            console.log('[AppOrchestrator] KittCore ready (started in Phase 0.5)');
+        }
+
         // Smart Graph Registry (and underlying CozoDB)
-        // CozoDB.init() will await the preload if started
+        // Now kittCore has loaded OPFS snapshot, so warmCache() will see entities
         console.log('Initializing Graph Registry...');
         await smartGraphRegistry.init();
 
-        if (!cozoDb.isReady()) {
-            throw new Error('CozoDB failed to initialize via Registry');
+
+        // When using Rust backend, skip TS CozoDB check (Rust handles DB)
+        if (USE_RUST_COZO_BACKEND) {
+            console.log('[AppOrchestrator] Rust CozoDB backend active - skipping TS CozoDB check');
+        } else {
+            // Legacy: Check TS CozoDB is ready
+            if (!cozoDb.isReady()) {
+                throw new Error('CozoDB failed to initialize via Registry');
+            }
         }
 
         // Get fresh stats
         const stats = await smartGraphRegistry.getStats();
         console.log(`[AppOrchestrator] Graph Ready with ${stats.totalEntities} entities`);
 
-        // Initialize EntityAttributeStore (requires CozoDB to be ready)
+        // Initialize EntityAttributeStore (requires Cozo to be ready)
         await entityAttributeStore.init();
         console.log('[AppOrchestrator] EntityAttributeStore initialized');
 
-        // [KittCore Integration]
-        // Hydrate WASM scanner immediately after Graph Registry is ready.
-        // This ensures the "Recall" (DAFSA) and "Deep Search" features are ready for the UI.
-        const { kittCore } = await import('../kittcore');
+        // Phase 2.5: Hydrate NebulaDB from storage
+        // NOTE: Rust backend handles ENTITIES, but NebulaDB still stores NOTES
+        // So we always hydrate NebulaDB for notes, regardless of backend
+        console.log('[AppOrchestrator] Phase 2.5: Hydrating NebulaDB...');
+        const adapter = nebulaDb.adapter as any;
+        if (typeof adapter.hydrate === 'function') {
+            await adapter.hydrate();
 
-        // Convert registry entities to KittCore format (lightweight)
+            // Refresh QueryClient with live notes now that we are hydrated
+            const liveNotes = await notes.find({ status: 'active' });
+            if (liveNotes.length > 0) {
+                console.log(`[AppOrchestrator] Hydration Complete: Updating QueryClient with ${liveNotes.length} notes`);
+                queryClient.setQueryData(noteKeys.all, liveNotes as any[]);
+            }
+        }
+
+        // Hydrate DAFSA scanner with registry entities for implicit matching
         const entities = smartGraphRegistry.getAllEntities();
         const kittCoreEntities = entities.map(e => ({
             id: e.id,
@@ -206,7 +243,8 @@ export class AppOrchestrator {
         }));
 
         const hydratedCount = await kittCore.hydrateEntities(kittCoreEntities);
-        console.log(`[AppOrchestrator] KittCore hydrated early with ${hydratedCount} entities`);
+        console.log(`[AppOrchestrator] KittCore hydrated with ${hydratedCount} entities`);
+
 
         console.timeEnd('Step 2: CozoDB Core');
     }
@@ -222,9 +260,26 @@ export class AppOrchestrator {
 
         setTimeout(async () => {
             try {
-                // 1. Initialize sync orchestrator (Cozo → NebulaDB)
-                await syncOrchestrator.init();
-                console.log('[AppOrchestrator] SyncOrchestrator initialized (NebulaDB ↔ Cozo)');
+                // 1. Sync orchestrator
+                // QUARANTINED: When Rust backend active, skip legacy TS Cozo sync
+                if (!USE_RUST_COZO_BACKEND) {
+                    await syncOrchestrator.init();
+                    console.log('[AppOrchestrator] SyncOrchestrator initialized (NebulaDB ↔ TS Cozo)');
+                } else {
+                    console.log('[AppOrchestrator] SyncOrchestrator skipped (Rust backend active)');
+                }
+
+                // 1.5: Sync Rust CozoDB → NebulaDB (always active when Rust backend is on)
+                if (USE_RUST_COZO_BACKEND) {
+                    try {
+                        const { nebulaSync } = await import('../nebulaSync');
+                        const syncResult = await nebulaSync.syncFromRust();
+                        console.log(`[AppOrchestrator] Rust Cozo → NebulaDB sync: ${syncResult.nodeCount} nodes, ${syncResult.edgeCount} edges`);
+                    } catch (syncErr) {
+                        console.warn('[AppOrchestrator] Rust Cozo sync skipped (not yet populated):', syncErr);
+                    }
+                }
+
 
                 // 2. Scanner hydration
                 const entities = smartGraphRegistry.getAllEntities();
@@ -256,6 +311,21 @@ export class AppOrchestrator {
                 );
                 saveCozoBootCache(freshCozoCache);
                 console.log(`[AppOrchestrator] Updated Cozo boot cache (${entities.length} entities)`);
+
+                // 5. Update Rust Cozo boot cache
+                try {
+                    const rustExport = await kittCore.cozoExport();
+                    if (rustExport) {
+                        const rustData = JSON.parse(rustExport);
+                        const rustEntities = (rustData.nodes?.rows || []).map((r: any[]) => ({
+                            id: r[0], label: r[1], kind: r[2]
+                        }));
+                        const edgeCount = rustData.edges?.rows?.length || 0;
+                        saveRustCozoBootCache(rustEntities, edgeCount);
+                    }
+                } catch (e) {
+                    console.warn('[AppOrchestrator] Failed to save Rust Cozo boot cache:', e);
+                }
 
                 // 5. Invalidate QueryClient to ensure UI gets CozoDB-backed data
                 // This triggers a refetch from the storage layer (which now uses CozoDB)

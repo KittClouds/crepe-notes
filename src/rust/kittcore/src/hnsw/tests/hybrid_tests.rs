@@ -2,8 +2,7 @@
 //!
 //! Contract tests for HNSW enhanced with quantized storage and hybrid search.
 
-use crate::hnsw::index::{Hnsw, Metric, HnswError};
-use crate::hnsw::quantization::ScalarQuantized;
+use crate::hnsw::index::{Hnsw, Metric};
 
 // ============================================================================
 // Hybrid Storage Contract Tests

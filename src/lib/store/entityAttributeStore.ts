@@ -15,7 +15,7 @@ import type { EntityKind } from '@/lib/types/entityTypes';
 import { entityMetadataService, ensureMetadataSchemas } from '@/lib/cozo/content/EntityMetadataService';
 import { cozoDb } from '@/lib/cozo/db';
 import { isPrimaryField } from '@/lib/fact-sheets/schema-definitions';
-import { smartGraphRegistry } from '@/lib/registry/SmartGraphRegistry';
+import { smartGraphRegistry } from '@/lib/registry';
 
 // ============================================
 // IN-MEMORY STORE (Singleton)
