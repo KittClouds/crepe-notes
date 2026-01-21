@@ -15,6 +15,8 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::Arc;
 use thiserror::Error;
 
+pub mod bridge;
+
 pub const MIN_ANCHOR_LEN: usize = 3;
 
 thread_local! {

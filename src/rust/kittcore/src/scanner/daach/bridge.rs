@@ -4,12 +4,13 @@
 //! full-parity Aho-Corasick implementation from daach module.
 
 use std::sync::Arc;
-use super::daach::{
+use super::{
     CompiledDictionary, RuntimeDictionary, ScannerCore, 
     compile_dictionary, set_global_dictionary,
     RegisteredEntity, EntityKind,
 };
-use super::implicit::EntityDefinition;
+use crate::scanner::implicit::EntityDefinition;
+
 use wasm_bindgen::prelude::*;
 
 /// WASM wrapper for DaachScanner (full-parity AC scanner)

@@ -99,7 +99,7 @@ pub use scanner::{
         TimelineEvent, CharacterSheet, RelationshipGraph, LinkGraph,
     },
     // Daach Scanner (NEW - Full-parity AC scanner)
-    daach_bridge::DaachScanner,
+    daach::bridge::DaachScanner,
 };
 
 // Public exports - ResoRank

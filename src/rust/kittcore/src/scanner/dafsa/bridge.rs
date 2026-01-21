@@ -1,7 +1,8 @@
 use std::sync::Arc;
-use super::dafsa::{CompiledDictionary, RuntimeDictionary, ScannerCore, compile_dictionary, DecorationSpan, set_global_dictionary};
-use super::implicit::EntityDefinition;
-use crate::scanner::dafsa::{RegisteredEntity, EntityKind};
+use super::{CompiledDictionary, RuntimeDictionary, ScannerCore, compile_dictionary, DecorationSpan, set_global_dictionary};
+use crate::scanner::implicit::EntityDefinition;
+use super::{RegisteredEntity, EntityKind};
+
 use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
 
