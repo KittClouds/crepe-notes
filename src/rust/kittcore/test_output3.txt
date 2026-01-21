@@ -1,0 +1,466 @@
+﻿cargo :    Compiling 
+kittcore v0.1.0 (C:\Users\sh
+uga\1kittroot\1code\crepe-no
+tes\src\rust\kittcore)
+At line:1 char:1
++ cargo test cozo_opfs 
+--features native 2>&1 | 
+Out-File -FilePath test ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (   Co  
+  mpiling ki...\rust\kitt   
+ core):String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+warning: unused imports: 
+`EvidenceSpan` and 
+`ProjectedRelation`
+  --> src\scanner\relation.r
+s:51:53
+   |
+51 | use crate::reality::evi
+dence_graph::{EvidenceGraph,
+ ProjectedRelation, 
+EvidenceSpan, 
+EvidenceSource};
+   |                        
+                            
+ ^^^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^
+   |
+   = note: 
+`#[warn(unused_imports)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused imports: 
+`CompiledDictionary` and 
+`DecorationSpan`
+ --> src\scanner\implicit_da
+fsa.rs:2:20
+  |
+2 | use super::dafsa::{Compi
+ledDictionary, 
+RuntimeDictionary, 
+ScannerCore, 
+compile_dictionary, 
+DecorationSpan, 
+set_global_dictionary};
+  |                    
+^^^^^^^^^^^^^^^^^^          
+                            
+                
+^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`Deserialize` and 
+`Serialize`
+ --> src\scanner\implicit_da
+fsa.rs:6:13
+  |
+6 | use serde::{Serialize, 
+Deserialize};
+  |             ^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: 
+`HashSet`
+  --> src\reality\evidence_g
+raph.rs:22:33
+   |
+22 | use 
+std::collections::{HashMap, 
+HashSet};
+   |                        
+         ^^^^^^^
+
+warning: unused imports: 
+`ConceptEdge` and 
+`ConceptNode`
+  --> src\reality\evidence_g
+raph.rs:25:34
+   |
+25 | use super::graph::{Conc
+eptGraph, ConceptNode, 
+ConceptEdge};
+   |                        
+          ^^^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: `rus
+tworkx_core::petgraph::graph
+::NodeIndex`
+ --> src\reality\tests\stein
+er_tests.rs:2:5
+  |
+2 | use rustworkx_core::petg
+raph::graph::NodeIndex;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`CozoError`
+ --> 
+src\db\cozo_shared.rs:9:40
+  |
+9 | use crate::db::cozo_grap
+h::{CozoGraph, CozoError};
+  |                         
+               ^^^^^^^^^
+
+warning: unused import: 
+`std::mem`
+ --> src\shared_mem.rs:2:5
+  |
+2 | use std::mem;
+  |     ^^^^^^^^
+
+warning: unused imports: 
+`CandidateStats` and 
+`CanonToken`
+ --> src\shared_mem.rs:6:50
+  |
+6 | use crate::scanner::disc
+overy::{DiscoveryEngine, 
+CandidateStats, 
+CandidateStatus, 
+canonicalize, CanonToken};
+  |                         
+                         
+^^^^^^^^^^^^^^              
+                   
+^^^^^^^^^^
+
+warning: unused import: `cra
+te::scanner::dafsa::types::E
+ntityKind`
+ --> src\shared_mem.rs:7:5
+  |
+7 | use crate::scanner::dafs
+a::types::EntityKind;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: 
+`result`
+   --> 
+src\scanner\syntax.rs:355:22
+    |
+355 |     fn 
+parse_matches(result: 
+JsValue) -> 
+Vec<SyntaxMatch> {
+    |                      
+^^^^^^ help: if this is 
+intentional, prefix it with 
+an underscore: `_result`
+    |
+    = note: 
+`#[warn(unused_variables)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused variable: 
+`focus_entities`
+   --> src\scanner\conductor
+.rs:288:41
+    |
+288 |     pub fn compute_sma
+rt_context(&self, 
+focus_entities: 
+Vec<String>) -> JsValue {
+    |                       
+                  
+^^^^^^^^^^^^^^ help: if 
+this is intentional, prefix 
+it with an underscore: 
+`_focus_entities`
+
+warning: value assigned to 
+`head_idx` is never read
+   --> src\scanner\chunker.r
+s:491:28
+    |
+491 |         let mut 
+head_idx = None;
+    |                       
+     ^^^^
+    |
+    = help: maybe it is 
+overwritten before being 
+read?
+    = note: `#[warn(unused_a
+ssignments)]` (part of 
+`#[warn(unused)]`) on by 
+default
+
+warning: unused variable: 
+`ng`
+   --> src\scanner\narrative
+.rs:247:13
+    |
+247 |         let ng = 
+NarrativeGraph::new();
+    |             ^^ help: 
+if this is intentional, 
+prefix it with an 
+underscore: `_ng`
+
+warning: unused variable: 
+`result`
+   --> src\scanner\narrative
+.rs:312:13
+    |
+312 |         let result = 
+ng.analyze_native("Gandalf 
+walked slowly. The wizard 
+stopped.");
+    |             ^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_result`
+
+warning: unused variable: 
+`relations`
+   --> src\scanner\structure
+d_relation.rs:926:13
+    |
+926 |         let relations 
+= extractor.extract_structur
+ed(text, &entities);
+    |             ^^^^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_relations`
+
+warning: unused variable: 
+`token_lower`
+  --> src\scanner\dafsa\scan
+ner.rs:99:13
+   |
+99 |         let 
+token_lower = 
+token.to_lowercase(); // 
+Anchor keys are normalized 
+(lowercase)
+   |             
+^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_token_lower`
+
+warning: unused variable: 
+`projections`
+   --> 
+src\reality\engine.rs:790:14
+    |
+790 |         let 
+(projections, stats) = engin
+e.process_with_projections(t
+ext, &spans);
+    |              
+^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_projections`
+
+warning: unused variable: 
+`e`
+   --> 
+src\reality\api.rs:660:85
+    |
+660 |         let edges: 
+Vec<ExportedEdge> = context_
+subgraph.graph().edge_weight
+s().map(|e| {
+    |                       
+                            
+                            
+      ^ help: if this is 
+intentional, prefix it with 
+an underscore: `_e`
+
+warning: unused variable: 
+`edges`
+   --> 
+src\reality\api.rs:660:13
+    |
+660 |         let edges: 
+Vec<ExportedEdge> = context_
+subgraph.graph().edge_weight
+s().map(|e| {
+    |             ^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_edges`
+
+warning: unused variable: 
+`entity_docs`
+   --> 
+src\reality\bridge.rs:310:13
+    |
+310 |         let 
+entity_docs = 
+global.entity_documents();
+    |             
+^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_entity_docs`
+
+warning: unused variable: 
+`q`
+   --> src\hnsw\tests\hnsw_t
+ests.rs:121:9
+    |
+121 |     for q in 
+0..num_queries {
+    |         ^ help: if 
+this is intentional, prefix 
+it with an underscore: `_q`
+
+warning: unused variable: 
+`timestamp`
+   --> 
+src\db\cozo_graph.rs:317:13
+    |
+317 |         let timestamp 
+= js_sys::Date::now(); // 
+Note: js_sys dependency 
+might be needed, or use a 
+placeholder
+    |             ^^^^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_timestamp`
+
+warning: function 
+`parse_matches` is never 
+used
+   --> 
+src\scanner\syntax.rs:355:8
+    |
+355 |     fn 
+parse_matches(result: 
+JsValue) -> 
+Vec<SyntaxMatch> {
+    |        ^^^^^^^^^^^^^
+    |
+    = note: 
+`#[warn(dead_code)]` (part 
+of `#[warn(unused)]`) on by 
+default
+
+warning: field 
+`semantic_weight` is never 
+read
+  --> 
+src\scanner\attacher.rs:89:5
+   |
+86 | pub struct Attacher {
+   |            -------- 
+field in this struct
+...
+89 |     semantic_weight: 
+f64,
+   |     ^^^^^^^^^^^^^^^
+
+warning: field `attributor` 
+is never read
+   --> src\scanner\narrative
+.rs:111:5
+    |
+107 | pub struct 
+NarrativeGraph {
+    |            
+-------------- field in 
+this struct
+...
+111 |     attributor: 
+DialogueAttributor,
+    |     ^^^^^^^^^^
+
+warning: field `label` is 
+never read
+   --> 
+src\reality\engine.rs:401:44
+    |
+401 |         Entity { 
+start: usize, end: usize, 
+label: String },
+    |         ------ field 
+in this variant       ^^^^^
+    |
+    = note: `TestSpan` has 
+derived impls for the 
+traits `Clone` and `Debug`, 
+but these are intentionally 
+ignored during dead code 
+analysis
+
+warning: comparison is 
+useless due to type limits
+   --> src\scanner\conductor
+.rs:562:17
+    |
+562 |         assert!(result
+.stats.timings.total_us >= 
+0);
+    |                 ^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_c
+omparisons)]` on by default
+
+warning: comparison is 
+useless due to type limits
+    --> 
+src\reality\pcst.rs:1105:17
+     |
+1105 |         assert!(resul
+t.dead_nodes.len() >= 0); 
+// Valid result
+     |                 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unstable feature 
+specified for 
+`-Ctarget-feature`: 
+`atomics`
+  |
+  = note: this feature is 
+not stably supported; its 
+behavior can change in the 
+future
+
+warning: `kittcore` (lib 
+test) generated 30 warnings 
+(run `cargo fix --lib -p 
+kittcore --tests` to apply 
+22 suggestions)
+    Finished `test` profile 
+[unoptimized + debuginfo] 
+target(s) in 1m 02s
+     Running unittests 
+src\lib.rs (target\wasm32-un
+known-unknown\debug\deps\kit
+tcore-874b42e70237b8b4.wasm)
+error: test failed, to 
+rerun pass `--lib`
+
+Caused by:
+  could not execute process 
+`C:\Users\shuga\1kittroot\1c
+ode\crepe-notes\src\rust\kit
+tcore\target\wasm32-unknown-
+unknown\debug\deps\kittcore-
+874b42e70237b8b4.wasm 
+cozo_opfs` (never executed)
+
+Caused by:
+  %1 is not a valid Win32 
+application. (os error 193)

@@ -16,8 +16,8 @@ import {
     type LinkingConfig,
     DEFAULT_LINKING_CONFIG
 } from '@/lib/crossdoc';
-import { cozoDb } from '@/lib/cozo/db';
-import { CROSSDOC_QUERIES } from '@/lib/cozo/schema/layer2-crossdoc';
+// LEGACY REMOVED: import { cozoDb } from '@/lib/cozo/db';
+// LEGACY REMOVED: import { CROSSDOC_QUERIES } from '@/lib/cozo/schema/layer2-crossdoc';
 
 // Message types (should match the worker)
 export interface EntityInput {
@@ -119,6 +119,11 @@ export class KittCoreService {
         reject: (error: Error) => void;
     }>();
 
+    // Hydration tracking - scanImplicitRust waits for this
+    private hydrationResolve: (() => void) | null = null;
+    private hydrationPromise: Promise<void> | null = null;
+    private isHydrated = false;
+
     /**
      * Initialize the KittCore worker
      */
@@ -215,6 +220,15 @@ export class KittCoreService {
             type: 'HYDRATE_ENTITIES',
             payload: { entities }
         });
+
+        // Mark hydration complete - unblock scanImplicitRust calls
+        this.isHydrated = true;
+        if (this.hydrationResolve) {
+            this.hydrationResolve();
+            this.hydrationResolve = null;
+        }
+        console.log('[KittCore] Hydration complete, scans unblocked');
+
         return result.count;
     }
 
@@ -244,9 +258,22 @@ export class KittCoreService {
 
     /**
      * Scan for implicit entity mentions using Rust DAFSA (A/B Test)
+     * IMPORTANT: Waits for hydration to complete before scanning
      */
     async scanImplicitRust(content: string, narrativeId?: string): Promise<any[]> {
         await this.ensureInitialized();
+
+        // Wait for hydration before scanning - prevents empty results during boot
+        if (!this.isHydrated) {
+            if (!this.hydrationPromise) {
+                this.hydrationPromise = new Promise<void>((resolve) => {
+                    this.hydrationResolve = resolve;
+                });
+            }
+            console.log('[KittCore] Waiting for hydration before scan...');
+            await this.hydrationPromise;
+        }
+
         const result = await this.sendMessage({
             type: 'SCAN_IMPLICIT_RUST',
             payload: { content, narrativeId }
@@ -475,7 +502,7 @@ export class KittCoreService {
 
 
     /**
-     * Sync Rust CozoDB state to NebulaDB (One-way projection)
+     * Sync Rust CozoDB state to Dexie (One-way projection)
      */
     async syncToNebula(): Promise<string | null> {
         await this.ensureInitialized();
@@ -681,110 +708,128 @@ export class KittCoreService {
 
         console.log('[KittCore] Running entity linking on main thread...');
 
-        // Get all entities with vectors from CozoDB
-        const vectorsResult = cozoDb.runQuery(CROSSDOC_QUERIES.getAllVectors, {});
-        if (!vectorsResult.ok || !vectorsResult.rows) {
-            throw new Error('Failed to fetch entities for linking');
-        }
-
-        const entities = vectorsResult.rows.map((row: any[]) => ({
-            id: row[0],
-            label: row[0], // TODO: get actual label from entity store
-            normalized: row[0].toLowerCase(),
-            sourceNote: row[2] || '',
-        }));
-
-        // Discover clusters
-        const clusters = await discoverClusters(entities, linkingConfig);
-
-        // Persist to CozoDB
-        await persistClusters(clusters);
-
-        const elapsedMs = performance.now() - startTime;
-        console.log(`[KittCore] Linking complete: ${clusters.length} clusters in ${elapsedMs.toFixed(1)}ms`);
-
-        return {
-            clusters,
-            stats: {
-                entities: entities.length,
-                clusters: clusters.length,
-                timeMs: elapsedMs,
-            }
-        };
+        // LEGACY REMOVED: TS CozoDB cross-doc linking
+        // TODO: Migrate to Rust backend for entity linking
+        console.warn('[KittCore] runEntityLinking disabled - requires Rust migration');
+        throw new Error('Entity linking temporarily disabled - pending Rust migration');
     }
 
     /**
      * Get entity clusters from CozoDB
      */
     async getClusters(entityId?: string): Promise<any[]> {
-        let clusters: any[] = [];
-
-        if (entityId) {
-            const result = cozoDb.runQuery(CROSSDOC_QUERIES.getClusterForEntity, { node_id: entityId });
-            if (result.ok && result.rows) {
-                clusters = result.rows.map((row: any[]) => ({
-                    clusterId: row[0],
-                    canonicalId: row[1],
-                    canonicalName: row[2],
-                    confidence: row[3],
-                }));
-            }
-        } else {
-            const result = cozoDb.runQuery(CROSSDOC_QUERIES.getAllClusters, {});
-            if (result.ok && result.rows) {
-                clusters = result.rows.map((row: any[]) => ({
-                    clusterId: row[0],
-                    canonicalId: row[1],
-                    canonicalName: row[2],
-                    confidence: row[3],
-                }));
-            }
-        }
-
-        return clusters;
+        // LEGACY REMOVED: TS CozoDB cluster queries
+        console.warn('[KittCore] getClusters disabled - requires Rust migration');
+        return [];
     }
 
     /**
      * Save confirmed candidates to CozoDB for persistence
      */
     async saveCandidates(candidates: DiscoveryCandidate[]): Promise<void> {
-        if (candidates.length === 0) return;
+        // LEGACY REMOVED: TS CozoDB candidate persistence
+        // TODO: Migrate to Rust backend
+        console.warn('[KittCore] saveCandidates disabled - requires Rust migration');
+    }
 
-        console.log(`[KittCore] Persisting ${candidates.length} candidates...`);
+    // =========================================================================
+    // Calendar API (Fantasy Calendar CRUD)
+    // =========================================================================
 
-        const rows = candidates.map(c => [
-            c.token,
-            c.kind,
-            c.score,
-            c.status,
-            Date.now(), // last_seen
-            Date.now(), // first_seen (if new)
-            1           // count (increment if exists)
-        ]);
+    /**
+     * Get calendar definition for a world
+     */
+    async calendarGetDefinition(worldId: string = 'default'): Promise<any | null> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'CALENDAR_GET_DEFINITION',
+            payload: { worldId }
+        });
+        return result.data;
+    }
 
-        // UPSERT logic: if token exists, update last_seen/status/score/count
-        const query = `
-            ?[token, kind, score, status, last_seen, first_seen, count] <- $rows
+    /**
+     * Save calendar definition
+     */
+    async calendarSaveDefinition(definition: any): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'CALENDAR_SAVE_DEFINITION',
+            payload: { definition: JSON.stringify(definition) }
+        });
+        return result.success;
+    }
 
-            :put discovery_candidates { 
-                token, 
-                kind, 
-                score, 
-                status, 
-                last_seen, 
-                first_seen, 
-                count 
-            }
-        `;
+    /**
+     * Get all calendar events for a calendar
+     */
+    async calendarGetAllEvents(calendarId: string): Promise<any[]> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'CALENDAR_GET_ALL_EVENTS',
+            payload: { calendarId }
+        });
+        return result.data || [];
+    }
 
-        try {
-            const result = cozoDb.runQuery(query, { rows });
-            if (!result.ok) {
-                console.error('[KittCore] Failed to save candidates:', result.message);
-            }
-        } catch (err) {
-            console.error('[KittCore] Error saving candidates:', err);
-        }
+    /**
+     * Create a calendar event
+     */
+    async calendarCreateEvent(event: any): Promise<any> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'CALENDAR_CREATE_EVENT',
+            payload: { event: JSON.stringify(event) }
+        });
+        return result.data;
+    }
+
+    /**
+     * Delete a calendar event
+     */
+    async calendarDeleteEvent(id: string): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'CALENDAR_DELETE_EVENT',
+            payload: { id }
+        });
+        return result.success;
+    }
+
+    /**
+     * Get all calendar periods for a calendar
+     */
+    async calendarGetAllPeriods(calendarId: string): Promise<any[]> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'CALENDAR_GET_ALL_PERIODS',
+            payload: { calendarId }
+        });
+        return result.data || [];
+    }
+
+    /**
+     * Create a calendar period
+     */
+    async calendarCreatePeriod(period: any): Promise<any> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'CALENDAR_CREATE_PERIOD',
+            payload: { period: JSON.stringify(period) }
+        });
+        return result.data;
+    }
+
+    /**
+     * Delete a calendar period
+     */
+    async calendarDeletePeriod(id: string): Promise<boolean> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({
+            type: 'CALENDAR_DELETE_PERIOD',
+            payload: { id }
+        });
+        return result.success;
     }
 
 }

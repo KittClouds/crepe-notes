@@ -89,7 +89,7 @@ function getContextSnippet(content: string, target: string, maxLength = 80): str
  */
 export function useBacklinks(currentNote: Note | null, allNotes: Note[]): BacklinksResult {
     return useMemo(() => {
-        if (!currentNote) {
+        if (!currentNote || !currentNote.title) {
             return { backlinks: [], count: 0, grouped: {} };
         }
 

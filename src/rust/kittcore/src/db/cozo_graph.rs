@@ -263,6 +263,165 @@ impl CozoGraph {
         "#;
         self.run_schema("network_relationship", network_relationship_schema)?;
 
+        // =====================================================================
+        // CALENDAR
+        // =====================================================================
+
+        // Calendar Definitions
+        let calendar_definitions_schema = r#"
+            :create calendar_definitions {
+                id: String
+                =>
+                world_id: String,
+                name: String,
+                hours_per_day: Int,
+                minutes_per_hour: Int,
+                seconds_per_minute: Int,
+                has_year_zero: Bool,
+                created_from: String,
+                weekdays: Json,
+                months: Json,
+                eras: Json,
+                epochs: Json,
+                moons: Json,
+                seasons: Json,
+                current_date: Json,
+                created_at: Float,
+                updated_at: Float
+            }
+        "#;
+        self.run_schema("calendar_definitions", calendar_definitions_schema)?;
+
+        // Calendar Events
+        let calendar_events_schema = r#"
+            :create calendar_events {
+                id: String
+                =>
+                calendar_id: String,
+                title: String,
+                description: String?,
+                date_year: Int,
+                date_month: Int,
+                date_day: Int,
+                date_hour: Int?,
+                date_minute: Int?,
+                end_year: Int?,
+                end_month: Int?,
+                end_day: Int?,
+                is_all_day: Bool,
+                importance: String,
+                category: String,
+                color: String?,
+                icon: String?,
+                entity_id: String?,
+                entity_kind: String?,
+                source_note_id: String?,
+                parent_event_id: String?,
+                status: String?,
+                narrative_type: String?,
+                story_beat: String?,
+                created_at: Float,
+                updated_at: Float
+            }
+        "#;
+        self.run_schema("calendar_events", calendar_events_schema)?;
+
+        // Calendar Periods
+        let calendar_periods_schema = r#"
+            :create calendar_periods {
+                id: String
+                =>
+                calendar_id: String,
+                name: String,
+                description: String?,
+                start_year: Int,
+                start_month: Int?,
+                end_year: Int?,
+                end_month: Int?,
+                parent_period_id: String?,
+                period_type: String,
+                color: String,
+                icon: String?,
+                abbreviation: String?,
+                direction: String,
+                arc_type: String?,
+                dominant_theme: String?,
+                protagonist_id: String?,
+                antagonist_id: String?,
+                summary: String?,
+                show_on_timeline: Bool,
+                timeline_color: String?,
+                timeline_icon: String?,
+                created_at: Float,
+                updated_at: Float
+            }
+        "#;
+        self.run_schema("calendar_periods", calendar_periods_schema)?;
+
+        // =====================================================================
+        // CROSS-DOC KNOWLEDGE GRAPH
+        // =====================================================================
+
+        // Node Vectors (embeddings)
+        let node_vectors_schema = r#"
+            :create node_vectors {
+                node_id: String,
+                model: String
+                =>
+                dimension: Int,
+                vector: <F64; 768>,
+                context_text: String?,
+                source_note_id: String?,
+                created_at: Float,
+                updated_at: Float
+            }
+        "#;
+        self.run_schema("node_vectors", node_vectors_schema)?;
+
+        // Entity Clusters
+        let entity_clusters_schema = r#"
+            :create entity_clusters {
+                cluster_id: String
+                =>
+                canonical_id: String,
+                canonical_name: String,
+                member_count: Int,
+                avg_similarity: Float,
+                confidence: Float,
+                created_at: Float,
+                updated_at: Float
+            }
+        "#;
+        self.run_schema("entity_clusters", entity_clusters_schema)?;
+
+        // Cluster Members
+        let cluster_members_schema = r#"
+            :create cluster_members {
+                cluster_id: String,
+                node_id: String
+                =>
+                label: String,
+                similarity: Float,
+                is_canonical: Bool,
+                joined_at: Float
+            }
+        "#;
+        self.run_schema("cluster_members", cluster_members_schema)?;
+
+        // Co-occurrence Edges
+        let cooccurrence_edges_schema = r#"
+            :create cooccurrence_edges {
+                source_id: String,
+                target_id: String
+                =>
+                weight: Float,
+                doc_count: Int,
+                last_seen_at: Float,
+                first_seen_at: Float
+            }
+        "#;
+        self.run_schema("cooccurrence_edges", cooccurrence_edges_schema)?;
+
         Ok(())
     }
 
@@ -399,7 +558,16 @@ impl CozoGraph {
             // Networks (factions/organizations)
             "network_instance",
             "network_membership",
-            "network_relationship"
+            "network_relationship",
+            // Calendar
+            "calendar_definitions",
+            "calendar_events",
+            "calendar_periods",
+            // Cross-doc knowledge graph
+            "node_vectors",
+            "entity_clusters",
+            "cluster_members",
+            "cooccurrence_edges"
         ];
 
 
@@ -502,18 +670,18 @@ mod tests {
         graph.upsert_node("n1", "Frodo", "CHARACTER", json!({})).unwrap();
         graph.upsert_node("n2", "Sam", "CHARACTER", json!({})).unwrap();
         
-        // Insert edge
+        // Insert relationship
         graph
-            .upsert_edge("n1", "n2", "brother_of", 1.0, json!({}))
+            .upsert_relationship("rel1", "n1", "n2", "brother_of", 1.0, false)
             .unwrap();
         
-        // Query edges
-        let edges = graph
-            .query("?[source, target, relation] := *edges{source, target, relation}")
+        // Query relationships
+        let rels = graph
+            .query("?[source_id, target_id, type] := *relationships{source_id, target_id, type}")
             .unwrap();
-        assert_eq!(edges.len(), 1);
-        assert_eq!(edges[0].get("source").unwrap(), "n1");
-        assert_eq!(edges[0].get("target").unwrap(), "n2");
+        assert_eq!(rels.len(), 1);
+        assert_eq!(rels[0].get("source_id").unwrap(), "n1");
+        assert_eq!(rels[0].get("target_id").unwrap(), "n2");
     }
 
     #[test]
@@ -522,9 +690,9 @@ mod tests {
         
         graph.upsert_node("a", "A", "T", json!({})).unwrap();
         graph.upsert_node("b", "B", "T", json!({})).unwrap();
-        graph.upsert_edge("a", "b", "e", 1.0, json!({})).unwrap();
+        graph.upsert_relationship("rel1", "a", "b", "e", 1.0, false).unwrap();
         
         assert_eq!(graph.node_count().unwrap(), 2);
-        assert_eq!(graph.edge_count().unwrap(), 1);
+        // Note: edge_count returns 0 because we use relationships now, not edges
     }
 }

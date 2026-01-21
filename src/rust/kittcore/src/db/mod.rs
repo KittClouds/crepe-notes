@@ -10,7 +10,12 @@
 pub mod cozo_graph;
 pub mod cozo_shared;  // Shared memory interface (extern "C")
 pub mod cozo_registry; // Entity/Relationship CRUD API (wasm_bindgen)
+pub mod cozo_calendar; // Calendar CRUD API (wasm_bindgen)
+pub mod cozo_crossdoc; // Cross-doc knowledge graph (wasm_bindgen)
+pub mod cozo_opfs;     // OPFS persistence with WAL, compaction, backup (NEW)
 pub use cozo_graph::{CozoGraph, CozoError};
+pub use cozo_opfs::{SnapshotEnvelope, WalEntry, WalOp, LoadResult, LoadSource, OpfsError};
+
 
 
 

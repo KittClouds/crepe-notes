@@ -1,6 +1,6 @@
 /**
  * CalendarContext - Centralized state management for Fantasy Calendar
- * Uses TanStack Query for persistence (NebulaDB) and React state for UI
+ * Uses TanStack Query for persistence (CozoDB) and React state for UI
  */
 
 import React, { createContext, useContext, useCallback, useMemo, ReactNode, useState, useEffect } from 'react';

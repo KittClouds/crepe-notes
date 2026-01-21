@@ -3,8 +3,8 @@
 //
 // Combines string similarity and semantic embeddings for cross-document entity linking.
 
-import { cozoDb } from '@/lib/cozo/db';
-import { CROSSDOC_QUERIES } from '@/lib/cozo/schema/layer2-crossdoc';
+// LEGACY REMOVED: import { cozoDb } from '@/lib/cozo/db';
+// LEGACY REMOVED: import { CROSSDOC_QUERIES } from '@/lib/cozo/schema/layer2-crossdoc';
 
 // ============================================================================
 // Types
@@ -268,33 +268,10 @@ async function findVectorCandidates(
     k: number = 10,
     dimension: number = 384
 ): Promise<Array<{ id: string; similarity: number }>> {
-    // Get the entity's vector
-    const vectorResult = cozoDb.runQuery(CROSSDOC_QUERIES.getVector, { node_id: entityId });
-
-    if (!vectorResult.ok || !vectorResult.rows || vectorResult.rows.length === 0) {
-        return [];
-    }
-
-    const queryVector = vectorResult.rows[0][3]; // vector is 4th column
-
-    // Search for similar vectors
-    const searchQuery = CROSSDOC_QUERIES.searchSimilar384; // TODO: select by dimension
-    const searchResult = cozoDb.runQuery(searchQuery, {
-        query_vector: queryVector,
-        k: k,
-        ef: 50,
-    });
-
-    if (!searchResult.ok || !searchResult.rows) {
-        return [];
-    }
-
-    return searchResult.rows
-        .filter((row: any[]) => row[0] !== entityId) // Exclude self
-        .map((row: any[]) => ({
-            id: row[0],
-            similarity: 1 - row[1], // Convert distance to similarity
-        }));
+    // LEGACY REMOVED: TS CozoDB vector search
+    // TODO: Migrate to Rust backend
+    console.warn('[HybridLinker] findVectorCandidates disabled - requires Rust migration');
+    return [];
 }
 
 // ============================================================================
@@ -483,30 +460,10 @@ export async function createCooccurrenceEdges(
     entityIds: string[],
     weightDelta: number = 1.0
 ): Promise<number> {
-    if (entityIds.length < 2) return 0;
-
-    let edgesCreated = 0;
-
-    // Create edges for all pairs
-    for (let i = 0; i < entityIds.length; i++) {
-        for (let j = i + 1; j < entityIds.length; j++) {
-            const sourceId = entityIds[i] < entityIds[j] ? entityIds[i] : entityIds[j];
-            const targetId = entityIds[i] < entityIds[j] ? entityIds[j] : entityIds[i];
-
-            try {
-                cozoDb.runQuery(CROSSDOC_QUERIES.upsertCooccurrence, {
-                    source_id: sourceId,
-                    target_id: targetId,
-                    weight_delta: weightDelta,
-                });
-                edgesCreated++;
-            } catch (err) {
-                console.warn(`[HybridLinker] Failed to create co-occurrence edge: ${err}`);
-            }
-        }
-    }
-
-    return edgesCreated;
+    // LEGACY REMOVED: TS CozoDB co-occurrence edge creation
+    // TODO: Migrate to Rust backend
+    console.warn('[HybridLinker] createCooccurrenceEdges disabled - requires Rust migration');
+    return 0;
 }
 
 // ============================================================================
@@ -517,24 +474,7 @@ export async function createCooccurrenceEdges(
  * Save discovered clusters to CozoDB
  */
 export async function persistClusters(clusters: EntityCluster[]): Promise<void> {
-    for (const cluster of clusters) {
-        // Upsert cluster
-        cozoDb.runQuery(CROSSDOC_QUERIES.upsertCluster, {
-            cluster_id: cluster.clusterId,
-            canonical_id: cluster.canonicalId,
-            canonical_name: cluster.canonicalName,
-            confidence: cluster.confidence,
-        });
-
-        // Add members
-        for (const member of cluster.members) {
-            cozoDb.runQuery(CROSSDOC_QUERIES.addClusterMember, {
-                cluster_id: cluster.clusterId,
-                node_id: member.nodeId,
-                label: member.label,
-                source_note: member.sourceNote,
-                similarity: member.similarity,
-            });
-        }
-    }
+    // LEGACY REMOVED: TS CozoDB cluster persistence
+    // TODO: Migrate to Rust backend
+    console.warn('[HybridLinker] persistClusters disabled - requires Rust migration');
 }

@@ -12,8 +12,8 @@ import type {
     FieldSchema,
 } from '@/lib/types/entityAttributes';
 import type { EntityKind } from '@/lib/types/entityTypes';
-import { entityMetadataService, ensureMetadataSchemas } from '@/lib/cozo/content/EntityMetadataService';
-import { cozoDb } from '@/lib/cozo/db';
+import { entityMetadataService, ensureMetadataSchemas } from '@/lib/storage/content/EntityMetadataService';
+// LEGACY REMOVED: import { cozoDb } from '@/lib/cozo/db';
 import { isPrimaryField } from '@/lib/fact-sheets/schema-definitions';
 import { smartGraphRegistry } from '@/lib/registry';
 
@@ -49,11 +49,8 @@ class EntityAttributeStore {
         if (this.initialized) return;
 
         try {
-            // Wait for CozoDB to be ready
-            if (!cozoDb.isReady()) {
-                console.log('[EntityAttributeStore] CozoDB not ready, deferring init...');
-                return;
-            }
+            // LEGACY REMOVED: cozoDb.isReady() check
+            // Rust backend is now the source of truth, no TS Cozo dependency
 
             // Ensure schemas exist
             ensureMetadataSchemas();

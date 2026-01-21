@@ -1,0 +1,490 @@
+﻿cargo :    Compiling 
+kittcore v0.1.0 (C:\Users\sh
+uga\1kittroot\1code\crepe-no
+tes\src\rust\kittcore)
+At line:1 char:1
++ cargo test cozo_opfs 
+--features native 2>&1 | 
+Out-File -FilePath test ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (   Co  
+  mpiling ki...\rust\kitt   
+ core):String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+warning: unused imports: 
+`EvidenceSpan` and 
+`ProjectedRelation`
+  --> src\scanner\relation.r
+s:51:53
+   |
+51 | use crate::reality::evi
+dence_graph::{EvidenceGraph,
+ ProjectedRelation, 
+EvidenceSpan, 
+EvidenceSource};
+   |                        
+                            
+ ^^^^^^^^^^^^^^^^^  
+^^^^^^^^^^^^
+   |
+   = note: 
+`#[warn(unused_imports)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused imports: 
+`CompiledDictionary` and 
+`DecorationSpan`
+ --> src\scanner\implicit_da
+fsa.rs:2:20
+  |
+2 | use super::dafsa::{Compi
+ledDictionary, 
+RuntimeDictionary, 
+ScannerCore, 
+compile_dictionary, 
+DecorationSpan, 
+set_global_dictionary};
+  |                    
+^^^^^^^^^^^^^^^^^^          
+                            
+                
+^^^^^^^^^^^^^^
+
+warning: unused imports: 
+`Deserialize` and 
+`Serialize`
+ --> src\scanner\implicit_da
+fsa.rs:6:13
+  |
+6 | use serde::{Serialize, 
+Deserialize};
+  |             ^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: 
+`HashSet`
+  --> src\reality\evidence_g
+raph.rs:22:33
+   |
+22 | use 
+std::collections::{HashMap, 
+HashSet};
+   |                        
+         ^^^^^^^
+
+warning: unused imports: 
+`ConceptEdge` and 
+`ConceptNode`
+  --> src\reality\evidence_g
+raph.rs:25:34
+   |
+25 | use super::graph::{Conc
+eptGraph, ConceptNode, 
+ConceptEdge};
+   |                        
+          ^^^^^^^^^^^  
+^^^^^^^^^^^
+
+warning: unused import: `rus
+tworkx_core::petgraph::graph
+::NodeIndex`
+ --> src\reality\tests\stein
+er_tests.rs:2:5
+  |
+2 | use rustworkx_core::petg
+raph::graph::NodeIndex;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: 
+`CozoError`
+ --> 
+src\db\cozo_shared.rs:9:40
+  |
+9 | use crate::db::cozo_grap
+h::{CozoGraph, CozoError};
+  |                         
+               ^^^^^^^^^
+
+warning: unused import: 
+`std::mem`
+ --> src\shared_mem.rs:2:5
+  |
+2 | use std::mem;
+  |     ^^^^^^^^
+
+warning: unused imports: 
+`CandidateStats` and 
+`CanonToken`
+ --> src\shared_mem.rs:6:50
+  |
+6 | use crate::scanner::disc
+overy::{DiscoveryEngine, 
+CandidateStats, 
+CandidateStatus, 
+canonicalize, CanonToken};
+  |                         
+                         
+^^^^^^^^^^^^^^              
+                   
+^^^^^^^^^^
+
+warning: unused import: `cra
+te::scanner::dafsa::types::E
+ntityKind`
+ --> src\shared_mem.rs:7:5
+  |
+7 | use crate::scanner::dafs
+a::types::EntityKind;
+  |     ^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
+
+error[E0277]: the trait 
+bound 
+`Arc<std::vec::Vec<u8>>: 
+AsRef<[u8]>` is not 
+satisfied
+   --> 
+src\db\cozo_opfs.rs:262:39
+    |
+262 |             
+opfs_project::write(dst, 
+&bytes)
+    |             
+-------------------       
+^^^^^ the trait 
+`AsRef<[u8]>` is not 
+implemented for 
+`Arc<std::vec::Vec<u8>>`
+    |             |
+    |             required 
+by a bound introduced by 
+this call
+    |
+    = note: required for 
+`&Arc<std::vec::Vec<u8>>` 
+to implement `AsRef<[u8]>`
+note: required by a bound 
+in `opfs_project::write`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\opfs-proj
+ect-0.2.3\src\lib.rs:50:58
+    |
+ 50 | pub async fn 
+write(path: impl 
+AsRef<Path>, content: impl 
+AsRef<[u8]>) -> Result<()> {
+    |                       
+                            
+       ^^^^^^^^^^^ required 
+by this bound in `write`
+help: consider 
+dereferencing here
+    |
+262 |             
+opfs_project::write(dst, 
+&*bytes)
+    |                       
+                +
+
+error[E0277]: the trait 
+bound 
+`Arc<std::vec::Vec<u8>>: 
+AsRef<[u8]>` is not 
+satisfied
+   --> 
+src\db\cozo_opfs.rs:262:13
+    |
+262 |             
+opfs_project::write(dst, 
+&bytes)
+    |             ^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^ the 
+trait `AsRef<[u8]>` is not 
+implemented for 
+`Arc<std::vec::Vec<u8>>`
+    |
+    = help: the trait 
+`AsRef<[u8]>` is not 
+implemented for 
+`Arc<std::vec::Vec<u8>>`
+            but trait 
+`AsRef<std::vec::Vec<u8>>` 
+is implemented for it
+    = help: for that trait 
+implementation, expected 
+`std::vec::Vec<u8>`, found 
+`[u8]`
+    = note: required for 
+`&Arc<std::vec::Vec<u8>>` 
+to implement `AsRef<[u8]>`
+note: required by a bound 
+in `opfs_project::write`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\opfs-proj
+ect-0.2.3\src\lib.rs:50:58
+    |
+ 50 | pub async fn 
+write(path: impl 
+AsRef<Path>, content: impl 
+AsRef<[u8]>) -> Result<()> {
+    |                       
+                            
+       ^^^^^^^^^^^ required 
+by this bound in `write`
+
+error[E0277]: the trait 
+bound 
+`Arc<std::vec::Vec<u8>>: 
+AsRef<[u8]>` is not 
+satisfied
+   --> 
+src\db\cozo_opfs.rs:263:18
+    |
+263 |                 .await
+    |                  
+^^^^^ the trait 
+`AsRef<[u8]>` is not 
+implemented for 
+`Arc<std::vec::Vec<u8>>`
+    |
+    = help: the trait 
+`AsRef<[u8]>` is not 
+implemented for 
+`Arc<std::vec::Vec<u8>>`
+            but trait 
+`AsRef<std::vec::Vec<u8>>` 
+is implemented for it
+    = help: for that trait 
+implementation, expected 
+`std::vec::Vec<u8>`, found 
+`[u8]`
+    = note: required for 
+`&Arc<std::vec::Vec<u8>>` 
+to implement `AsRef<[u8]>`
+note: required by a bound 
+in `opfs_project::write`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\opfs-proj
+ect-0.2.3\src\lib.rs:50:58
+    |
+ 50 | pub async fn 
+write(path: impl 
+AsRef<Path>, content: impl 
+AsRef<[u8]>) -> Result<()> {
+    |                       
+                            
+       ^^^^^^^^^^^ required 
+by this bound in `write`
+
+warning: unused variable: 
+`result`
+   --> 
+src\scanner\syntax.rs:355:22
+    |
+355 |     fn 
+parse_matches(result: 
+JsValue) -> 
+Vec<SyntaxMatch> {
+    |                      
+^^^^^^ help: if this is 
+intentional, prefix it with 
+an underscore: `_result`
+    |
+    = note: 
+`#[warn(unused_variables)]` 
+(part of `#[warn(unused)]`) 
+on by default
+
+warning: unused variable: 
+`focus_entities`
+   --> src\scanner\conductor
+.rs:288:41
+    |
+288 |     pub fn compute_sma
+rt_context(&self, 
+focus_entities: 
+Vec<String>) -> JsValue {
+    |                       
+                  
+^^^^^^^^^^^^^^ help: if 
+this is intentional, prefix 
+it with an underscore: 
+`_focus_entities`
+
+warning: value assigned to 
+`head_idx` is never read
+   --> src\scanner\chunker.r
+s:491:28
+    |
+491 |         let mut 
+head_idx = None;
+    |                       
+     ^^^^
+    |
+    = help: maybe it is 
+overwritten before being 
+read?
+    = note: `#[warn(unused_a
+ssignments)]` (part of 
+`#[warn(unused)]`) on by 
+default
+
+warning: unused variable: 
+`ng`
+   --> src\scanner\narrative
+.rs:247:13
+    |
+247 |         let ng = 
+NarrativeGraph::new();
+    |             ^^ help: 
+if this is intentional, 
+prefix it with an 
+underscore: `_ng`
+
+warning: unused variable: 
+`result`
+   --> src\scanner\narrative
+.rs:312:13
+    |
+312 |         let result = 
+ng.analyze_native("Gandalf 
+walked slowly. The wizard 
+stopped.");
+    |             ^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_result`
+
+warning: unused variable: 
+`relations`
+   --> src\scanner\structure
+d_relation.rs:926:13
+    |
+926 |         let relations 
+= extractor.extract_structur
+ed(text, &entities);
+    |             ^^^^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_relations`
+
+warning: unused variable: 
+`token_lower`
+  --> src\scanner\dafsa\scan
+ner.rs:99:13
+   |
+99 |         let 
+token_lower = 
+token.to_lowercase(); // 
+Anchor keys are normalized 
+(lowercase)
+   |             
+^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_token_lower`
+
+warning: unused variable: 
+`projections`
+   --> 
+src\reality\engine.rs:790:14
+    |
+790 |         let 
+(projections, stats) = engin
+e.process_with_projections(t
+ext, &spans);
+    |              
+^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_projections`
+
+warning: unused variable: 
+`e`
+   --> 
+src\reality\api.rs:660:85
+    |
+660 |         let edges: 
+Vec<ExportedEdge> = context_
+subgraph.graph().edge_weight
+s().map(|e| {
+    |                       
+                            
+                            
+      ^ help: if this is 
+intentional, prefix it with 
+an underscore: `_e`
+
+warning: unused variable: 
+`edges`
+   --> 
+src\reality\api.rs:660:13
+    |
+660 |         let edges: 
+Vec<ExportedEdge> = context_
+subgraph.graph().edge_weight
+s().map(|e| {
+    |             ^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_edges`
+
+warning: unused variable: 
+`entity_docs`
+   --> 
+src\reality\bridge.rs:310:13
+    |
+310 |         let 
+entity_docs = 
+global.entity_documents();
+    |             
+^^^^^^^^^^^ help: if this 
+is intentional, prefix it 
+with an underscore: 
+`_entity_docs`
+
+warning: unused variable: 
+`q`
+   --> src\hnsw\tests\hnsw_t
+ests.rs:121:9
+    |
+121 |     for q in 
+0..num_queries {
+    |         ^ help: if 
+this is intentional, prefix 
+it with an underscore: `_q`
+
+warning: unused variable: 
+`timestamp`
+   --> 
+src\db\cozo_graph.rs:317:13
+    |
+317 |         let timestamp 
+= js_sys::Date::now(); // 
+Note: js_sys dependency 
+might be needed, or use a 
+placeholder
+    |             ^^^^^^^^^ 
+help: if this is 
+intentional, prefix it with 
+an underscore: `_timestamp`
+
+For more information about 
+this error, try `rustc 
+--explain E0277`.
+warning: `kittcore` (lib 
+test) generated 23 warnings
+error: could not compile 
+`kittcore` (lib test) due 
+to 3 previous errors; 23 
+warnings emitted

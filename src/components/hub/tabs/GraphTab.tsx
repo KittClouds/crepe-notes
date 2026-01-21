@@ -131,7 +131,7 @@ function EntityBrowser({ entityStats, notes, selectedLabel, onSelect, onCreate }
         const q = searchQuery.toLowerCase();
         const filtered: Record<string, EntityStats[]> = {};
         for (const [kind, stats] of Object.entries(byKind)) {
-            const matches = stats.filter(s => s.entityLabel.toLowerCase().includes(q));
+            const matches = stats.filter(s => s.entityLabel?.toLowerCase().includes(q));
             if (matches.length > 0) {
                 filtered[kind] = matches;
             }
@@ -141,12 +141,19 @@ function EntityBrowser({ entityStats, notes, selectedLabel, onSelect, onCreate }
 
     // Check if entity has a note
     const checkEntityNoteExists = useCallback((label: string, kind: string): boolean => {
+        if (!label || !kind) return false;
+
         const normalizedLabel = label.toLowerCase().trim();
-        return notes.some(n =>
-            n.title.toLowerCase().trim() === normalizedLabel ||
-            (n.isEntity && n.entityLabel?.toLowerCase().trim() === normalizedLabel) ||
-            n.title.toLowerCase().includes(`[${kind.toLowerCase()}|${normalizedLabel}]`)
-        );
+        const normalizedKind = kind.toLowerCase().trim();
+
+        return notes.some(n => {
+            if (!n.title) return false;
+            const noteTitle = n.title.toLowerCase().trim();
+
+            return noteTitle === normalizedLabel ||
+                (n.isEntity && n.entityLabel?.toLowerCase().trim() === normalizedLabel) ||
+                noteTitle.includes(`[${normalizedKind}|${normalizedLabel}]`);
+        });
     }, [notes]);
 
     const toggleKind = (kind: string) => {
@@ -289,10 +296,14 @@ function GraphDetailView({ entity, notes, onNavigate, onCreate }: GraphDetailVie
     const totalConnections = groupedRelationships.reduce((sum, g) => sum + g.totalCount, 0);
 
     // Check if entity has note
-    const noteExists = notes.some(n =>
-        n.title.toLowerCase().trim() === entity.label.toLowerCase().trim() ||
-        (n.isEntity && n.entityLabel?.toLowerCase().trim() === entity.label.toLowerCase().trim())
-    );
+    const noteExists = notes.some(n => {
+        if (!n.title || !entity.label) return false;
+        const noteTitle = n.title.toLowerCase().trim();
+        const entityLabel = entity.label.toLowerCase().trim();
+
+        return noteTitle === entityLabel ||
+            (n.isEntity && n.entityLabel?.toLowerCase().trim() === entityLabel);
+    });
 
     const handleNavigate = useCallback((targetEntity: {
         id: string;

@@ -261,7 +261,7 @@ const Index: React.FC = () => {
                         console.warn('[Index] JSON parse failed:', e);
                       }
                     } else {
-                      console.warn('[Index] Note has no content field:', { id: currentNote.id, hasMarkdown: !!currentNote.markdownContent });
+                      // Valid case: New/Empty note
                     }
                     // Fallback to markdown
                     return { type: 'markdown' as const, value: currentNote.markdownContent || currentNote.content || '' };

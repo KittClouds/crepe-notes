@@ -86,6 +86,8 @@ opfs-project = "0.2"
 dawgdic = "0.1.2"
 thiserror = "2.0.18"
 stop-words = "=0.5.0"
+sha2 = "0.10"    # SHA-256 for OPFS integrity
+hex = "0.4"     # Hex encoding for hashes
 
 [dev-dependencies]
 

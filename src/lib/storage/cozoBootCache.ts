@@ -2,7 +2,7 @@
  * Cozo Boot Cache
  * 
  * Stores lightweight entity metadata in localStorage for instant UI rendering.
- * Mirrors the NebulaDB bootCache pattern.
+ * Boot cache pattern for fast UI hydration from localStorage.
  */
 
 const CACHE_KEY = 'cozo-boot-cache';

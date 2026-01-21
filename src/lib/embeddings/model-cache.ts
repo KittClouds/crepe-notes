@@ -1,19 +1,14 @@
 // src/lib/embeddings/model-cache.ts
-// Model cache using NebulaDB (unified with app database)
+// Model cache using Dexie (IndexedDB)
 
-import { modelCache as modelCacheCollection } from '@/lib/nebuladb/db';
+import { db, ModelCache as CachedModel } from '@/lib/dexie/db';
 
-// Type definition (previously from Dexie)
-export interface CachedModel {
-    modelId: string;              // Primary key
-    onnx: ArrayBuffer;            // ONNX model binary
-    tokenizer: string;            // tokenizer.json content
-    timestamp: number;            // When cached
-}
+// Re-export type for consumers
+export type { CachedModel };
 
 /**
  * Model cache for ONNX embedding model files.
- * Uses NebulaDB (OPFS) for efficient binary blob storage.
+ * Uses Dexie (IndexedDB) for efficient binary blob storage.
  */
 export const modelCache = {
     /**
@@ -21,14 +16,7 @@ export const modelCache = {
      */
     async get(modelId: string): Promise<CachedModel | undefined> {
         try {
-            const doc = await modelCacheCollection.findOne({ id: modelId });
-            if (!doc) return undefined;
-            return {
-                modelId: doc.id,
-                onnx: doc.onnx,
-                tokenizer: doc.tokenizer,
-                timestamp: doc.timestamp,
-            };
+            return await db.modelCache.get(modelId);
         } catch (err) {
             console.warn('[ModelCache] Failed to get model:', err);
             return undefined;
@@ -40,20 +28,12 @@ export const modelCache = {
      */
     async put(modelId: string, onnx: ArrayBuffer, tokenizer: string): Promise<void> {
         try {
-            // Check if exists
-            const existing = await modelCacheCollection.findOne({ id: modelId });
-            if (existing) {
-                await modelCacheCollection.update({ id: modelId }, {
-                    $set: { onnx, tokenizer, timestamp: Date.now() }
-                });
-            } else {
-                await modelCacheCollection.insert({
-                    id: modelId,
-                    onnx,
-                    tokenizer,
-                    timestamp: Date.now(),
-                });
-            }
+            await db.modelCache.put({
+                modelId,
+                onnx,
+                tokenizer,
+                timestamp: Date.now(),
+            });
             console.log(`[ModelCache] Cached ${modelId} (${(onnx.byteLength / 1024 / 1024).toFixed(1)} MB)`);
         } catch (err) {
             console.error('[ModelCache] Failed to cache model:', err);
@@ -64,29 +44,29 @@ export const modelCache = {
      * Delete a cached model
      */
     async delete(modelId: string): Promise<void> {
-        await modelCacheCollection.delete({ id: modelId });
+        await db.modelCache.delete(modelId);
     },
 
     /**
      * Clear all cached models
      */
     async clear(): Promise<void> {
-        await modelCacheCollection.clear();
+        await db.modelCache.clear();
     },
 
     /**
      * List all cached model IDs
      */
     async list(): Promise<string[]> {
-        const models = await modelCacheCollection.find({});
-        return models.map(m => m.id);
+        const models = await db.modelCache.toArray();
+        return models.map(m => m.modelId);
     },
 
     /**
      * Get cache stats
      */
     async getStats(): Promise<{ count: number; totalBytes: number }> {
-        const models = await modelCacheCollection.find({});
+        const models = await db.modelCache.toArray();
         const totalBytes = models.reduce((sum, m) => sum + (m.onnx?.byteLength || 0), 0);
         return { count: models.length, totalBytes };
     }

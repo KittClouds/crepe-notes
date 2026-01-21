@@ -319,10 +319,10 @@ export const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>
         } else {
           // WARNING: Markdown path loses formatting (colors, etc.)
           // This should only be used as absolute fallback
-          console.warn('[Editor] Using markdown fallback - formatting may be lost!');
+          // Markdown fallback - expected for new/empty notes
+          // Formatting (colors) will be lost if coming from structured JSON, but for
+          // raw markdown or new notes this is the correct behavior.
 
-          // replaceAll is a macro - use it directly as action
-          // We need to call it outside the action callback
         }
       });
 

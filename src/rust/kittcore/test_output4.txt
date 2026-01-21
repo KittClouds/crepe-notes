@@ -1,0 +1,245 @@
+﻿cargo :    Compiling 
+getrandom v0.2.16
+At line:1 char:1
++ cargo test cozo_opfs 
+--features native --target 
+x86_64-pc-windows-msv ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (   Co  
+  mpiling getrandom v0.2.   
+ 16:String) [], RemoteEx    
+ception
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+   Compiling getrandom 
+v0.3.4
+   Compiling wasm-bindgen 
+v0.2.106
+   Compiling serde_json 
+v1.0.148
+   Compiling nu-ansi-term 
+v0.50.3
+   Compiling cast v0.3.0
+   Compiling oorandom 
+v11.1.5
+   Compiling instant v0.1.13
+   Compiling hex v0.4.3
+   Compiling rand_core 
+v0.6.4
+   Compiling ahash v0.7.8
+   Compiling rand_core 
+v0.9.5
+   Compiling tempfile 
+v3.24.0
+   Compiling uuid v1.19.0
+   Compiling rand_chacha 
+v0.9.0
+   Compiling rand_pcg v0.9.0
+   Compiling rand_chacha 
+v0.3.1
+   Compiling hashbrown 
+v0.12.3
+   Compiling rand v0.9.2
+   Compiling rand v0.8.5
+   Compiling indexmap v1.9.3
+   Compiling fast2s v0.3.1
+   Compiling stop-words 
+v0.5.0
+   Compiling priority-queue 
+v1.4.0
+   Compiling rand_distr 
+v0.5.1
+   Compiling twox-hash 
+v1.6.3
+   Compiling opfs-project 
+v0.2.3
+   Compiling lz4_flex 
+v0.10.0
+   Compiling swapvec v0.3.0
+   Compiling rustworkx-core 
+v0.17.1
+   Compiling js-sys v0.3.83
+   Compiling 
+console_error_panic_hook 
+v0.1.7
+   Compiling 
+wasm-bindgen-futures v0.4.56
+   Compiling 
+serde-wasm-bindgen v0.6.5
+   Compiling web-sys v0.3.83
+   Compiling cozo v0.7.6
+   Compiling 
+wasm-bindgen-test v0.3.56
+error[E0433]: failed to 
+resolve: use of unresolved 
+module or unlinked crate 
+`rayon`
+  --> C:\Users\shuga\.cargo\
+registry\src\index.crates.io
+-1949cf8c6b5b557f\cozo-0.7.6
+\src\query\eval.rs:17:5
+   |
+17 | use rayon::prelude::*;
+   |     ^^^^^ use of 
+unresolved module or 
+unlinked crate `rayon`
+   |
+   = help: if you wanted to 
+use a crate named `rayon`, 
+use `cargo add rayon` to 
+add it to your `Cargo.toml`
+
+error[E0599]: no method 
+named `par_iter` found for 
+reference 
+`&BTreeMap<MagicSymbol, 
+CompiledRuleSet>` in the 
+current scope
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\cozo-0.7.
+6\src\query\eval.rs:200:26
+    |
+199 |                       
+let execs = prog
+    |  _____________________
+____________-
+200 | |                     
+    .par_iter()
+    | |_____________________
+____-^^^^^^^^
+    |
+help: there is a method 
+`iter` with a similar name
+    |
+200 -                       
+  .par_iter()
+200 +                       
+  .iter()
+    |
+
+error[E0282]: type 
+annotations needed for `(_, 
+_)`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\cozo-0.7.
+6\src\query\eval.rs:201:34
+    |
+201 |                       
+  .filter(|(symb, _)| 
+!(limiter_enabled && 
+symb.is_prog_entry()))
+    |                       
+           ^^^^^^^^^        
+               ---- type 
+must be known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type, where the 
+placeholders `_` are 
+specified
+    |
+201 |                       
+  .filter(|(symb, _): (_, 
+_)| !(limiter_enabled && 
+symb.is_prog_entry()))
+    |                       
+                    ++++++++
+
+error[E0599]: no method 
+named `par_iter` found for 
+reference 
+`&BTreeMap<MagicSymbol, 
+CompiledRuleSet>` in the 
+current scope
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\cozo-0.7.
+6\src\query\eval.rs:275:26
+    |
+274 |                       
+let execs = prog
+    |  _____________________
+____________-
+275 | |                     
+    .par_iter()
+    | |_____________________
+____-^^^^^^^^
+    |
+help: there is a method 
+`iter` with a similar name
+    |
+275 -                       
+  .par_iter()
+275 +                       
+  .iter()
+    |
+
+error[E0282]: type 
+annotations needed for `(_, 
+_)`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\cozo-0.7.
+6\src\query\eval.rs:276:34
+    |
+276 |                       
+  .filter(|(symb, _)| 
+!(limiter_enabled && 
+symb.is_prog_entry()))
+    |                       
+           ^^^^^^^^^        
+               ---- type 
+must be known at this point
+    |
+help: consider giving this 
+closure parameter an 
+explicit type, where the 
+placeholders `_` are 
+specified
+    |
+276 |                       
+  .filter(|(symb, _): (_, 
+_)| !(limiter_enabled && 
+symb.is_prog_entry()))
+    |                       
+                    ++++++++
+
+error[E0433]: failed to 
+resolve: use of unresolved 
+module or unlinked crate 
+`rayon`
+   --> C:\Users\shuga\.cargo
+\registry\src\index.crates.i
+o-1949cf8c6b5b557f\cozo-0.7.
+6\src\lib.rs:511:9
+    |
+511 |         
+rayon::spawn(move || db.run_
+multi_transaction(write, 
+app2db_recv, db2app_send));
+    |         ^^^^^ use of 
+unresolved module or 
+unlinked crate `rayon`
+    |
+    = help: if you wanted 
+to use a crate named 
+`rayon`, use `cargo add 
+rayon` to add it to your 
+`Cargo.toml`
+
+Some errors have detailed 
+explanations: E0282, E0433, 
+E0599.
+For more information about 
+an error, try `rustc 
+--explain E0282`.
+error: could not compile 
+`cozo` (lib) due to 6 
+previous errors

@@ -97,7 +97,7 @@ export class TauriEditorApi implements EditorApi {
 }
 
 // =============================================================================
-// WEB IMPLEMENTATION (NebulaDB)
+// WEB IMPLEMENTATION (Storage Layer)
 // =============================================================================
 
 export class WebEditorApi implements EditorApi {
@@ -175,7 +175,7 @@ export function getEditorApi(): EditorApi {
         console.log('[EditorApi] Using TauriEditorApi');
         _instance = new TauriEditorApi();
     } else {
-        console.log('[EditorApi] Using WebEditorApi (NebulaDB)');
+        console.log('[EditorApi] Using WebEditorApi (Storage)');
         _instance = new WebEditorApi();
     }
 

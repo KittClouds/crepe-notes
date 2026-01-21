@@ -436,13 +436,97 @@ unsafe fn read_str<'a>(ptr: *const u8, len: usize) -> Option<&'a str> {
 // =============================================================================
 
 use wasm_bindgen::prelude::*;
+use crate::db::cozo_opfs::OpfsAdapter;
 
-const OPFS_PATH: &str = "/cozo/rust_graph.json";
+/// Toggle this to use the old basic OPFS (no envelope, no backup, no WAL)
+const USE_LEGACY_OPFS: bool = false;
 
-/// Save Rust CozoDB to OPFS
+// Legacy paths (for rollback compatibility)
+const LEGACY_OPFS_PATH: &str = "/cozo/rust_graph.json";
+
+/// Save Rust CozoDB to OPFS (Enterprise: envelope + backup rotation)
 /// Returns a Promise that resolves to true on success
 #[wasm_bindgen]
 pub async fn cozo_save_to_opfs() -> Result<bool, JsValue> {
+    if USE_LEGACY_OPFS {
+        return cozo_save_to_opfs_legacy().await;
+    }
+
+    // Export the DB
+    let export_data = COZO_DB.with(|cell| {
+        let db_opt = cell.borrow();
+        match db_opt.as_ref() {
+            None => Err("CozoDB not initialized"),
+            Some(graph) => graph.export().map_err(|_| "Export failed"),
+        }
+    });
+
+    let json = match export_data {
+        Ok(j) => j,
+        Err(e) => return Err(JsValue::from_str(e)),
+    };
+
+    // Use enterprise OPFS adapter with envelope + backup
+    match OpfsAdapter::save_snapshot(&json).await {
+        Ok(_) => Ok(true),
+        Err(e) => Err(JsValue::from_str(&format!("OPFS save failed: {:?}", e))),
+    }
+}
+
+/// Load Rust CozoDB from OPFS (Enterprise: envelope validation + backup fallback)
+/// Returns a Promise that resolves to true on success, false if no file exists
+#[wasm_bindgen]
+pub async fn cozo_load_from_opfs() -> Result<bool, JsValue> {
+    if USE_LEGACY_OPFS {
+        return cozo_load_from_opfs_legacy().await;
+    }
+
+    // Use enterprise OPFS adapter with envelope validation + backup fallback
+    let result = match OpfsAdapter::load_snapshot().await {
+        Ok(r) => r,
+        Err(e) => return Err(JsValue::from_str(&format!("OPFS load failed: {:?}", e))),
+    };
+
+    // Check if we have a snapshot
+    let payload_json = match result.snapshot {
+        Some(p) => p,
+        None => {
+            web_sys::console::log_1(&"[Rust Cozo] No OPFS snapshot found".into());
+            return Ok(false);
+        }
+    };
+
+    if result.recovery_mode {
+        web_sys::console::warn_1(&"[Rust Cozo] ⚠️ Recovered from backup snapshot".into());
+    }
+
+    // Import into CozoDB
+    let import_result = COZO_DB.with(|cell| {
+        let db_opt = cell.borrow();
+        match db_opt.as_ref() {
+            None => Err("CozoDB not initialized"),
+            Some(graph) => graph.import(&payload_json).map_err(|_| "Import failed"),
+        }
+    });
+
+    match import_result {
+        Ok(_) => {
+            web_sys::console::log_1(
+                &format!("[Rust Cozo] Loaded from OPFS ({} bytes, source: {:?})", 
+                    payload_json.len(), result.source).into()
+            );
+            Ok(true)
+        }
+        Err(e) => Err(JsValue::from_str(e)),
+    }
+}
+
+// =============================================================================
+// LEGACY OPFS (Keep for rollback - set USE_LEGACY_OPFS = true to use)
+// =============================================================================
+
+/// [LEGACY] Save Rust CozoDB to OPFS - basic version without envelope
+async fn cozo_save_to_opfs_legacy() -> Result<bool, JsValue> {
     // Export the DB
     let export_data = COZO_DB.with(|cell| {
         let db_opt = cell.borrow();
@@ -459,29 +543,26 @@ pub async fn cozo_save_to_opfs() -> Result<bool, JsValue> {
 
     // Ensure directory exists
     if let Err(e) = opfs_project::create_dir_all("/cozo").await {
-        // Ignore if already exists
-        let _ = e;
+        let _ = e; // Ignore if already exists
     }
 
-    // Write to OPFS
-    match opfs_project::write(OPFS_PATH, json.as_bytes()).await {
+    // Write to OPFS (raw, no envelope)
+    match opfs_project::write(LEGACY_OPFS_PATH, json.as_bytes()).await {
         Ok(_) => {
-            web_sys::console::log_1(&format!("[Rust Cozo] Saved to OPFS ({} bytes)", json.len()).into());
+            web_sys::console::log_1(&format!("[Rust Cozo LEGACY] Saved to OPFS ({} bytes)", json.len()).into());
             Ok(true)
         }
         Err(e) => Err(JsValue::from_str(&format!("OPFS write failed: {:?}", e))),
     }
 }
 
-/// Load Rust CozoDB from OPFS
-/// Returns a Promise that resolves to true on success, false if no file exists
-#[wasm_bindgen]
-pub async fn cozo_load_from_opfs() -> Result<bool, JsValue> {
-    // Try to read from OPFS - if it fails, assume file doesn't exist
-    let bytes = match opfs_project::read(OPFS_PATH).await {
+/// [LEGACY] Load Rust CozoDB from OPFS - basic version without envelope validation
+async fn cozo_load_from_opfs_legacy() -> Result<bool, JsValue> {
+    // Try to read from OPFS
+    let bytes = match opfs_project::read(LEGACY_OPFS_PATH).await {
         Ok(b) => b,
         Err(_) => {
-            web_sys::console::log_1(&"[Rust Cozo] No OPFS snapshot found".into());
+            web_sys::console::log_1(&"[Rust Cozo LEGACY] No OPFS snapshot found".into());
             return Ok(false);
         }
     };
@@ -503,7 +584,7 @@ pub async fn cozo_load_from_opfs() -> Result<bool, JsValue> {
 
     match result {
         Ok(_) => {
-            web_sys::console::log_1(&format!("[Rust Cozo] Loaded from OPFS ({} bytes)", data.len()).into());
+            web_sys::console::log_1(&format!("[Rust Cozo LEGACY] Loaded from OPFS ({} bytes)", data.len()).into());
             Ok(true)
         }
         Err(e) => Err(JsValue::from_str(e)),

@@ -26,7 +26,16 @@ import init, {
     registry_get_relationships_for_entity,
     registry_get_all_relationships,
     registry_delete_relationship,
-    registry_get_stats
+    registry_get_stats,
+    // Calendar API
+    calendar_get_definition,
+    calendar_save_definition,
+    calendar_get_all_events,
+    calendar_create_event,
+    calendar_delete_event,
+    calendar_get_all_periods,
+    calendar_create_period,
+    calendar_delete_period
 } from "../rust/kittcore/pkg/kittcore.js";
 
 
@@ -34,11 +43,56 @@ import init, {
 import wasmUrl from "../rust/kittcore/pkg/kittcore_bg.wasm?url";
 import { SharedMemoryManager, WasmExports } from "../lib/wasm-shared";
 
-// ... (ExtendedExports type stays same)
+// =============================================================================
+// Type Definitions (duplicated from kittcore/index.ts for worker isolation)
+// =============================================================================
 
-// ...
+interface EntityInput {
+    label: string;
+    start: number;
+    end: number;
+}
 
-// Types for messages
+interface EntityDefinition {
+    id: string;
+    label: string;
+    kind: string;
+    aliases?: string[];
+}
+
+interface EntitySpan {
+    id: string;
+    label: string;
+    start: number;
+    end: number;
+}
+
+interface ExtractedEntity {
+    id: string;
+    label: string;
+    kind: string;
+    contextBefore?: string;
+    contextAfter?: string;
+}
+
+interface LinkingConfig {
+    stringThreshold: number;
+    semanticThreshold: number;
+    caseInsensitive: boolean;
+    stringWeight: number;
+    semanticWeight: number;
+}
+
+interface ResponseMessage {
+    type: string;
+    payload?: any;
+    error?: string;
+}
+
+// =============================================================================
+// Message Types
+// =============================================================================
+
 type KittCoreMessage =
     | { type: 'INIT' }
     | { type: 'GREET'; payload: { name: string } }
@@ -90,7 +144,16 @@ type KittCoreMessage =
     // Cross-doc entity linking
     | { type: 'ENTITIES_EXTRACTED'; payload: { noteId: string; noteTitle: string; entities: ExtractedEntity[] } }
     | { type: 'RUN_LINKING'; payload?: { config?: Partial<LinkingConfig> } }
-    | { type: 'GET_CLUSTERS'; payload?: { entityId?: string } };
+    | { type: 'GET_CLUSTERS'; payload?: { entityId?: string } }
+    // Calendar API
+    | { type: 'CALENDAR_GET_DEFINITION'; payload: { worldId: string } }
+    | { type: 'CALENDAR_SAVE_DEFINITION'; payload: { definition: string } }
+    | { type: 'CALENDAR_GET_ALL_EVENTS'; payload: { calendarId: string } }
+    | { type: 'CALENDAR_CREATE_EVENT'; payload: { event: string } }
+    | { type: 'CALENDAR_DELETE_EVENT'; payload: { id: string } }
+    | { type: 'CALENDAR_GET_ALL_PERIODS'; payload: { calendarId: string } }
+    | { type: 'CALENDAR_CREATE_PERIOD'; payload: { period: string } }
+    | { type: 'CALENDAR_DELETE_PERIOD'; payload: { id: string } };
 
 
 // Shared state
@@ -411,8 +474,8 @@ self.onmessage = async (e: MessageEvent) => {
                 break;
 
             case 'GREET':
-                if (!conductor) throw new Error('Not initialized');
-                self.postMessage({ type: 'GREET_RESULT', payload: { message: conductor.greet(msg.payload.name) } } as ResponseMessage);
+                // Legacy: greet() method was removed from ScanConductor
+                self.postMessage({ type: 'GREET_RESULT', payload: { message: `Hello from WASM!` } } as ResponseMessage);
                 break;
 
             case 'SCAN':
@@ -444,7 +507,7 @@ self.onmessage = async (e: MessageEvent) => {
                         aliasCount: e.aliases?.length ?? 0
                     })));
                 } else {
-                    console.warn('[KittCoreWorker:TRACE] NO ENTITIES to hydrate!');
+                    console.log('[KittCoreWorker:TRACE] No entities to hydrate (empty list)');
                 }
 
                 conductor.hydrateEntities(entitiesToHydrate);
@@ -664,6 +727,151 @@ self.onmessage = async (e: MessageEvent) => {
                         entityId: msg.payload?.entityId
                     }
                 } as ResponseMessage);
+                break;
+            }
+
+            // =========================================================================
+            // Calendar API
+            // =========================================================================
+
+            case 'CALENDAR_GET_DEFINITION': {
+                const { worldId } = msg.payload;
+                try {
+                    const result = calendar_get_definition(worldId || 'default');
+                    self.postMessage({
+                        type: 'CALENDAR_GET_DEFINITION_RESULT',
+                        payload: { success: true, data: result }
+                    } as ResponseMessage);
+                } catch (e) {
+                    self.postMessage({
+                        type: 'CALENDAR_GET_DEFINITION_RESULT',
+                        payload: { success: false, error: String(e) }
+                    } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'CALENDAR_SAVE_DEFINITION': {
+                const { definition } = msg.payload;
+                try {
+                    const result = calendar_save_definition(definition);
+                    self.postMessage({
+                        type: 'CALENDAR_SAVE_DEFINITION_RESULT',
+                        payload: { success: result }
+                    } as ResponseMessage);
+                    if (result) scheduleDebouncedSave();
+                } catch (e) {
+                    self.postMessage({
+                        type: 'CALENDAR_SAVE_DEFINITION_RESULT',
+                        payload: { success: false, error: String(e) }
+                    } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'CALENDAR_GET_ALL_EVENTS': {
+                const { calendarId } = msg.payload;
+                try {
+                    const result = calendar_get_all_events(calendarId);
+                    self.postMessage({
+                        type: 'CALENDAR_GET_ALL_EVENTS_RESULT',
+                        payload: { success: true, data: result }
+                    } as ResponseMessage);
+                } catch (e) {
+                    self.postMessage({
+                        type: 'CALENDAR_GET_ALL_EVENTS_RESULT',
+                        payload: { success: false, data: [], error: String(e) }
+                    } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'CALENDAR_CREATE_EVENT': {
+                const { event } = msg.payload;
+                try {
+                    const result = calendar_create_event(event);
+                    self.postMessage({
+                        type: 'CALENDAR_CREATE_EVENT_RESULT',
+                        payload: { success: true, data: result }
+                    } as ResponseMessage);
+                    scheduleDebouncedSave();
+                } catch (e) {
+                    self.postMessage({
+                        type: 'CALENDAR_CREATE_EVENT_RESULT',
+                        payload: { success: false, error: String(e) }
+                    } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'CALENDAR_DELETE_EVENT': {
+                const { id } = msg.payload;
+                try {
+                    const result = calendar_delete_event(id);
+                    self.postMessage({
+                        type: 'CALENDAR_DELETE_EVENT_RESULT',
+                        payload: { success: result }
+                    } as ResponseMessage);
+                    if (result) scheduleDebouncedSave();
+                } catch (e) {
+                    self.postMessage({
+                        type: 'CALENDAR_DELETE_EVENT_RESULT',
+                        payload: { success: false, error: String(e) }
+                    } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'CALENDAR_GET_ALL_PERIODS': {
+                const { calendarId } = msg.payload;
+                try {
+                    const result = calendar_get_all_periods(calendarId);
+                    self.postMessage({
+                        type: 'CALENDAR_GET_ALL_PERIODS_RESULT',
+                        payload: { success: true, data: result }
+                    } as ResponseMessage);
+                } catch (e) {
+                    self.postMessage({
+                        type: 'CALENDAR_GET_ALL_PERIODS_RESULT',
+                        payload: { success: false, data: [], error: String(e) }
+                    } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'CALENDAR_CREATE_PERIOD': {
+                const { period } = msg.payload;
+                try {
+                    const result = calendar_create_period(period);
+                    self.postMessage({
+                        type: 'CALENDAR_CREATE_PERIOD_RESULT',
+                        payload: { success: true, data: result }
+                    } as ResponseMessage);
+                    scheduleDebouncedSave();
+                } catch (e) {
+                    self.postMessage({
+                        type: 'CALENDAR_CREATE_PERIOD_RESULT',
+                        payload: { success: false, error: String(e) }
+                    } as ResponseMessage);
+                }
+                break;
+            }
+
+            case 'CALENDAR_DELETE_PERIOD': {
+                const { id } = msg.payload;
+                try {
+                    const result = calendar_delete_period(id);
+                    self.postMessage({
+                        type: 'CALENDAR_DELETE_PERIOD_RESULT',
+                        payload: { success: result }
+                    } as ResponseMessage);
+                    if (result) scheduleDebouncedSave();
+                } catch (e) {
+                    self.postMessage({
+                        type: 'CALENDAR_DELETE_PERIOD_RESULT',
+                        payload: { success: false, error: String(e) }
+                    } as ResponseMessage);
+                }
                 break;
             }
         }

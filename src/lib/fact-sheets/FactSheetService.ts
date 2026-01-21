@@ -10,7 +10,7 @@
  */
 
 import type { EntityKind } from '@/lib/types/entityTypes';
-import { entityMetadataService, ensureMetadataSchemas } from '@/lib/cozo/content/EntityMetadataService';
+import { entityMetadataService, ensureMetadataSchemas } from '@/lib/storage/content/EntityMetadataService';
 
 // ===================================
 // TYPES (kept for compatibility)

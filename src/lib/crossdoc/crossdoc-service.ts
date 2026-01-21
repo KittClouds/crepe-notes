@@ -6,8 +6,8 @@
  * Uses lightweight MDBR-Leaf model (256d) - separate from RAG.
  */
 
-import { cozoDb } from '@/lib/cozo/db';
-import { CROSSDOC_QUERIES } from '@/lib/cozo/schema/layer2-crossdoc';
+// LEGACY REMOVED: import { cozoDb } from '@/lib/cozo/db';
+// LEGACY REMOVED: import { CROSSDOC_QUERIES } from '@/lib/cozo/schema/layer2-crossdoc';
 import { createCooccurrenceEdges } from '@/lib/crossdoc';
 
 // ============================================================================
@@ -159,31 +159,16 @@ export class CrossDocService {
         });
 
         const embeddings: EntityEmbedding[] = result.embeddings;
-        let stored = 0;
 
-        // Store embeddings in CozoDB (on main thread)
-        for (const emb of embeddings) {
-            try {
-                cozoDb.runQuery(CROSSDOC_QUERIES.upsertVector, {
-                    node_id: emb.entityId,
-                    node_type: 'entity',
-                    source_note: noteId,
-                    vector: emb.embedding,
-                });
-                stored++;
-            } catch (err) {
-                console.warn(`[CrossDocService] Failed to store vector for ${emb.entityId}:`, err);
-            }
-        }
+        // LEGACY REMOVED: TS CozoDB vector storage
+        // TODO: Migrate to Rust backend for vector persistence
+        console.warn('[CrossDocService] Vector storage disabled - requires Rust migration');
+        const stored = 0;
 
-        // Create co-occurrence edges
-        let cooccurrences = 0;
-        const entityIds = embeddings.map(e => e.entityId);
-        if (entityIds.length >= 2) {
-            cooccurrences = await createCooccurrenceEdges(entityIds, 1.0);
-        }
+        // LEGACY REMOVED: Co-occurrence edges stored in TS CozoDB
+        const cooccurrences = 0;
 
-        console.log(`[CrossDocService] Stored ${stored} vectors, ${cooccurrences} co-occurrence edges`);
+        console.log(`[CrossDocService] Computed ${embeddings.length} embeddings (storage disabled)`);
         return { embedded: stored, cooccurrences };
     }
 
