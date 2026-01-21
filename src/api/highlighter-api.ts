@@ -88,6 +88,9 @@ class DefaultHighlighterApi implements HighlighterApi {
     private hasScannedOnOpen = false;  // Ensures one initial scan per note
     private lastKnownEntityCount = 0;  // Track entity count for change detection
 
+    // Node batch tracking for discovery position alignment
+    private lastNodeBatch: Array<{ text: string; pos: number }> = [];
+
     // Rust scanner tracking
     private pendingRustScan = false;   // Entities found, waiting for sentence end
     private lastSentenceEndPos = 0;    // Track last punctuation position
@@ -330,14 +333,19 @@ class DefaultHighlighterApi implements HighlighterApi {
         // Collect full text for hash computation
         let fullText = '';
         let batchIdCounter = 0;
+        const nodeBatchForDiscovery: Array<{ text: string; pos: number }> = [];
         doc.descendants((node, pos) => {
             if (node.isText && node.text) {
                 const id = batchIdCounter++;
                 batch.push({ id, text: node.text });
                 nodePositions.set(id, pos);
+                nodeBatchForDiscovery.push({ text: node.text, pos });
                 fullText += node.text; // Concatenate for hash (matches docContent logic)
             }
         });
+
+        // Store for discovery candidate position alignment
+        this.lastNodeBatch = nodeBatchForDiscovery;
 
         // If nothing to scan
         if (batch.length === 0) {
@@ -492,35 +500,40 @@ class DefaultHighlighterApi implements HighlighterApi {
 
     /**
      * Create entity_candidate spans for discovered tokens
+     * Uses per-node position info to properly align with ProseMirror positions
      */
-    private createCandidateSpans(text: string, candidates: Array<{ token: string; score: number }>): DecorationSpan[] {
+    private createCandidateSpans(_text: string, candidates: Array<{ token: string; score: number }>): DecorationSpan[] {
         const spans: DecorationSpan[] = [];
-        const textLower = text.toLowerCase();
 
-        for (const candidate of candidates) {
-            const tokenLower = candidate.token.toLowerCase();
-            // Find all occurrences of this token (case-insensitive, word boundary)
-            const regex = new RegExp(`\\b${this.escapeRegex(tokenLower)}\\b`, 'gi');
-            let match: RegExpExecArray | null;
+        // Search for candidates within each node (with proper position offsets)
+        for (const node of this.lastNodeBatch) {
+            for (const candidate of candidates) {
+                const tokenLower = candidate.token.toLowerCase();
+                // Find all occurrences of this token (case-insensitive, word boundary)
+                const regex = new RegExp(`\\b${this.escapeRegex(tokenLower)}\\b`, 'gi');
+                let match: RegExpExecArray | null;
 
-            while ((match = regex.exec(text)) !== null) {
-                // Skip if already covered by an entity_implicit span
-                const from = match.index;
-                const to = match.index + match[0].length;
-                const alreadyCovered = this.implicitDecorations.some(d =>
-                    d.type === 'entity_implicit' && d.from <= from && d.to >= to
-                );
+                while ((match = regex.exec(node.text)) !== null) {
+                    // Calculate document position by adding node offset
+                    const from = node.pos + match.index;
+                    const to = node.pos + match.index + match[0].length;
 
-                if (!alreadyCovered) {
-                    spans.push({
-                        type: 'entity_candidate',
-                        from,
-                        to,
-                        label: candidate.token,
-                        matchedText: String(candidate.score.toFixed(2)),
-                        kind: 'UNKNOWN',
-                        resolved: false
-                    });
+                    // Skip if already covered by an entity_implicit span
+                    const alreadyCovered = this.implicitDecorations.some(d =>
+                        d.type === 'entity_implicit' && d.from <= from && d.to >= to
+                    );
+
+                    if (!alreadyCovered) {
+                        spans.push({
+                            type: 'entity_candidate',
+                            from,
+                            to,
+                            label: candidate.token,
+                            matchedText: String(candidate.score.toFixed(2)),
+                            kind: 'UNKNOWN',
+                            resolved: false
+                        });
+                    }
                 }
             }
         }
