@@ -39,6 +39,8 @@ pub use document::*;
 pub use conductor::*;
 pub mod dafsa;
 pub mod implicit_dafsa; // Bridge for WASM
+pub mod daach;          // NEW: Full-parity AC scanner (TDD)
+pub mod daach_bridge;   // WASM bridge for daach
 
 
 

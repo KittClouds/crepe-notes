@@ -152,7 +152,8 @@ class DefaultHighlighterApi implements HighlighterApi {
                 console.log('[HighlighterApi:DIAG] Initial scan on note open (fresh)');
                 this.hasScannedOnOpen = true;
                 this.lastScannedContext = text;
-                this.triggerImplicitScan(doc, text);  // Direct scan, not cache check
+                // CHANGED: Try load from cache first instead of forcing fresh scan
+                this.tryLoadCachedOrScan(doc, text);
             } else {
                 // After initial scan: only re-scan if entity count increased
                 // This detects when user adds a new entity mention
@@ -466,6 +467,18 @@ class DefaultHighlighterApi implements HighlighterApi {
                     console.log(`[Discovery:HighlightApi] Found ${newCandidates.length} NEW candidates:`, newCandidates.map(c => c.token));
                     // Emit to DiscoveryStore
                     useDiscoveryStore.getState().addCandidates(newCandidates);
+
+                    // Create highlight spans for discovered tokens
+                    const candidateSpans = this.createCandidateSpans(text, newCandidates);
+                    if (candidateSpans.length > 0) {
+                        console.log(`[Discovery:HighlightApi] Created ${candidateSpans.length} candidate spans`);
+                        // Merge with existing implicitDecorations
+                        this.implicitDecorations = [
+                            ...this.implicitDecorations.filter(d => d.type !== 'entity_candidate'),
+                            ...candidateSpans
+                        ];
+                        this.notifyListeners();
+                    }
                 } else {
                     if (candidates.length > 0) {
                         console.log(`[Discovery:HighlightApi] Ignored ${candidates.length} candidates (all existing/ignored)`);
@@ -475,6 +488,48 @@ class DefaultHighlighterApi implements HighlighterApi {
             .catch(err => {
                 console.warn('[HighlighterApi] Discovery scan failed:', err);
             });
+    }
+
+    /**
+     * Create entity_candidate spans for discovered tokens
+     */
+    private createCandidateSpans(text: string, candidates: Array<{ token: string; score: number }>): DecorationSpan[] {
+        const spans: DecorationSpan[] = [];
+        const textLower = text.toLowerCase();
+
+        for (const candidate of candidates) {
+            const tokenLower = candidate.token.toLowerCase();
+            // Find all occurrences of this token (case-insensitive, word boundary)
+            const regex = new RegExp(`\\b${this.escapeRegex(tokenLower)}\\b`, 'gi');
+            let match: RegExpExecArray | null;
+
+            while ((match = regex.exec(text)) !== null) {
+                // Skip if already covered by an entity_implicit span
+                const from = match.index;
+                const to = match.index + match[0].length;
+                const alreadyCovered = this.implicitDecorations.some(d =>
+                    d.type === 'entity_implicit' && d.from <= from && d.to >= to
+                );
+
+                if (!alreadyCovered) {
+                    spans.push({
+                        type: 'entity_candidate',
+                        from,
+                        to,
+                        label: candidate.token,
+                        matchedText: String(candidate.score.toFixed(2)),
+                        kind: 'UNKNOWN',
+                        resolved: false
+                    });
+                }
+            }
+        }
+
+        return spans;
+    }
+
+    private escapeRegex(str: string): string {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     /**

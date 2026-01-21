@@ -98,6 +98,8 @@ pub use scanner::{
         WasmProjector, Projector,
         TimelineEvent, CharacterSheet, RelationshipGraph, LinkGraph,
     },
+    // Daach Scanner (NEW - Full-parity AC scanner)
+    daach_bridge::DaachScanner,
 };
 
 // Public exports - ResoRank

@@ -12,6 +12,7 @@
 import init, {
     ScanConductor,
     RustImplicitScanner,
+    DaachScanner,
     RealityCortex,
     InitOutput,
     cozo_save_to_opfs,
@@ -101,6 +102,7 @@ type KittCoreMessage =
     | { type: 'HYDRATE_ENTITIES'; payload: { entities: EntityDefinition[]; narrativeId?: string } }
     | { type: 'SCAN_IMPLICIT'; payload: { content: string; narrativeId?: string } }
     | { type: 'SCAN_IMPLICIT_RUST'; payload: { content: string; narrativeId?: string } }
+    | { type: 'SCAN_DAACH'; payload: { content: string; narrativeId?: string } }  // NEW: Full-parity AC scanner
     | { type: 'EXTRACT_RELATIONS'; payload: { content: string; entities: EntitySpan[]; narrativeId?: string } }
     | { type: 'EXTRACT_TRIPLES'; payload: { content: string } }
     | { type: 'SCAN_TEMPORAL'; payload: { content: string } }
@@ -159,6 +161,7 @@ type KittCoreMessage =
 // Shared state
 let conductor: ScanConductor | null = null;
 let dafsaScanner: RustImplicitScanner | null = null;
+let daachScanner: DaachScanner | null = null;  // NEW: Full-parity AC scanner
 let realityCortex: RealityCortex | null = null;
 // let db: WasmDatabase | null = null; // NEW: SQLite DB (Disabled)
 let sharedScanner: SharedMemoryManager | null = null;
@@ -203,6 +206,8 @@ self.onmessage = async (e: MessageEvent) => {
                 const output = await init({ module_or_path: wasmUrl });
                 conductor = new ScanConductor();
                 dafsaScanner = new RustImplicitScanner();
+                daachScanner = new DaachScanner();  // NEW: Full-parity AC
+                console.log('[KittCoreWorker] DaachScanner instantiated');
                 realityCortex = new RealityCortex();
                 sharedScanner = new SharedMemoryManager(output);
 
@@ -525,6 +530,17 @@ self.onmessage = async (e: MessageEvent) => {
                     console.warn('[KittCoreWorker:TRACE] dafsaScanner is NULL, cannot hydrate!');
                 }
 
+                // Also hydrate DaachScanner (full-parity AC)
+                if (daachScanner) {
+                    try {
+                        console.log('[KittCoreWorker:TRACE] Calling daachScanner.hydrate()...');
+                        daachScanner.hydrate(entitiesToHydrate);
+                        console.log('[KittCoreWorker:TRACE] DaachScanner hydration complete');
+                    } catch (err) {
+                        console.error('[KittCoreWorker] DaachScanner hydration failed:', err);
+                    }
+                }
+
 
                 // Also push entities to Rust CozoDB for persistence
                 if (sharedScanner) {
@@ -573,6 +589,28 @@ self.onmessage = async (e: MessageEvent) => {
                     payload: { spans: rustSpans || [] }
                 } as ResponseMessage);
                 break;
+
+            // NEW: Full-parity Aho-Corasick Scanner (DaachScanner)
+            case 'SCAN_DAACH': {
+                if (!daachScanner) throw new Error('DaachScanner not initialized');
+                const daachContent = msg.payload.content;
+                const daachNarrativeId = msg.payload.narrativeId;
+
+                console.log(`[KittCoreWorker:TRACE] SCAN_DAACH called, contentLen=${daachContent?.length ?? 0}, narrativeId=${daachNarrativeId ?? 'none'}`);
+
+                const daachSpans = daachScanner.scan(daachContent, daachNarrativeId);
+
+                console.log(`[KittCoreWorker:TRACE] DaachScanner returned ${daachSpans?.length ?? 0} spans`);
+                if (daachSpans && daachSpans.length > 0) {
+                    console.log('[KittCoreWorker:TRACE] DaachScanner sample spans:', daachSpans.slice(0, 5));
+                }
+
+                self.postMessage({
+                    type: 'SCAN_DAACH_RESULT',
+                    payload: { spans: daachSpans || [] }
+                } as ResponseMessage);
+                break;
+            }
 
 
             case 'EXTRACT_RELATIONS':

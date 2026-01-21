@@ -124,6 +124,9 @@ export class KittCoreService {
     private hydrationPromise: Promise<void> | null = null;
     private isHydrated = false;
 
+    // Scanner toggle: true = DaachScanner (full-parity AC), false = DAFSA (legacy)
+    public useDaachScanner = true;  // ENABLED: Field name fix applied
+
     /**
      * Initialize the KittCore worker
      */
@@ -257,7 +260,8 @@ export class KittCoreService {
     }
 
     /**
-     * Scan for implicit entity mentions using Rust DAFSA (A/B Test)
+     * Scan for implicit entity mentions using Rust scanner
+     * Uses DaachScanner (full-parity AC) or DAFSA (legacy) based on useDaachScanner flag
      * IMPORTANT: Waits for hydration to complete before scanning
      */
     async scanImplicitRust(content: string, narrativeId?: string): Promise<any[]> {
@@ -270,12 +274,16 @@ export class KittCoreService {
                     this.hydrationResolve = resolve;
                 });
             }
-            console.log('[KittCore] Waiting for hydration before scan...');
+            // console.log('[KittCore] Waiting for hydration before scan...');
             await this.hydrationPromise;
         }
 
+        // Toggle between scanners based on flag
+        const messageType = this.useDaachScanner ? 'SCAN_DAACH' : 'SCAN_IMPLICIT_RUST';
+        console.log(`[KittCore] Using ${this.useDaachScanner ? 'DaachScanner' : 'DAFSA'} for scan`);
+
         const result = await this.sendMessage({
-            type: 'SCAN_IMPLICIT_RUST',
+            type: messageType,
             payload: { content, narrativeId }
         });
         return result.spans;

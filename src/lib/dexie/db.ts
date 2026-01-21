@@ -91,6 +91,15 @@ export interface DecorationMeta {
     lastScan: number;
 }
 
+export interface DecorationSpans {
+    noteId: string;
+    // Stored as generic JSON to avoid circular dependency with Scanner types if needed,
+    // but strictly it's DecorationSpan[]
+    spans: any[];
+    contentHash: string;
+    updatedAt: number;
+}
+
 export interface ScannerCache {
     id: string;
     data: Uint8Array;
@@ -137,6 +146,7 @@ export class CrepeDatabase extends Dexie {
     mentions!: Table<Mention>;
     edges!: Table<Edge>;
     decorationMeta!: Table<DecorationMeta>;
+    decorationSpans!: Table<DecorationSpans>;
     scannerCache!: Table<ScannerCache>;
     modelCache!: Table<ModelCache>;
     entityMetadata!: Table<EntityMetadata>;
@@ -145,7 +155,7 @@ export class CrepeDatabase extends Dexie {
     constructor() {
         super('CrepeNotes');
 
-        this.version(1).stores({
+        this.version(2).stores({
             // Notes: indexed by folderId for folder view, title for search
             notes: 'id, worldId, folderId, title, entityKind, isEntity, isPinned, favorite, updatedAt',
 
@@ -169,6 +179,9 @@ export class CrepeDatabase extends Dexie {
 
             // Decoration metadata: keyed by noteId
             decorationMeta: 'noteId',
+
+            // Decoration Spans (New Phase 2 Persistence)
+            decorationSpans: 'noteId',
 
             // Scanner cache (DAFSA trie)
             scannerCache: 'id',

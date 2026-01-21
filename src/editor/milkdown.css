@@ -329,3 +329,18 @@
   color: hsl(var(--entity-unknown));
   border-bottom-color: hsl(var(--entity-unknown));
 }
+
+/* NER Discovery Candidates - Gray dashed underline */
+.entity-candidate {
+  text-decoration: underline;
+  text-decoration-color: #666;
+  text-decoration-style: dashed;
+  text-underline-offset: 2px;
+  cursor: help;
+  transition: all 0.15s ease;
+}
+
+.entity-candidate:hover {
+  text-decoration-color: #888;
+  background-color: hsl(var(--entity-unknown) / 0.1);
+}

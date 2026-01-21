@@ -31,36 +31,75 @@ export async function saveNoteDecorations(
 ): Promise<void> {
     const now = Date.now();
 
+    // Update in-memory cache for speed
     decorationCache.set(noteId, {
         spans,
         contentHash: contentHash ?? '',
         updatedAt: now,
     });
 
-    // Update Dexie metadata for persistence
-    await db.decorationMeta.put({
-        noteId,
-        version: 1,
-        lastScan: now,
-    });
+    // Validations
+    if (!noteId) return;
 
-    console.log(`[Dexie] Saved ${spans.length} decorations for note ${noteId}`);
+    try {
+        // Persist to Dexie
+        await db.transaction('rw', [db.decorationSpans, db.decorationMeta], async () => {
+            await db.decorationSpans.put({
+                noteId,
+                spans,
+                contentHash: contentHash ?? '',
+                updatedAt: now
+            });
+
+            await db.decorationMeta.put({
+                noteId,
+                version: 1,
+                lastScan: now,
+            });
+        });
+        // console.log(`[Dexie] Persisted ${spans.length} decorations for note ${noteId}`);
+    } catch (err) {
+        console.warn(`[Dexie] Failed to persist decorations for ${noteId}:`, err);
+    }
 }
 
 /**
  * Get the content hash for a note's cached decorations
  */
 export async function getDecorationContentHash(noteId: string): Promise<string | null> {
+    // Check memory first
     const cached = decorationCache.get(noteId);
-    return cached?.contentHash ?? null;
+    if (cached) return cached.contentHash;
+
+    // Check DB
+    const record = await db.decorationSpans.get(noteId);
+    return record?.contentHash ?? null;
 }
 
 /**
  * Get decorations for a note
  */
 export async function getNoteDecorations(noteId: string): Promise<DecorationSpan[]> {
+    // Check memory first
     const cached = decorationCache.get(noteId);
-    return cached?.spans ?? [];
+    if (cached) return cached.spans;
+
+    // Check DB
+    try {
+        const record = await db.decorationSpans.get(noteId);
+        if (record) {
+            // Hydrate memory cache
+            decorationCache.set(noteId, {
+                spans: record.spans,
+                contentHash: record.contentHash,
+                updatedAt: record.updatedAt
+            });
+            return record.spans;
+        }
+    } catch (err) {
+        console.warn(`[Dexie] Failed to load decorations for ${noteId}:`, err);
+    }
+    return [];
 }
 
 /**
@@ -68,6 +107,7 @@ export async function getNoteDecorations(noteId: string): Promise<DecorationSpan
  */
 export async function clearNoteDecorations(noteId: string): Promise<void> {
     decorationCache.delete(noteId);
+    await db.decorationSpans.delete(noteId);
     await db.decorationMeta.delete(noteId);
 }
 
@@ -76,5 +116,6 @@ export async function clearNoteDecorations(noteId: string): Promise<void> {
  */
 export async function clearAllDecorations(): Promise<void> {
     decorationCache.clear();
+    await db.decorationSpans.clear();
     await db.decorationMeta.clear();
 }

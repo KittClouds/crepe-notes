@@ -203,6 +203,18 @@ export const entityHighlighter = $prose(() => {
                         continue;
                     }
 
+                    // NER CANDIDATE HIGHLIGHTS: Gray underline for potential entities
+                    if (span.type === 'entity_candidate') {
+                        decorations.push(
+                            Decoration.inline(span.from, span.to, {
+                                class: 'entity-candidate',
+                                style: 'text-decoration: underline; text-decoration-color: #666; text-decoration-style: dashed;',
+                                title: `Potential entity: ${span.label} (score: ${span.matchedText || 'unknown'})`
+                            })
+                        );
+                        continue;
+                    }
+
                     if (isEditing) {
                         // EDITING MODE: Show raw text with subtle highlight
                         decorations.push(
