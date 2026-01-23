@@ -1596,6 +1596,7 @@ name = "kittcore"
 version = "0.1.0"
 dependencies = [
  "aho-corasick",
+ "bincode",
  "chrono",
  "console_error_panic_hook",
  "cozo",

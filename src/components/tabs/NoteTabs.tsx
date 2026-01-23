@@ -50,12 +50,12 @@ export function NoteTabs({ className }: NoteTabsProps) {
 
     const handleDoubleClick = useCallback((note: Note) => {
         setEditingId(note.id);
-        setEditValue(note.title);
+        setEditValue(note.title ?? '');
     }, []);
 
-    const handleSave = useCallback(() => {
+    const handleSave = useCallback(async () => {
         if (editingId && editValue.trim()) {
-            updateNote(editingId, { title: editValue.trim() });
+            await updateNote(editingId, { title: editValue.trim() });
         }
         setEditingId(null);
         setEditValue('');
@@ -120,7 +120,7 @@ export function NoteTabs({ className }: NoteTabsProps) {
                                 onClick={(e) => e.stopPropagation()}
                             />
                         ) : (
-                            <span className="truncate flex-1">{getDisplayName(note.title)}</span>
+                            <span className="truncate flex-1">{getDisplayName(note.title || 'Untitled')}</span>
                         )}
 
                         <Button

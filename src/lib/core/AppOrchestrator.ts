@@ -215,6 +215,9 @@ export class AppOrchestrator {
         const hydratedCount = await kittCore.hydrateEntities(kittCoreEntities);
         console.log(`[AppOrchestrator] KittCore hydrated with ${hydratedCount} entities`);
 
+        // Refresh registry cache to pick up entities pushed to CozoDB during hydration
+        await smartGraphRegistry.refresh();
+        console.log(`[AppOrchestrator] Registry refreshed after hydration`);
 
         console.timeEnd('Step 2: CozoDB Core');
     }

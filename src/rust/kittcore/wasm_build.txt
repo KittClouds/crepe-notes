@@ -1,561 +1,194 @@
-node.exe : [INFO]: Checking 
-for the Wasm target...
-At C:\Users\shuga\AppData\Ro
-aming\npm\wasm-pack.ps1:24 
-char:5
-+     & "node$exe"  "$basedi
-r/node_modules/wasm-pack/run
-.js" $args
-+     ~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~
-    + CategoryInfo          
-    : NotSpecified: ([INFO  
-  ]: Checking for the Was   
- m target...:String) [],    
- RemoteException
-    + FullyQualifiedErrorId 
-    : NativeCommandError
+﻿node.exe : [INFO]: Checking for the Wasm target...
+At C:\Users\shuga\AppData\Roaming\npm\wasm-pack.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/wasm-pack/run.js" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([INFO]: Checking for the Wasm target...:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
  
 [INFO]: Compiling to Wasm...
-   Compiling kittcore 
-v0.1.0 (C:\Users\shuga\1kitt
-root\1code\collaborative-can
-vas\rust\kittcore)
-warning: unused import: 
-`RelationSource`
-  --> src\scanner\document.r
-s:19:50
+   Compiling kittcore v0.1.0 (C:\Users\shuga\1kittroot\1code\crepe-notes\src\rust\kittcore)
+warning: unused imports: `EvidenceSpan` and `ProjectedRelation`
+  --> src\scanner\relation.rs:51:53
    |
-19 |     RelationCortex, 
-EntitySpan, 
-UnifiedRelation, 
-RelationSource,
-   |                        
-                          
-^^^^^^^^^^^^^^
+51 | use crate::reality::evidence_graph::{EvidenceGraph, ProjectedRelation, EvidenceSpan, EvidenceSource};
+   |                                                     ^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^
    |
-   = note: 
-`#[warn(unused_imports)]` 
-on by default
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
 
-warning: unused import: 
-`ChunkResult`
-  --> src\scanner\attacher.r
-s:21:49
-   |
-21 | use crate::scanner::chu
-nker::{Chunk, ChunkKind, 
-ChunkResult};
-   |                        
-                         
-^^^^^^^^^^^
-
-warning: unused import: 
-`ChunkResult`
-  --> src\scanner\dialogue.r
-s:10:49
-   |
-10 | use crate::scanner::chu
-nker::{Chunk, ChunkKind, 
-ChunkResult};
-   |                        
-                         
-^^^^^^^^^^^
-
-warning: unused import: 
-`NarrativeContext`
-  --> src\scanner\dialogue.r
-s:11:32
-   |
-11 | use crate::scanner::res
-olver::{NarrativeContext, 
-EntityId, Resolver};
-   |                        
-        ^^^^^^^^^^^^^^^^
-
-warning: unused imports: 
-`Deserialize` and 
-`Serialize`
-  --> src\scanner\dialogue.r
-s:13:13
-   |
-13 | use 
-serde::{Deserialize, 
-Serialize};
-   |             
-^^^^^^^^^^^  ^^^^^^^^^
-
-warning: unused import: 
-`POS`
-  --> src\scanner\structured
-_relation.rs:35:73
-   |
-35 | use 
-super::chunker::{Chunk, 
-ChunkKind, ChunkResult, 
-Chunker, TextRange, POS};
-   |                        
-                            
-                     ^^^
-
-warning: unused import: 
-`ChunkResult`
-   --> 
-src\reality\parser.rs:643:49
-    |
-643 | use crate::scanner::ch
-unker::{Chunk, ChunkKind, 
-ChunkResult};
-    |                       
-                          
-^^^^^^^^^^^
-
-warning: unused imports: 
-`ProjectionStats`, 
-`project_all`, 
-`project_attributions`, 
-`project_quads`, and 
-`project_state_changes`
-  --> 
-src\reality\engine.rs:16:22
-   |
-16 |     project_triples, 
-project_quads, 
-project_attributions, 
-project_state_changes,
-   |                      
-^^^^^^^^^^^^^  
-^^^^^^^^^^^^^^^^^^^^  
-^^^^^^^^^^^^^^^^^^^^^
-17 |     project_all, 
-project_all_with_stats,
-   |     ^^^^^^^^^^^
-18 |     Triple, QuadPlus, 
-Attribution, StateChange, 
-Projection, ProjectionStats,
-   |                        
-                            
-         ^^^^^^^^^^^^^^^
-
-warning: unused import: 
-`EdgeKind`
-  --> 
-src\reality\engine.rs:20:60
-   |
-20 | use super::graph::{Conc
-eptGraph, ConceptNode, 
-ConceptEdge, EdgeKind};
-   |                        
-                            
-        ^^^^^^^^
-
-warning: unused import: 
-`ExtractedRelation`
-   --> 
-src\reality\api.rs:100:82
-    |
-100 | use crate::scanner::re
-lation::{RelationCortex, 
-EntitySpan as 
-RelationEntitySpan, 
-ExtractedRelation};
-    |                       
-                            
-                            
-   ^^^^^^^^^^^^^^^^^
-
-warning: unused import: 
-`SpanRecord`
-   --> 
-src\reality\api.rs:101:40
-    |
-101 | use super::entity_laye
-r::{EntityLayer, 
-SpanRecord, EntityRecord};
-    |                       
-                 ^^^^^^^^^^
-
-warning: unused import: 
-`ConceptEdge`
-  --> 
-src\reality\global.rs:11:47
-   |
-11 | use super::graph::{Conc
-eptGraph, ConceptNode, 
-ConceptEdge};
-   |                        
-                       
-^^^^^^^^^^^
-
-warning: unused imports: 
-`ConceptEdge` and 
-`ConceptNode`
- --> src\reality\algorithms.
-rs:9:34
+warning: unused imports: `CompiledDictionary` and `DecorationSpan`
+ --> src\scanner\implicit_dafsa.rs:2:20
   |
-9 | use super::graph::{Conce
-ptGraph, ConceptNode, 
-ConceptEdge};
-  |                         
-         ^^^^^^^^^^^  
-^^^^^^^^^^^
+2 | use super::dafsa::{CompiledDictionary, RuntimeDictionary, ScannerCore, compile_dictionary, DecorationSpan, 
+set_global_dictionary};
+  |                    ^^^^^^^^^^^^^^^^^^                                                      ^^^^^^^^^^^^^^
 
-warning: unused import: 
-`EdgeKind`
- --> 
-src\reality\temporal.rs:9:60
+warning: unused imports: `Deserialize` and `Serialize`
+ --> src\scanner\implicit_dafsa.rs:6:13
   |
-9 | use super::graph::{Conce
-ptGraph, ConceptNode, 
-ConceptEdge, EdgeKind};
-  |                         
-                            
-       ^^^^^^^^
+6 | use serde::{Serialize, Deserialize};
+  |             ^^^^^^^^^  ^^^^^^^^^^^
 
-warning: unused import: `tra
-ct_core::tract_data::TractRe
-sult`
- --> 
-src\embeddings\model.rs:8:5
+warning: unused import: `CompiledDictionary`
+ --> src\scanner\daach_bridge.rs:8:5
   |
-8 | use tract_core::tract_da
-ta::TractResult;
-  |     ^^^^^^^^^^^^^^^^^^^^
-^^^^^^^^^^^^^^^
+8 |     CompiledDictionary, RuntimeDictionary, ScannerCore, 
+  |     ^^^^^^^^^^^^^^^^^^
 
-warning: unused import: `uni
-code_segmentation::UnicodeSe
-gmentation`
- --> src\embeddings\chunker.
-rs:6:5
+warning: unused imports: `ConceptEdge` and `ConceptNode`
+ --> src\reality\algorithms.rs:9:34
   |
-6 | use unicode_segmentation
-::UnicodeSegmentation;
-  |     ^^^^^^^^^^^^^^^^^^^^
-^^^^^^^^^^^^^^^^^^^^^
+9 | use super::graph::{ConceptGraph, ConceptNode, ConceptEdge};
+  |                                  ^^^^^^^^^^^  ^^^^^^^^^^^
 
-warning: unused import: 
-`HnswError`
- --> src\rag\index.rs:8:40
+warning: unused import: `HashSet`
+  --> src\reality\evidence_graph.rs:22:33
+   |
+22 | use std::collections::{HashMap, HashSet};
+   |                                 ^^^^^^^
+
+warning: unused imports: `ConceptEdge` and `ConceptNode`
+  --> src\reality\evidence_graph.rs:25:34
+   |
+25 | use super::graph::{ConceptGraph, ConceptNode, ConceptEdge};
+   |                                  ^^^^^^^^^^^  ^^^^^^^^^^^
+
+warning: unused import: `CozoError`
+ --> src\db\cozo_shared.rs:9:40
   |
-8 | use 
-crate::hnsw::index::{Hnsw, 
-Metric, HnswError};
-  |                         
-               ^^^^^^^^^
+9 | use crate::db::cozo_graph::{CozoGraph, CozoError};
+  |                                        ^^^^^^^^^
 
-warning: unused imports: 
-`FieldOccurrence`, 
-`ProximityStrategy`, and 
-`ResoRankConfig`
-  --> 
-src\rag\pipeline.rs:12:39
-   |
-12 |     ResoRankScorer, 
-CorpusStatistics, 
-ResoRankConfig, 
-ProximityStrategy,
-   |                        
-               
-^^^^^^^^^^^^^^  
-^^^^^^^^^^^^^^^^^
-13 |     DocumentMetadata 
-as ResoDocMeta, 
-TokenMetadata, 
-FieldOccurrence,
-   |                        
-                            
- ^^^^^^^^^^^^^^^
-
-warning: unused import: 
-`SearchResult as 
-IndexSearchResult`
-  --> 
-src\rag\pipeline.rs:16:33
-   |
-16 | use 
-super::index::{VectorIndex, 
-SearchResult as 
-IndexSearchResult};
-   |                        
-         ^^^^^^^^^^^^^^^^^^^
-^^^^^^^^^^^^^^
-
-warning: unused import: `cra
-te::hnsw::node::HnswNode`
- --> src\hnsw\wasm.rs:3:5
+warning: unused import: `std::mem`
+ --> src\shared_mem.rs:2:5
   |
-3 | use 
-crate::hnsw::node::HnswNode;
-  |     
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2 | use std::mem;
+  |     ^^^^^^^^
 
-warning: unnecessary 
-parentheses around assigned 
-value
-   --> src\hnsw\binary_quant
-ization.rs:159:17
-    |
-159 |     let denom = 
-(mag_a.sqrt() * 
-mag_b.sqrt());
-    |                 ^     
-                      ^
-    |
-    = note: 
-`#[warn(unused_parens)]` on 
-by default
-help: remove these 
-parentheses
-    |
-159 -     let denom = 
-(mag_a.sqrt() * 
-mag_b.sqrt());
-159 +     let denom = 
-mag_a.sqrt() * mag_b.sqrt();
-    |
+warning: unused imports: `CandidateStats` and `CanonToken`
+ --> src\shared_mem.rs:6:50
+  |
+6 | use crate::scanner::discovery::{DiscoveryEngine, CandidateStats, CandidateStatus, canonicalize, CanonToken};
+  |                                                  ^^^^^^^^^^^^^^                                 ^^^^^^^^^^
 
-warning: unused doc comment
-  --> src\db\mod.rs:14:1
+warning: unused import: `crate::scanner::dafsa::types::EntityKind`
+ --> src\shared_mem.rs:7:5
+  |
+7 | use crate::scanner::dafsa::types::EntityKind;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: `focus_entities`
+   --> src\scanner\conductor.rs:288:41
+    |
+288 |     pub fn compute_smart_context(&self, focus_entities: Vec<String>) -> JsValue {
+    |                                         ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an 
+underscore: `_focus_entities`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: value assigned to `head_idx` is never read
+   --> src\scanner\chunker.rs:491:28
+    |
+491 |         let mut head_idx = None;
+    |                            ^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `token_lower`
+  --> src\scanner\dafsa\scanner.rs:99:13
    |
-14 | /// Global VFS utility 
-handle (stored after 
-installation)
-   | ^^^^^^^^^^^^^^^^^^^^^^^
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-^^^^^^ rustdoc does not 
-generate documentation for 
-macro invocations
-   |
-   = help: to document an 
-item produced by a macro, 
-the macro must produce the 
-documentation as part of 
-its expansion
-   = note: `#[warn(unused_do
-c_comments)]` on by default
+99 |         let token_lower = token.to_lowercase(); // Anchor keys are normalized (lowercase)
+   |             ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_token_lower`
 
-warning: value assigned to 
-`head_idx` is never read
-   --> src\scanner\chunker.r
-s:491:17
+warning: unused variable: `e`
+   --> src\reality\api.rs:660:85
     |
-491 |         let mut 
-head_idx = None;
-    |                 
-^^^^^^^^
+660 |         let edges: Vec<ExportedEdge> = context_subgraph.graph().edge_weights().map(|e| {
+    |                                                                                     ^ help: if this is 
+intentional, prefix it with an underscore: `_e`
+
+warning: unused variable: `edges`
+   --> src\reality\api.rs:660:13
     |
-    = help: maybe it is 
-overwritten before being 
-read?
-    = note: `#[warn(unused_a
-ssignments)]` on by default
+660 |         let edges: Vec<ExportedEdge> = context_subgraph.graph().edge_weights().map(|e| {
+    |             ^^^^^ help: if this is intentional, prefix it with an underscore: `_edges`
 
-warning: unused variable: 
-`resolver`
-  --> src\scanner\dialogue.r
-s:74:49
-   |
-74 |     fn find_speaker_in_
-chunks(chunks: &[Chunk], 
-resolver: &mut Resolver) -> 
-Option<EntityId> {
-   |                        
-                         
-^^^^^^^^ help: if this is 
-intentional, prefix it with 
-an underscore: `_resolver`
-   |
-   = note: 
-`#[warn(unused_variables)]` 
-on by default
-
-warning: unused variable: 
-`quote_pos`
-  --> 
-src\scanner\dialogue.rs:97:9
-   |
-97 |         quote_pos: 
-QuotePosition,
-   |         ^^^^^^^^^ 
-help: if this is 
-intentional, prefix it with 
-an underscore: `_quote_pos`
-
-warning: unused variable: 
-`character_label`
-   --> src\scanner\projectio
-ns.rs:653:13
+warning: unused variable: `timestamp`
+   --> src\db\cozo_graph.rs:476:13
     |
-653 |         let 
-character_label = character_
-ref.target.to_lowercase();
-    |             
-^^^^^^^^^^^^^^^ help: if 
-this is intentional, prefix 
-it with an underscore: 
-`_character_label`
+476 |         let timestamp = js_sys::Date::now(); // Note: js_sys dependency might be needed, or use a placeholder
+    |             ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_timestamp`
 
-warning: unused variable: 
-`agent_pp`
-   --> src\scanner\structure
-d_relation.rs:552:13
-    |
-552 |         let agent_pp 
-= pattern.modifiers.iter().f
-ind(|pp| {
-    |             ^^^^^^^^ 
-help: if this is 
-intentional, prefix it with 
-an underscore: `_agent_pp`
-
-warning: unused variable: 
-`batch_size`
-   --> src\embeddings\model.
-rs:108:13
-    |
-108 |         let 
-batch_size = padded.len();
-    |             
-^^^^^^^^^^ help: if this is 
-intentional, prefix it with 
-an underscore: `_batch_size`
-
-warning: unused variable: 
-`start`
-   --> src\embeddings\chunke
-r.rs:103:18
-    |
-103 |             let 
-(start, end, sentence) = 
-sentences[sentence_idx];
-    |                  
-^^^^^ help: if this is 
-intentional, prefix it with 
-an underscore: `_start`
-
-warning: unused variable: 
-`end`
-   --> src\embeddings\chunke
-r.rs:103:25
-    |
-103 |             let 
-(start, end, sentence) = 
-sentences[sentence_idx];
-    |                       
-  ^^^ help: if this is 
-intentional, prefix it with 
-an underscore: `_end`
-
-warning: unused variable: 
-`note_count`
-   --> 
-src\rag\pipeline.rs:186:13
-    |
-186 |         let 
-note_count = notes.len();
-    |             
-^^^^^^^^^^ help: if this is 
-intentional, prefix it with 
-an underscore: `_note_count`
-
-warning: unused variable: 
-`id`
-   --> 
-src\rag\raptor.rs:118:14
-    |
-118 |         for (id, emb, 
-_) in &chunks {
-    |              ^^ help: 
-if this is intentional, 
-prefix it with an 
-underscore: `_id`
-
-warning: field 
-`semantic_weight` is never 
-read
-  --> 
-src\scanner\attacher.rs:89:5
+warning: field `semantic_weight` is never read
+  --> src\scanner\attacher.rs:89:5
    |
 86 | pub struct Attacher {
-   |            -------- 
-field in this struct
+   |            -------- field in this struct
 ...
-89 |     semantic_weight: 
-f64,
+89 |     semantic_weight: f64,
    |     ^^^^^^^^^^^^^^^
    |
-   = note: 
-`#[warn(dead_code)]` on by 
-default
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 
-warning: field `attributor` 
-is never read
-   --> src\scanner\narrative
-.rs:111:5
+warning: field `attributor` is never read
+   --> src\scanner\narrative.rs:111:5
     |
-107 | pub struct 
-NarrativeGraph {
-    |            
--------------- field in 
-this struct
+107 | pub struct NarrativeGraph {
+    |            -------------- field in this struct
 ...
-111 |     attributor: 
-DialogueAttributor,
+111 |     attributor: DialogueAttributor,
     |     ^^^^^^^^^^
 
-warning: `kittcore` (lib) 
-generated 34 warnings (run 
-`cargo fix --lib -p 
-kittcore` to apply 21 
-suggestions)
-    Finished `release` 
-profile [optimized] 
-target(s) in 1m 56s
-[INFO]: Installing 
-wasm-bindgen...
-[INFO]: Optimizing wasm 
-binaries with `wasm-opt`...
-child not found in parent
-UNREACHABLE executed at D:\a
-\binaryen\binaryen\src\passe
-s\Precompute.cpp:838!
-Error: failed to execute 
-`wasm-opt`: exited with 
-exit code: 0xc0000409
-  full command: "C:\\Users\\
-shuga\\AppData\\Local\\.wasm
--pack\\wasm-opt-cdcb9e877b68
-d02e\\bin/wasm-opt.exe" "C:\
-\Users\\shuga\\1kittroot\\1c
-ode\\collaborative-canvas\\s
-rc\\lib\\wasm\\kittcore\\kit
-tcore_bg.wasm" "-o" "C:\\Use
-rs\\shuga\\1kittroot\\1code\
-\collaborative-canvas\\src\\
-lib\\wasm\\kittcore\\kittcor
-e_bg.wasm-opt.wasm" "-O"
-To disable `wasm-opt`, add 
-`wasm-opt = false` to your 
-package metadata in your 
-`Cargo.toml`.
-Caused by: failed to 
-execute `wasm-opt`: exited 
-with exit code: 0xc0000409
-  full command: "C:\\Users\\
-shuga\\AppData\\Local\\.wasm
--pack\\wasm-opt-cdcb9e877b68
-d02e\\bin/wasm-opt.exe" "C:\
-\Users\\shuga\\1kittroot\\1c
-ode\\collaborative-canvas\\s
-rc\\lib\\wasm\\kittcore\\kit
-tcore_bg.wasm" "-o" "C:\\Use
-rs\\shuga\\1kittroot\\1code\
-\collaborative-canvas\\src\\
-lib\\wasm\\kittcore\\kittcor
-e_bg.wasm-opt.wasm" "-O"
-To disable `wasm-opt`, add 
-`wasm-opt = false` to your 
-package metadata in your 
-`Cargo.toml`.
+warning: function `strip_possessive` is never used
+   --> src\scanner\daach\mod.rs:146:4
+    |
+146 | fn strip_possessive(tok: &str) -> &str {
+    |    ^^^^^^^^^^^^^^^^
+
+warning: fields `patterns` and `unique_token_to_id` are never read
+   --> src\scanner\daach\mod.rs:300:5
+    |
+298 | pub struct RuntimeDictionary {
+    |            ----------------- fields in this struct
+299 |     ac: AhoCorasick,
+300 |     patterns: Vec<String>,
+    |     ^^^^^^^^
+...
+303 |     unique_token_to_id: BTreeMap<String, String>,
+    |     ^^^^^^^^^^^^^^^^^^
+
+warning: methods `select_best` and `fuzzy_match_token` are never used
+   --> src\scanner\daach\mod.rs:349:8
+    |
+308 | impl RuntimeDictionary {
+    | ---------------------- methods in this implementation
+...
+349 |     fn select_best(&self, ids: &[String]) -> Option<EntityInfo> {
+    |        ^^^^^^^^^^^
+...
+361 |     fn fuzzy_match_token(&self, token: &str) -> Option<EntityInfo> {
+    |        ^^^^^^^^^^^^^^^^^
+
+warning: function `dl_within` is never used
+   --> src\scanner\daach\mod.rs:398:4
+    |
+398 | fn dl_within(a: &str, b: &str, max: usize) -> bool {
+    |    ^^^^^^^^^
+
+warning: function `tok_match` is never used
+   --> src\scanner\daach\mod.rs:429:4
+    |
+429 | fn tok_match(a: &str, b: &str) -> bool {
+    |    ^^^^^^^^^
+
+warning: unstable feature specified for `-Ctarget-feature`: `atomics`
+  |
+  = note: this feature is not stably supported; its behavior can change in the future
+
+warning: `kittcore` (lib) generated 25 warnings (run `cargo fix --lib -p kittcore` to apply 16 suggestions)
+    Finished `release` profile [optimized] target(s) in 1m 31s
+[INFO]: Installing wasm-bindgen...
+[INFO]: License key is set in Cargo.toml but no LICENSE file(s) were found; Please add the LICENSE file(s) to your 
+project directory
+[INFO]: :-) Done in 1m 34s
+[INFO]: :-) Your wasm pkg is ready to publish at C:\Users\shuga\1kittroot\1code\crepe-notes\src\rust\kittcore\pkg.

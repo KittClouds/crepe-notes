@@ -518,6 +518,30 @@ impl CozoGraph {
         Ok(rows)
     }
 
+    /// Execute a mutable Datalog query (for :put, :rm operations)
+    pub fn query_mut(&self, q: &str) -> Result<Vec<BTreeMap<String, JsonValue>>, CozoError> {
+        let result = self
+            .db
+            .run_script(q, Default::default(), cozo::ScriptMutability::Mutable)
+            .map_err(|e| CozoError::Query(e.to_string()))?;
+
+        // Convert NamedRows to Vec<BTreeMap>
+        let headers = result.headers.clone();
+        let rows: Vec<BTreeMap<String, JsonValue>> = result
+            .rows
+            .into_iter()
+            .map(|row| {
+                headers
+                    .iter()
+                    .zip(row.into_iter())
+                    .map(|(h, v)| (h.clone(), datavalue_to_json(v)))
+                    .collect()
+            })
+            .collect();
+
+        Ok(rows)
+    }
+
     /// Get node count
     pub fn node_count(&self) -> Result<usize, CozoError> {
         let result = self.query("?[count(id)] := *nodes{id}")?;

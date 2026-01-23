@@ -125,9 +125,44 @@ class DefaultHighlighterApi implements HighlighterApi {
         getScanCoordinator().onKeystroke(char, cursorPos, contextText, this.currentNoteId);
     }
 
+    // Store last doc for re-scan capability
+    private lastDoc: ProseMirrorDoc | null = null;
+
     constructor() {
         // subscribe to store changes
         highlightingStore.subscribe(() => this.notifyListeners());
+
+        // Listen for entity changes to trigger immediate re-scan
+        if (typeof window !== 'undefined') {
+            window.addEventListener('entities-changed', () => {
+                console.log('[HighlighterApi] Entities changed, triggering re-scan');
+                this.forceRescan();
+            });
+        }
+    }
+
+    /**
+     * Force a fresh scan (called when entities are registered/changed)
+     * This clears cache state and re-scans current content
+     */
+    forceRescan(): void {
+        if (!this.lastDoc || !this.currentNoteId) {
+            console.log('[HighlighterApi] forceRescan: no doc or noteId cached');
+            return;
+        }
+
+        // Clear scan state to force fresh scan
+        this.hasScannedOnOpen = false;
+        this.lastScannedContext = '';
+
+        // Get current text and trigger scan
+        const text = docContent(this.lastDoc);
+        this.lastContext = text;
+        this.hasScannedOnOpen = true;
+        this.lastScannedContext = text;
+
+        console.log('[HighlighterApi] forceRescan: triggering fresh implicit scan');
+        this.triggerImplicitScan(this.lastDoc, text);
     }
 
     private notifyListeners() {
@@ -135,6 +170,9 @@ class DefaultHighlighterApi implements HighlighterApi {
     }
 
     getDecorations(doc: ProseMirrorDoc): DecorationSpan[] {
+        // Cache doc for forceRescan capability
+        this.lastDoc = doc;
+
         const settings = highlightingStore.getSettings();
 
         if (settings.mode === 'off') {

@@ -151,9 +151,24 @@ export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
     }, []);
 
     const handleFlushRegistry = useCallback(async () => {
-        await smartGraphRegistry.clearAll();
-        setEntities([]);
-        setIsFlushOpen(false);
+        try {
+            // V2 Genius Flush: Clears entities only, preserves notes/folders/calendar
+            const clearedCount = await smartGraphRegistry.clearAll();
+
+            // Clear localStorage boot caches
+            localStorage.removeItem('cozo-boot-cache');
+            localStorage.removeItem('rustCozoBootCache');
+
+            setEntities([]);
+            setIsFlushOpen(false);
+
+            // Dispatch event to trigger Hub refresh
+            window.dispatchEvent(new CustomEvent('registry-flushed'));
+
+            console.log(`[EntityRegistryPanel] ✅ Flushed ${clearedCount} entity rows (content preserved)`);
+        } catch (err) {
+            console.error('[EntityRegistryPanel] Flush failed:', err);
+        }
     }, []);
 
     const sortedKinds = Object.keys(byKind).sort();
@@ -296,8 +311,8 @@ export function EntityRegistryPanel({ onNavigate }: EntityRegistryPanelProps) {
                             Flush Entity Registry
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will permanently delete all {entities.length} registered entities.
-                            This action cannot be undone.
+                            This will delete all {entities.length} registered entities and their relationships.
+                            <br /><span className="text-muted-foreground">Your notes and folders will be preserved.</span>
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

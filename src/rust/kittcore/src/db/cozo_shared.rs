@@ -592,3 +592,99 @@ async fn cozo_load_from_opfs_legacy() -> Result<bool, JsValue> {
 }
 
 
+// =============================================================================
+// Entity-Only Flush (V2 - Surgical Delete)
+// =============================================================================
+
+/// Clear all entity-related relations from CozoDB.
+/// PRESERVES: folders, folder_hierarchy, network_*, calendar_*
+/// CLEARS: nodes, relationships, entity_*, discovery_candidates, clusters, vectors
+#[wasm_bindgen]
+pub fn registry_clear_all_entities() -> Result<u32, JsValue> {
+    // Entity relations to clear with their primary key columns
+    // Format: (relation_name, key_columns_for_rm)
+    let entity_relations: &[(&str, &str)] = &[
+        // Dependent relations first
+        ("relationship_provenance", "relationship_id, source, origin_id"),
+        ("relationship_attributes", "relationship_id, key"),
+        ("entity_aliases", "entity_id, normalized"),
+        ("entity_mentions", "entity_id, note_id"),
+        ("entity_metadata", "entity_id, key"),
+        ("discovery_candidates", "token"),
+        ("cluster_members", "cluster_id, node_id"),
+        ("entity_clusters", "cluster_id"),
+        ("cooccurrence_edges", "source_id, target_id"),
+        ("node_vectors", "node_id, model"),
+        // Core relations last
+        ("relationships", "id"),
+        ("nodes", "id"),
+    ];
+
+    let mut total_cleared: u32 = 0;
+
+    COZO_DB.with(|cell| {
+        let db_opt = cell.borrow();
+        match db_opt.as_ref() {
+            None => Err(JsValue::from_str("CozoDB not initialized")),
+            Some(graph) => {
+                for (relation, key_cols) in entity_relations.iter() {
+                    // Count rows before delete
+                    let count_query = format!("?[count(n)] := *{}{{id: n}}", relation);
+                    let count = match graph.query(&count_query) {
+                        Ok(rows) => {
+                            if let Some(row) = rows.first() {
+                                if let Some(serde_json::Value::Number(n)) = row.get("count(n)") {
+                                    n.as_u64().unwrap_or(0) as u32
+                                } else { 0 }
+                            } else { 0 }
+                        }
+                        Err(_) => 0, // Relation might not have 'id' column, that's ok
+                    };
+
+                    // Delete all rows: select all keys, then :rm
+                    // CozoDB: ?[key1, key2, ...] := *relation{key1, key2, ...} :rm relation{key1, key2, ...}
+                    let delete_query = format!(
+                        "?[{keys}] := *{rel}{{{keys}}} :rm {rel}{{{keys}}}",
+                        keys = key_cols,
+                        rel = relation
+                    );
+                    
+                    match graph.query_mut(&delete_query) {
+                        Ok(_) => {
+                            if count > 0 {
+                                web_sys::console::log_1(
+                                    &format!("[Flush] Cleared {} rows from {}", count, relation).into()
+                                );
+                            }
+                            total_cleared += count;
+                        }
+                        Err(e) => {
+                            web_sys::console::warn_1(
+                                &format!("[Flush] Failed to clear {}: {:?}", relation, e).into()
+                            );
+                        }
+                    }
+                }
+
+                web_sys::console::log_1(
+                    &format!("[Flush] ✅ Entity flush complete: {} total rows cleared", total_cleared).into()
+                );
+                Ok(total_cleared)
+            }
+        }
+    })
+}
+
+/// Clear Alex OPFS snapshot (entity FST dictionary)
+#[wasm_bindgen]
+pub async fn alex_clear() -> Result<bool, JsValue> {
+    // Clear global Alex state
+    crate::alex::persistence::clear_global_alex();
+    
+    // Delete Alex OPFS files
+    let _ = opfs_project::remove_file("/alex/snapshot.bin").await;
+    let _ = opfs_project::remove_file("/alex/snapshot.bin.bak").await;
+    
+    web_sys::console::log_1(&"[Alex] ✅ Cleared OPFS snapshot and global state".into());
+    Ok(true)
+}

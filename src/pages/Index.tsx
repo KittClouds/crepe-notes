@@ -29,6 +29,7 @@ import { smartGraphRegistry } from '@/lib/registry';
 import type { EntityKind } from '@/lib/types/entityTypes';
 import { BacklinksDrawer } from '@/components/backlinks/BacklinksDrawer';
 import { Logo } from '@/components/icons/Logo';
+import { kittCore } from '@/lib/kittcore';
 
 const Index: React.FC = () => {
   const {
@@ -56,7 +57,7 @@ const Index: React.FC = () => {
     return state.notes.find(n => n.id === state.selectedNoteId) || null;
   }, [state.selectedNoteId, state.notes]);
 
-  // Scan current note for outgoing links and entities
+  // Scan current note for outgoing links and entities (explicit + implicit)
   useEffect(() => {
     if (!currentNote) {
       setEntityStats([]);
@@ -66,30 +67,61 @@ const Index: React.FC = () => {
     }
 
     const content = currentNote.markdownContent || currentNote.content || '';
-    const spans = scanForPatternsSync(content);
 
-    // (Outgoing links removed - using Entities panel only)
+    // Async function to scan for both explicit and implicit entities
+    const scanEntities = async () => {
+      const entityMap = new Map<string, EntityStats>();
 
-    // Extract entity stats
-    const entityMap = new Map<string, EntityStats>();
-    for (const span of spans) {
-      if (span.kind) {
-        const key = `${span.kind}:${span.label}`;
-        const existing = entityMap.get(key);
-        if (existing) {
-          existing.mentionsInThisNote++;
-        } else {
-          entityMap.set(key, {
-            entityKind: span.kind,
-            entityLabel: span.label,
-            mentionsInThisNote: 1,
-            mentionsAcrossVault: 1, // TODO: Calculate across vault
-            appearanceCount: 1,
-          });
+      // 1. Explicit entity syntax: [Character|Sanji]
+      const spans = scanForPatternsSync(content);
+      for (const span of spans) {
+        if (span.kind) {
+          const key = `${span.kind}:${span.label}`;
+          const existing = entityMap.get(key);
+          if (existing) {
+            existing.mentionsInThisNote++;
+          } else {
+            entityMap.set(key, {
+              entityKind: span.kind,
+              entityLabel: span.label,
+              mentionsInThisNote: 1,
+              mentionsAcrossVault: 1,
+              appearanceCount: 1,
+            });
+          }
         }
       }
-    }
-    setEntityStats(Array.from(entityMap.values()));
+
+      // 2. Implicit entity mentions: "Luffy", "Nami", etc. (from Rust scanner)
+      try {
+        const implicitMatches = await kittCore.scanImplicitRust(content, currentNote.folderId || undefined);
+        for (const match of implicitMatches) {
+          // Implicit matches have: entity_id, entity_label, entity_kind, matched_text, start, end
+          const kind = match.entity_kind || 'UNKNOWN';
+          const label = match.entity_label || match.matched_text;
+          const key = `${kind}:${label}`;
+
+          const existing = entityMap.get(key);
+          if (existing) {
+            existing.mentionsInThisNote++;
+          } else {
+            entityMap.set(key, {
+              entityKind: kind,
+              entityLabel: label,
+              mentionsInThisNote: 1,
+              mentionsAcrossVault: 1,
+              appearanceCount: 1,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('[Index] Implicit scan failed:', err);
+      }
+
+      setEntityStats(Array.from(entityMap.values()));
+    };
+
+    scanEntities();
 
     // Word and character count (strip syntax patterns)
     const text = content.replace(/\[[A-Z_]+\|[^\]]+\]|\[\[[^\]]+\]\]|<<[^>]+>>/g, '');
@@ -104,6 +136,16 @@ const Index: React.FC = () => {
 
   // Backlinks for current note
   const backlinksResult = useBacklinks(currentNote, state.notes);
+
+  // Listen for registry flush to clear Hub entities
+  useEffect(() => {
+    const handleFlush = () => {
+      console.log('[Index] Registry flushed - clearing entity stats');
+      setEntityStats([]);
+    };
+    window.addEventListener('registry-flushed', handleFlush);
+    return () => window.removeEventListener('registry-flushed', handleFlush);
+  }, []);
 
   // Wire up NavigationApi handler ONCE
   useEffect(() => {

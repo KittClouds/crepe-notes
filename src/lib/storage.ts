@@ -111,18 +111,24 @@ export async function createNote(partial?: Partial<Note>): Promise<Note> {
 }
 
 export async function updateNote(id: string, updates: Partial<Note>): Promise<Note | undefined> {
-  const updated = await NoteRepo.update(id, {
-    title: updates.title,
-    content: updates.content,
-    markdownContent: updates.markdownContent ?? updates.content,
-    folderId: updates.folderId,
-    entityKind: updates.entityKind ?? null,
-    entitySubtype: updates.entitySubtype ?? null,
-    isEntity: updates.isEntity !== undefined ? !!updates.isEntity : undefined,
-    isPinned: updates.isPinned !== undefined ? !!updates.isPinned : undefined,
-    favorite: updates.favorite !== undefined ? !!updates.favorite : undefined,
-  });
+  // Only include defined fields - don't pass undefined values to Dexie
+  const updateObj: Record<string, unknown> = {};
 
+  if (updates.title !== undefined) updateObj.title = updates.title;
+  if (updates.content !== undefined) {
+    updateObj.content = updates.content;
+    updateObj.markdownContent = updates.markdownContent ?? updates.content;
+  } else if (updates.markdownContent !== undefined) {
+    updateObj.markdownContent = updates.markdownContent;
+  }
+  if (updates.folderId !== undefined) updateObj.folderId = updates.folderId;
+  if (updates.entityKind !== undefined) updateObj.entityKind = updates.entityKind ?? null;
+  if (updates.entitySubtype !== undefined) updateObj.entitySubtype = updates.entitySubtype ?? null;
+  if (updates.isEntity !== undefined) updateObj.isEntity = !!updates.isEntity;
+  if (updates.isPinned !== undefined) updateObj.isPinned = !!updates.isPinned;
+  if (updates.favorite !== undefined) updateObj.favorite = !!updates.favorite;
+
+  const updated = await NoteRepo.update(id, updateObj);
   return updated ? dexieNoteToLegacy(updated) : undefined;
 }
 

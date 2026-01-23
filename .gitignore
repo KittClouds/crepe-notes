@@ -27,3 +27,13 @@ dist-ssr
 rust/kittcore/target/
 rust/kittcore/*.txt
 rust/kittcore/Cargo.lock
+
+# Excluded experimental/legacy directories
+crepe-svelte/
+daach_experiment/
+legacy_v1/
+milkdown-examples/
+milkdown-source/
+reference_graph_implementation/
+src-tauri/
+

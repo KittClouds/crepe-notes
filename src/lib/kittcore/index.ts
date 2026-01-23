@@ -663,6 +663,25 @@ export class KittCoreService {
         return result.data ?? { entity_count: 0, relationship_count: 0 };
     }
 
+    /**
+     * V2 Entity-Only Flush (GENIUS SYSTEM)
+     * 
+     * Clears all entity-related data while PRESERVING content:
+     * - Clears: nodes, relationships, entity_*, discovery_candidates, clusters, vectors
+     * - Preserves: folders, folder_hierarchy, network_*, calendar_*
+     * - Also clears: Alex OPFS, in-memory scanners, boot caches (handled by caller)
+     * 
+     * @returns Number of entity rows cleared
+     */
+    async registryClearAllEntities(): Promise<{ success: boolean; clearedCount: number }> {
+        await this.ensureInitialized();
+        const result = await this.sendMessage({ type: 'REGISTRY_CLEAR_ALL_ENTITIES' });
+        return {
+            success: result.success ?? false,
+            clearedCount: result.clearedCount ?? 0
+        };
+    }
+
     private async ensureInitialized(): Promise<void> {
 
 

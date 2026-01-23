@@ -15,8 +15,12 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::Arc;
 use thiserror::Error;
 
+// Import shared fuzzy matching utilities from alex
+use crate::alex::fuzzy::{tok_match, strip_possessive};
+
 pub mod bridge;
 
+// Re-export for local use
 pub const MIN_ANCHOR_LEN: usize = 3;
 
 thread_local! {
@@ -145,9 +149,8 @@ fn tokenize_norm(text: &str) -> Vec<String> {
         .collect()
 }
 
-fn strip_possessive(tok: &str) -> &str {
-    tok.strip_suffix("'s").or_else(|| tok.strip_suffix("s'")).unwrap_or(tok)
-}
+// strip_possessive is now imported from crate::alex::fuzzy
+
 
 // -------------------- Auto-Alias Generation --------------------
 
@@ -395,49 +398,8 @@ impl RuntimeDictionary {
     }
 }
 
-// -------------------- Fuzzy Algorithms --------------------
+// Fuzzy algorithms (dl_within, tok_match) are now imported from crate::alex::fuzzy
 
-fn dl_within(a: &str, b: &str, max: usize) -> bool {
-    if a == b { return true; }
-    let la = a.chars().count();
-    let lb = b.chars().count();
-    if la.abs_diff(lb) > max { return false; }
-    if la > 32 || lb > 32 { return false; }
-
-    let a_chars: Vec<char> = a.chars().collect();
-    let b_chars: Vec<char> = b.chars().collect();
-    let mut dp = vec![vec![0; lb + 1]; la + 1];
-
-    for i in 0..=la { dp[i][0] = i; }
-    for j in 0..=lb { dp[0][j] = j; }
-
-    for i in 1..=la {
-        let mut row_min = 999;
-        for j in 1..=lb {
-            let cost = if a_chars[i-1] == b_chars[j-1] { 0 } else { 1 };
-            let mut v = (dp[i-1][j] + 1).min(dp[i][j-1] + 1).min(dp[i-1][j-1] + cost);
-            if i > 1 && j > 1 && a_chars[i-1] == b_chars[j-2] && a_chars[i-2] == b_chars[j-1] {
-                v = v.min(dp[i-2][j-2] + 1);
-            }
-            dp[i][j] = v;
-            row_min = row_min.min(v);
-        }
-        if row_min > max { return false; }
-    }
-
-    dp[la][lb] <= max
-}
-
-fn tok_match(a: &str, b: &str) -> bool {
-    if a == b { return true; }
-    if a.len() < 4 || b.len() < 4 { return false; }
-    let a_first = a.chars().next();
-    let b_first = b.chars().next();
-    if a_first != b_first { return false; }
-    if a.len().abs_diff(b.len()) > 2 { return false; }
-    let max = if a.len().max(b.len()) <= 5 { 1 } else { 2 };
-    dl_within(a, b, max)
-}
 
 // -------------------- Scanner Core --------------------
 

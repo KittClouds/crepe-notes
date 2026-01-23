@@ -23,6 +23,7 @@ const UIStateContext = createContext<UIStateContextValue | null>(null);
 
 export function UIStateProvider({ children }: { children: ReactNode }) {
     const [state, setState] = useState<UIState>(() => {
+        // Load from localStorage immediately to avoid blank state on first render
         const lastNoteId = getCurrentNoteId();
         return {
             selectedNoteId: lastNoteId,
@@ -69,8 +70,21 @@ export function UIStateProvider({ children }: { children: ReactNode }) {
 
     const initializeWithNotes = useCallback((noteIds: string[]) => {
         setState(prev => {
-            if (prev.selectedNoteId) return prev; // Already initialized
-            const firstId = noteIds[0] || null;
+            // Validate: ensure current selectedNoteId exists in actual notes
+            const currentIsValid = prev.selectedNoteId && noteIds.includes(prev.selectedNoteId);
+
+            if (currentIsValid) {
+                // Already valid, keep current state
+                return prev;
+            }
+
+            // Current selection is invalid or null - find a valid one
+            const lastNoteId = getCurrentNoteId();
+            const validCachedId = lastNoteId && noteIds.includes(lastNoteId)
+                ? lastNoteId
+                : null;
+            const firstId = validCachedId || noteIds[0] || null;
+
             if (firstId) persistCurrentNoteId(firstId);
             return {
                 ...prev,

@@ -28,6 +28,7 @@ import init, {
     registry_get_all_relationships,
     registry_delete_relationship,
     registry_get_stats,
+    registry_clear_all_entities,
     // Calendar API
     calendar_get_definition,
     calendar_save_definition,
@@ -36,7 +37,16 @@ import init, {
     calendar_delete_event,
     calendar_get_all_periods,
     calendar_create_period,
-    calendar_delete_period
+    calendar_delete_period,
+    // Alex API (Entity Library)
+    alexBuild,
+    alexLoadFromOpfs,
+    alexSaveToOpfs,
+    alexIsReady,
+    alexEntityCount,
+    alexIsKnown,
+    alexToRegisteredEntities,
+    alex_clear
 } from "../rust/kittcore/pkg/kittcore.js";
 
 
@@ -180,12 +190,31 @@ function scheduleDebouncedSave() {
     opfsSaveTimeout = setTimeout(async () => {
         try {
             await cozo_save_to_opfs();
-            console.log('[KittCoreWorker] Auto-saved to OPFS');
+            console.log('[KittCoreWorker] Auto-saved CozoDB to OPFS');
         } catch (e) {
-            console.warn('[KittCoreWorker] Auto-save failed:', e);
+            console.warn('[KittCoreWorker] CozoDB auto-save failed:', e);
         }
         opfsSaveTimeout = null;
     }, OPFS_SAVE_DELAY_MS);
+}
+
+// Debounced Alex OPFS save
+let alexSaveTimeout: ReturnType<typeof setTimeout> | null = null;
+const ALEX_SAVE_DELAY_MS = 1000;
+
+function scheduleDebouncedAlexSave() {
+    if (alexSaveTimeout) {
+        clearTimeout(alexSaveTimeout);
+    }
+    alexSaveTimeout = setTimeout(async () => {
+        try {
+            await alexSaveToOpfs();
+            console.log('[KittCoreWorker] Auto-saved Alex to OPFS');
+        } catch (e) {
+            console.warn('[KittCoreWorker] Alex auto-save failed:', e);
+        }
+        alexSaveTimeout = null;
+    }, ALEX_SAVE_DELAY_MS);
 }
 
 // ... (ResponseMessage stays same)
@@ -228,6 +257,37 @@ self.onmessage = async (e: MessageEvent) => {
                     }
                 } else {
                     console.warn('[KittCoreWorker] CozoDB init failed');
+                }
+
+                // =====================================================
+                // Alex Initialization: Load from OPFS or build fresh
+                // =====================================================
+                try {
+                    const alexLoaded = await alexLoadFromOpfs();
+                    if (alexLoaded) {
+                        const alexCount = alexEntityCount();
+                        console.log(`[KittCoreWorker] Alex loaded from OPFS (${alexCount} entities)`);
+
+                        // Hydrate scanners from Alex's cached entities
+                        if (alexCount > 0) {
+                            const cachedEntitiesJson = alexToRegisteredEntities();
+                            const cachedEntities = JSON.parse(cachedEntitiesJson);
+
+                            if (daachScanner) {
+                                daachScanner.hydrate(cachedEntities);
+                                console.log(`[KittCoreWorker] DaachScanner hydrated from Alex cache`);
+                            }
+                            if (dafsaScanner) {
+                                dafsaScanner.hydrate(cachedEntities);
+                                console.log(`[KittCoreWorker] DAFSA hydrated from Alex cache`);
+                            }
+                            entitiesHydrated = alexCount;
+                        }
+                    } else {
+                        console.log('[KittCoreWorker] No Alex snapshot - will build on first hydration');
+                    }
+                } catch (e) {
+                    console.warn('[KittCoreWorker] Alex OPFS load failed:', e);
                 }
 
                 initialized = true;
@@ -459,6 +519,42 @@ self.onmessage = async (e: MessageEvent) => {
                 break;
             }
 
+            // =====================================================================
+            // V2 ENTITY-ONLY FLUSH (Preserves content - notes/folders/calendar)
+            // =====================================================================
+
+            case 'REGISTRY_CLEAR_ALL_ENTITIES': {
+                try {
+                    // 1. Clear entity relations from Rust CozoDB
+                    const clearedCount = registry_clear_all_entities();
+                    console.log(`[KittCoreWorker] Cleared ${clearedCount} entity rows from CozoDB`);
+
+                    // 2. Clear Alex OPFS + global state
+                    await alex_clear();
+                    console.log('[KittCoreWorker] Cleared Alex OPFS and global state');
+
+                    // 3. Clear in-memory scanners (pass actual empty JS array)
+                    if (dafsaScanner) dafsaScanner.hydrate([]);
+                    if (daachScanner) daachScanner.hydrate([]);
+
+                    // 4. Save the now-clean Cozo state to OPFS (preserves content, no entities)
+                    await cozo_save_to_opfs();
+                    console.log('[KittCoreWorker] Saved clean Cozo state to OPFS');
+
+                    self.postMessage({
+                        type: 'REGISTRY_CLEAR_ALL_ENTITIES_RESULT',
+                        payload: { success: true, clearedCount }
+                    } as ResponseMessage);
+                } catch (e: any) {
+                    console.error('[KittCoreWorker] Entity flush failed:', e);
+                    self.postMessage({
+                        type: 'REGISTRY_CLEAR_ALL_ENTITIES_RESULT',
+                        payload: { success: false, error: e.message }
+                    } as ResponseMessage);
+                }
+                break;
+            }
+
             // Legacy SQLite handlers - disabled
 
 
@@ -541,6 +637,19 @@ self.onmessage = async (e: MessageEvent) => {
                     }
                 }
 
+                // =====================================================
+                // Rebuild Alex with new entities and save to OPFS
+                // =====================================================
+                try {
+                    const entitiesJson = JSON.stringify(entitiesToHydrate);
+                    const alexCount = alexBuild(entitiesJson);
+                    console.log(`[KittCoreWorker] Alex rebuilt with ${alexCount} entities`);
+
+                    // Debounced save to OPFS
+                    scheduleDebouncedAlexSave();
+                } catch (err) {
+                    console.error('[KittCoreWorker] Alex rebuild failed:', err);
+                }
 
                 // Also push entities to Rust CozoDB for persistence
                 if (sharedScanner) {

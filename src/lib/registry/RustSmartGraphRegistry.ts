@@ -72,6 +72,7 @@ export class RustSmartGraphRegistry {
     private initialized = false;
     private entityCache = new Map<string, RegisteredEntity>();
     private labelIndex = new Map<string, string>(); // normalized label -> entity ID
+    private suppressEvents = false; // Suppress events during batch operations
 
     // =========================================================================
     // Initialization
@@ -93,6 +94,15 @@ export class RustSmartGraphRegistry {
 
     isInitialized(): boolean {
         return this.initialized;
+    }
+
+    /**
+     * Public method to refresh cache from Rust CozoDB.
+     * Call this after entities are loaded from Alex OPFS.
+     */
+    async refresh(): Promise<void> {
+        await this.warmCache();
+        console.log(`[RustSmartGraphRegistry] Cache refreshed: ${this.entityCache.size} entities`);
     }
 
     /**
@@ -226,6 +236,11 @@ export class RustSmartGraphRegistry {
         this.entityCache.set(id, entity);
         this.labelIndex.set(label.toLowerCase(), id);
 
+        // Dispatch event to trigger highlight re-scan (unless in batch mode)
+        if (!this.suppressEvents && typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('entities-changed'));
+        }
+
         return { entity, isNew, wasMerged: false };
     }
 
@@ -244,9 +259,20 @@ export class RustSmartGraphRegistry {
     ): Promise<EntityRegistrationResult[]> {
         const results: EntityRegistrationResult[] = [];
 
-        for (const { label, kind, noteId, options } of entities) {
-            const result = await this.registerEntity(label, kind, noteId, options);
-            results.push(result);
+        // Suppress events during batch to avoid spamming
+        this.suppressEvents = true;
+        try {
+            for (const { label, kind, noteId, options } of entities) {
+                const result = await this.registerEntity(label, kind, noteId, options);
+                results.push(result);
+            }
+        } finally {
+            this.suppressEvents = false;
+        }
+
+        // Dispatch single event at end of batch
+        if (results.length > 0 && typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('entities-changed'));
         }
 
         return results;
@@ -313,15 +339,33 @@ export class RustSmartGraphRegistry {
         return updated;
     }
 
+    /**
+     * V2 Entity-Only Flush (GENIUS SYSTEM)
+     * 
+     * Clears all entity-related data while PRESERVING content:
+     * - Clears: nodes, relationships, entity_*, discovery_candidates, clusters, vectors
+     * - Preserves: folders, folder_hierarchy, network_*, calendar_*
+     * - Also clears: Alex OPFS, in-memory scanners
+     * 
+     * @returns Number of entity rows cleared
+     */
     async clearAll(): Promise<number> {
-        const count = this.entityCache.size;
-        // Delete all entities one by one (could be optimized with bulk delete)
-        for (const id of this.entityCache.keys()) {
-            await kittCore.registryDeleteEntity(id);
+        console.log('[RustSmartGraphRegistry] Starting V2 entity-only flush...');
+
+        // Use the new V2 genius flush API
+        const result = await kittCore.registryClearAllEntities();
+
+        if (!result.success) {
+            console.error('[RustSmartGraphRegistry] Entity flush failed');
+            return 0;
         }
+
+        // Clear local caches
         this.entityCache.clear();
         this.labelIndex.clear();
-        return count;
+
+        console.log(`[RustSmartGraphRegistry] ✅ V2 flush complete: ${result.clearedCount} rows cleared (content preserved)`);
+        return result.clearedCount;
     }
 
     // =========================================================================

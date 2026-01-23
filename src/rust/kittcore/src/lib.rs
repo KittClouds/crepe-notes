@@ -62,6 +62,7 @@ pub mod hnsw;
 pub mod db;  // Database layer (CozoGraph always available, SQLite gated)
 pub mod graphdb;  // Graph database layer
 pub mod narrative;  // FST-based narrative verb dictionary
+pub mod alex;  // Alex: The Librarian - DAFSA-based entity library
 
 // Shared Memory Interface (No-Bindgen)
 pub mod shared_mem;
@@ -133,6 +134,13 @@ pub use rag::{
 
 // Public exports - CozoGraph (always available)
 pub use db::{CozoGraph, CozoError};
+
+// Public exports - Alex (DAFSA-based entity library)
+pub use alex::{Alex, AlexSnapshot, AlexError};
+// Alex submodules - shared utilities for entity processing
+pub use alex::fuzzy;
+pub use alex::normalize;
+pub use alex::persistence;
 
 // Public exports - SQLite WASM (experimental)
 #[cfg(feature = "sqlite_wasm")]
